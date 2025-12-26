@@ -4,14 +4,21 @@ from flask import Flask, request, jsonify
 import requests
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+# from sklearn.ensemble import RandomForestRegressor
 import pickle
 from datetime import datetime
 import logging
-from flask_cors import CORS
+# from flask_cors import CORS
 import time
-from typing import Optional, Dict
+# from typing import Optional, Dict
 from flask import send_from_directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "ml", "model_xgboost.pkl")
+
+with open(MODEL_PATH, "rb") as f:
+    ML_MODEL = pickle.load(f)
+logger = logging.getLogger(__name__)
+logger.info("XGBoost model loaded at startup")
 
 
 from backend.integrations import (
@@ -28,7 +35,7 @@ from backend.integrations import (
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+
 
 def _load_env_if_present():
 	"""Load simple KEY=VALUE pairs from a local .env file if present."""
@@ -52,7 +59,7 @@ _load_env_if_present()
 
 # app = Flask(__name__)
 # CORS(app)  
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 app = Flask(
     __name__,
@@ -161,36 +168,36 @@ def prepare_data():
     return normalized_rainfall
 
 
-def train_model():
-    data = list(collection.find())
-    X, y = [], []
-    for d in data:
-        if "data" in d and "normalized_rainfall" in d["data"]:
-            rainfall = d["data"]["normalized_rainfall"]
-            flood_count = len(d.get("flood", {}).get("history", [])) if "flood" in d else 0
-            soil_quality = np.random.uniform(0, 1)
-            X.append([rainfall, flood_count, soil_quality])
-            suitability = 100 - (rainfall * 50 + flood_count * 20 + (1 - soil_quality) * 30)
-            y.append(max(0, min(100, suitability)))
-    if not X:
-        X = [[0.5, 0, 0.5]]
-        y = [50]
-    X = np.array(X)
-    y = np.array(y)
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    with open("model.pkl", "wb") as f:
-        pickle.dump(model, f)
-    logger.info("Model trained successfully")
-    return model
+# def train_model():
+#     data = list(collection.find())
+#     X, y = [], []
+#     for d in data:
+#         if "data" in d and "normalized_rainfall" in d["data"]:
+#             rainfall = d["data"]["normalized_rainfall"]
+#             flood_count = len(d.get("flood", {}).get("history", [])) if "flood" in d else 0
+#             soil_quality = np.random.uniform(0, 1)
+#             X.append([rainfall, flood_count, soil_quality])
+#             suitability = 100 - (rainfall * 50 + flood_count * 20 + (1 - soil_quality) * 30)
+#             y.append(max(0, min(100, suitability)))
+#     if not X:
+#         X = [[0.5, 0, 0.5]]
+#         y = [50]
+#     X = np.array(X)
+#     y = np.array(y)
+#     model = RandomForestRegressor(n_estimators=100, random_state=42)
+#     model.fit(X, y)
+#     with open("model.pkl", "wb") as f:
+#         pickle.dump(model, f)
+#     logger.info("Model trained successfully")
+#     return model
 
 
-try:
-    with open("model.pkl", "rb") as f:
-        model = pickle.load(f)
-    logger.info("Model loaded from file")
-except FileNotFoundError:
-    model = train_model()
+# try:
+#     with open("model.pkl", "rb") as f:
+#         model = pickle.load(f)
+#     logger.info("Model loaded from file")
+# except FileNotFoundError:
+#     model = train_model()
 
 # Prediction Endpoint
 @app.route('/predict', methods=['POST', 'OPTIONS'])
@@ -212,7 +219,9 @@ def predict():
         soil_quality = np.random.uniform(0, 1)
         features = np.array([[rainfall, flood_count, soil_quality]])
 
-        score = model.predict(features)[0]
+        # score = model.predict(features)[0]
+        score = ML_MODEL.predict(features)[0]
+
         risk_flags = "High Risk (Flood-prone)" if score < 30 else "Low Risk (Suitable)"
         recommendations = (
             "Avoid construction if High Risk; consider drainage solutions. "
@@ -392,9 +401,9 @@ def suitability():
         label = "Unknown"
 
         try:
-            if not hasattr(app, "ml_model"):
-                app.ml_model = pickle.load(open("backend/ml/model_xgboost.pkl", "rb"))
-                logger.info("XGBoost model loaded successfully")
+            # if not hasattr(app, "ml_model"):
+            #     app.ml_model = pickle.load(open("backend/ml/model_xgboost.pkl", "rb"))
+            logger.info("XGBoost model loaded successfully")
             features = np.array([[
                 rainfall_score or 70.0,
                 flood_risk_score or 50.0,
@@ -406,7 +415,9 @@ def suitability():
                 landuse_score or 70.0
             ]], dtype=float)
 
-            predicted = float(app.ml_model.predict(features)[0])
+            # predicted = float(app.ml_model.predict(features)[0])
+            predicted = float(ML_MODEL.predict(features)[0])
+
             final_score = round(predicted, 2)
             model_used = "XGBoost Regressor (Machine Learning)"
             label = "Highly Suitable" if final_score >= 70 else ("Moderate" if final_score >= 40 else "Unsuitable")

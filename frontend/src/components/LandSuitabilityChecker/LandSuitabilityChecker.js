@@ -101,7 +101,7 @@ export default function LandSuitabilityChecker() {
       const data = await response.json();
       setResult(data);
     } catch (err) {
-      setError("Failed to fetch suitability. Ensure backend is running on :5000");
+      setError("Failed to fetch suitability. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
