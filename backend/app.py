@@ -14,7 +14,7 @@ from typing import Optional, Dict
 from flask import send_from_directory
 
 
-from integrations import (
+from backend.integrations import (
     compute_suitability_score,
     estimate_flood_risk_score,
     compute_proximity_score,

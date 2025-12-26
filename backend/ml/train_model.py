@@ -5,7 +5,7 @@ import random
 import pickle
 import numpy as np
 import xgboost as xgb
-from integrations import *
+from backend.integrations import *
 
 
 _cache = {}
