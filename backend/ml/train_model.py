@@ -26,8 +26,8 @@ def safe_call(func, lat, lon, *args, fallback=None):
 print("Training XGBoost model with *minimal* API calls...")
 
 # STEP 1: FEW REAL COORDINATES
-BASE_COORDS = 20        # only 20 real locations
-AUG_PER_COORD = 10      # 10 synthetic variations per location
+BASE_COORDS = 2        # only 20 real locations
+AUG_PER_COORD = 5      # 10 synthetic variations per location
 # Total training samples = BASE_COORDS * AUG_PER_COORD = 200
 
 base_samples = []       
@@ -129,9 +129,16 @@ model = xgb.XGBRegressor(
 model.fit(X, y)
 
 # Save model
-os.makedirs("backend/ml", exist_ok=True)
-model_path = "backend/ml/model_xgboost.pkl"
+# os.makedirs("backend/ml", exist_ok=True)
+# model_path = "backend/ml/model_xgboost.pkl"
+# pickle.dump(model, open(model_path, "wb"))
+# model_path = "model_xgboost.pkl"
+# pickle.dump(model, open(model_path, "wb"))
+# Save model in the same folder as this script
+model_path = os.path.join(os.path.dirname(__file__), "model_xgboost.pkl")
 pickle.dump(model, open(model_path, "wb"))
+
+
 
 print("\nMODEL TRAINED SUCCESSFULLY!")
 print(f"R² Score (train): {model.score(X, y):.4f}")

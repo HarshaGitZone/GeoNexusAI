@@ -1,0 +1,7 @@
+flask
+gunicorn
+pymongo
+numpy
+scikit-learn
+requests
+flask-cors
