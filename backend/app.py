@@ -12,8 +12,13 @@ import logging
 import time
 # from typing import Optional, Dict
 from flask import send_from_directory
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+
+BASE_DIR = os.path.dirname(BACKEND_DIR)  # project root
 MODEL_PATH = os.path.join(BASE_DIR, "ml", "models")
+
+
 
 # Attempt to load optional trained models: water detector, suitability regressor, optional xgboost
 ML_MODELS = {}
@@ -101,22 +106,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 def _load_env_if_present():
-	"""Load simple KEY=VALUE pairs from a local .env file if present."""
-	try:
-		base_dir = os.path.dirname(os.path.abspath(__file__))
-		dotenv_path = os.path.join(base_dir, ".env")
-		if os.path.exists(dotenv_path):
-			with open(dotenv_path, "r", encoding="utf-8") as f:
-				for line in f:
-					line = line.strip()
-					if not line or line.startswith("#") or "=" not in line:
-						continue
-					key, val = line.split("=", 1)
-					key = key.strip()
-					val = val.strip().strip('"').strip("'")
-					os.environ.setdefault(key, val)
-	except Exception:
-		pass
+    try:
+        dotenv_path = os.path.join(BASE_DIR, ".env")
+        if os.path.exists(dotenv_path):
+            with open(dotenv_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, val = line.split("=", 1)
+                    key = key.strip()
+                    val = val.strip().strip('"').strip("'")
+                    os.environ.setdefault(key, val)
+    except Exception:
+        pass
+
 
 _load_env_if_present()
 
@@ -124,11 +128,17 @@ _load_env_if_present()
 # CORS(app)  
 
 
+# app = Flask(
+#     __name__,
+#     static_folder=os.path.join(BASE_DIR, "../frontend/build"),
+#     template_folder=os.path.join(BASE_DIR, "../frontend/build")
+# )
 app = Flask(
     __name__,
-    static_folder=os.path.join(BASE_DIR, "../frontend/build"),
-    template_folder=os.path.join(BASE_DIR, "../frontend/build")
+    static_folder=os.path.join(BASE_DIR, "frontend", "build"),
+    static_url_path=""
 )
+
 
 
 
