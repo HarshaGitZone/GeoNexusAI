@@ -48,37 +48,58 @@ def compute_suitability_score(
 
 	# Simple weighted sum (weights sum to 1.0)
 	weights = {
-		"rainfall": 0.12,
-		"flood": 0.20,
+		"rainfall": 0.10,
+		"flood": 0.16,
 		"landslide": 0.10,
-		"soil": 0.18,
+		"soil": 0.16,
 		"proximity": 0.10,
-		"water": 0.10,
+		"water": 0.18,
 		"pollution": 0.10,
 		"landuse": 0.10,
 	}
 
-	score = (
-		rainfall * weights["rainfall"]
-		+ flood * weights["flood"]
-		+ landslide * weights["landslide"]
-		+ soil * weights["soil"]
-		+ proximity * weights["proximity"]
-		+ water * weights["water"]
-		+ pollution * weights["pollution"]
-		+ landuse * weights["landuse"]
-	)
+	# calculate raw weighted score
+	contributions = {
+		"rainfall": round(rainfall * weights["rainfall"], 3),
+		"flood": round(flood * weights["flood"], 3),
+		"landslide": round(landslide * weights["landslide"], 3),
+		"soil": round(soil * weights["soil"], 3),
+		"proximity": round(proximity * weights["proximity"], 3),
+		"water": round(water * weights["water"], 3),
+		"pollution": round(pollution * weights["pollution"], 3),
+		"landuse": round(landuse * weights["landuse"], 3),
+	}
+
+	score = sum(contributions.values())
+
+	# neutral contribution (if all factors were neutral 50)
+	neutral_contrib = {k: round(50.0 * w, 3) for k, w in weights.items()}
+
+	# compute deltas from neutral: negative means the factor drags the score down
+	deltas = {k: round(contributions[k] - neutral_contrib[k], 3) for k in contributions}
+
+	# sort contributors
+	negatives = sorted(((k, v) for k, v in deltas.items() if v < 0), key=lambda x: x[1])
+	positives = sorted(((k, v) for k, v in deltas.items() if v >= 0), key=lambda x: -x[1])
 
 	return {
 		"score": round(score, 2),
-		"rainfall": rainfall,
-		"flood": flood,
-		"landslide": landslide,
-		"soil": soil,
-		"proximity": proximity,
-		"water": water,
-		"pollution": pollution,
-		"landuse": landuse,
+		"factors": {
+			"rainfall": rainfall,
+			"flood": flood,
+			"landslide": landslide,
+			"soil": soil,
+			"proximity": proximity,
+			"water": water,
+			"pollution": pollution,
+			"landuse": landuse,
+		},
+		"weights": weights,
+		"contributions": contributions,
+		"neutral_contribution": neutral_contrib,
+		"deltas": deltas,
+		"top_negative_contributors": [ {"factor": k, "delta": v} for k, v in negatives[:3] ],
+		"top_positive_contributors": [ {"factor": k, "delta": v} for k, v in positives[:3] ],
 	}
 
 

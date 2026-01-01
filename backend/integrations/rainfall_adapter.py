@@ -54,3 +54,17 @@ def estimate_rainfall_score(latitude: float, longitude: float) -> Tuple[float, O
         score = 85.0
     return score, round(total_mm, 1)
 
+
+def get_rainfall_totals(latitude: float, longitude: float, days_list=(7, 30, 60)) -> dict:
+    """Return a dict mapping days -> total_mm (or None).
+    Example: get_rainfall_totals(lat, lon, (7,30,60)) -> {7: 12.3, 30: 45.0, 60: 120.4}
+    """
+    out = {}
+    for d in days_list:
+        try:
+            tot = _fetch_open_meteo_sum(latitude, longitude, d)
+            out[int(d)] = (round(tot, 1) if tot is not None else None)
+        except Exception:
+            out[int(d)] = None
+    return out
+
