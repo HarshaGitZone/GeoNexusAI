@@ -180,7 +180,7 @@ function App() {
   return (
     <div className="App">
       {/* 🔴 TEMP BUILD MARKER — REMOVE AFTER CONFIRMATION */}
-      <div
+      {/* <div
         style={{
           background: '#ffecec',
           color: '#b00020',
@@ -191,7 +191,7 @@ function App() {
         }}
       >
         GeoAI Frontend Build — 01 Jan 2026 (cache test)
-      </div>
+      </div> */}
 
       <LandSuitabilityChecker />
     </div>
