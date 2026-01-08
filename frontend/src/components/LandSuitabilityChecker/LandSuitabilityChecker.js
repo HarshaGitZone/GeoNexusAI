@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import FactorBar from "../FactorBar/FactorBar";
 import "leaflet/dist/leaflet.css";
@@ -35,7 +35,7 @@ export default function LandSuitabilityChecker() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [debug, setDebug] = useState(false);
+  const [debug] = useState(false);
 
   const [savedPlaces, setSavedPlaces] = useState(() => {
     const stored = localStorage.getItem("savedPlaces");
@@ -57,10 +57,10 @@ const handleDeletePlace = (e, index) => {
   setSavedPlaces(updated);
   localStorage.setItem("savedPlaces", JSON.stringify(updated));
 };
-const handleSelectPlace = (place) => {
-  setLat(place.lat);
-  setLng(place.lng);
-};
+// const handleSelectPlace = (place) => {
+//   setLat(place.lat);
+//   setLng(place.lng);
+// };
   useEffect(() => {
     document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
