@@ -1156,3 +1156,99 @@ html, body, #root, .app-shell {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
+/* --- REFINED THEME TOGGLE --- */
+.theme-toggle {
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid var(--border) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Dark Mode Toggle: Black background, White icon/text */
+[data-theme="dark"] .theme-toggle {
+    background-color: #e2dcdc !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Light Mode Toggle: White background, Black icon/text */
+[data-theme="light"] .theme-toggle {
+    background-color: #0a0a0a !important;
+    color: #000000 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+/* --- PROJECT TEAM HOVER EFFECTS --- */
+.team-grid span {
+    font-size: 11px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    border: 1px solid var(--border) !important;
+    transition: all 0.3s ease !important;
+    color: var(--text) !important;
+    cursor: default;
+}
+
+.team-grid span:hover {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    border-color: var(--accent) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(45, 138, 138, 0.4) !important;
+    /* letter-spacing: 0.5px; */
+}
+
+
+
+
+
+/* --- ATTRACTIVE CARD ENHANCEMENTS --- */
+.card {
+    background: var(--card) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    margin-bottom: 20px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle glow effect on the cards */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(45, 138, 138, 0.4) !important;
+}
+
+/* Heading styles inside cards */
+.card h3 {
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    color: var(--accent) !important;
+    margin-bottom: 20px !important;
+    font-weight: 800 !important;
+}
+
+/* Projective Card - Specific style for Risk Card to make it pop */
+.risk-card {
+    border-left: 4px solid #ef4444 !important;
+    background: linear-gradient(145deg, var(--card), rgba(239, 68, 68, 0.02)) !important;
+}
