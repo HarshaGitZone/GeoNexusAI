@@ -1113,3 +1113,46 @@ html, body, #root, .app-shell {
     height: 100% !important;
     border-radius: 10px !important;
 }
+
+
+
+
+
+
+/* --- DELETE BUTTON STYLING --- */
+
+.btn-delete {
+    background: transparent !important;
+    border: none !important;
+    color: #ef4444 !important; /* Red color for danger */
+    padding: 8px !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    font-size: 14px !important;
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
+
+/* Ensure the place item container handles the flex layout correctly */
+.place-item {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Specific fix for text wrapping so it doesn't collide with the button */
+.place-item strong {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
