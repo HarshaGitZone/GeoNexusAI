@@ -2281,11 +2281,11 @@ MODEL_PATH = os.path.join(BASE_DIR, "ml", "models")
 if BACKEND_DIR not in sys.path:
     sys.path.append(BACKEND_DIR)
 
-# --- Imports for Nearby Places and Integrations ---
-try:
-    from integrations.nearby_places import get_nearby_named_places
-except ImportError:
-    from backend.integrations.nearby_places import get_nearby_named_places
+# # --- Imports for Nearby Places and Integrations ---
+# try:
+#     from integrations.nearby_places import get_nearby_named_places
+# except ImportError:
+#     from backend.integrations.nearby_places import get_nearby_named_places
 
 from backend.integrations import (
     compute_suitability_score,
