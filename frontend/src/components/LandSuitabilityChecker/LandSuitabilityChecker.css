@@ -64,7 +64,7 @@ body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidde
 .results-grid { display: grid; grid-template-columns: 380px 1fr; gap: 25px; max-width: 1400px; margin: 0 auto; }
 .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
 
-.score-value { font-size: 72px; font-weight: 900; color: var(--accent); text-align: center; line-height: 1; margin: 10px 0; }
+/* .score-value { font-size: 72px; font-weight: 900; color: var(--accent); text-align: center; line-height: 1; margin: 10px 0; } */
 .status-pill { text-align: center; padding: 6px; border-radius: 20px; font-size: 13px; font-weight: bold; text-transform: uppercase; }
 .status-pill.low { background: #10b981; color: white; }
 .status-pill.moderate { background: #f59e0b; color: white; }
@@ -341,9 +341,1385 @@ html, body, #root {
   background: var(--accent-hover) !important;
 }
 
+
+
+
+
+
+
+/* --- FORCED THEME REFINEMENTS --- */
+
+/* 1. LAT/LNG INPUT TEXT VISIBILITY */
+/* Target the input values to ensure they are readable in Dark Mode */
+[data-theme="dark"] .field input {
+    color: #e0e0e0 !important; /* Lighter grey/white for readability */
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Also target the labels above the inputs */
+[data-theme="dark"] .field label {
+    color: #b0b0b0 !important;
+    opacity: 1 !important;
+}
+
+/* 2. SAVE PLACE BUTTON - THEME SPECIFIC HOVER */
+
+/* Base State */
+.btn-save {
+    transition: all 0.3s ease !important;
+    border: 1px solid var(--accent) !important;
+}
+
+/* DARK MODE HOVER: White background, Black text */
+[data-theme="dark"] .btn-save:hover {
+    background-color: #84afd4 !important;
+    color: #020202 !important;
+    border-color: #84afd4 !important;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+/* LIGHT MODE HOVER: Black background, White text */
+[data-theme="light"] .btn-save:hover {
+    background-color: #8bacb8 !important;
+    color: #111010 !important;
+    border-color: #8bacb8 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+/* 3. SAVED PLACES LIST TEXT (Dark Mode fix) */
+[data-theme="dark"] .place-item strong {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .place-item span {
+    color: #a0a0a0 !important;
+}
+
+/* 4. ANALYSIS BUTTON TEXT */
+/* Ensuring text is always white on the teak background for contrast */
+.btn-analyze {
+    color: #ffffff !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+
+
+
+
+/* --- FULL RESPONSIVENESS (MOBILE & TABLETS) --- */
+@media (max-width: 1024px) {
+    /* 1. Shell Reset: Allow the page to scroll naturally */
+    .app-shell {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        height: auto !important;
+        position: relative !important;
+    }
+
+    /* 2. Sidebar: Make it full width and remove fixed positioning */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    /* Remove the scroll lock on sidebar internal sections */
+    .sidebar-scrollable {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .places-list {
+        max-height: 250px !important; /* Limit list height so it doesn't push team card too far down */
+        overflow-y: auto !important;
+    }
+
+    /* 3. Main Content: Stack the map and results */
+    .main-content {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .map-container {
+        height: 400px !important; /* Fixed height for map on mobile */
+        min-height: 300px !important;
+    }
+
+    .results-container {
+        height: auto !important;
+        padding: 15px !important;
+    }
+
+    /* 4. Results Grid: Convert 2-columns to 1-column */
+    .results-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        padding: 0 !important;
+    }
+
+    .col-1, .col-2 {
+        width: 100% !important;
+    }
+
+    /* 5. UI Adjustments for small touch targets */
+    .score-value {
+        font-size: 60px !important; /* Slightly smaller text for mobile */
+    }
+
+    .brand {
+        justify-content: center !important;
+        margin: 0 auto !important;
+    }
+
+    .sidebar-top {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* 6. Fix for Team Card spacing on mobile */
+    .sidebar-footer {
+        margin: 20px 15px !important;
+    }
+}
+
+/* Specific fix for very small screens (phones) */
+@media (max-width: 480px) {
+    .team-grid {
+        grid-template-columns: 1fr !important; /* Stack names in one column */
+    }
+    
+    .status-pill {
+        font-size: 11px !important;
+        letter-spacing: 0px !important;
+    }
+}
+
+
+
+/* --- ULTIMATE MOBILE FIX --- */
+@media (max-width: 1024px) {
+    /* 1. Unlock the Root: Allow the entire page to scroll */
+    html, body, #root, .app-shell {
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        display: block !important; /* Switch from flex to block for vertical flow */
+    }
+
+    /* 2. Sidebar Reset: Make it a normal top section */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    /* 3. Disable internal scroll-locks for Mobile */
+    .sidebar-scrollable {
+        overflow: visible !important;
+        height: auto !important;
+        display: block !important;
+        padding: 15px !important;
+    }
+
+    .places-list {
+        max-height: 200px !important; /* Keep this small so map is reachable */
+        overflow-y: auto !important;
+        background: rgba(0,0,0,0.2) !important;
+    }
+
+    /* 4. Main Content Reset */
+    .main-content {
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
+    }
+
+    /* 5. Map: Give it a clear, fixed window */
+    .map-container {
+        height: 350px !important;
+        width: 100% !important;
+        position: relative !important;
+        z-index: 5;
+    }
+
+    /* 6. Results: Ensure they stack and are fully visible */
+    .results-container {
+        height: auto !important;
+        width: 100% !important;
+        overflow: visible !important;
+        padding: 20px !important;
+        background: var(--bg) !important;
+    }
+
+    .results-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+
+    /* 7. Footer/Team Card spacing */
+    .sidebar-footer {
+        margin: 10px !important;
+        position: relative !important;
+    }
+
+    /* 8. Hide Map on tiny screens if needed, or ensure zoom controls fit */
+    .leaflet-control-zoom {
+        display: none !important; /* Optional: hides +/- buttons to save space */
+    }
+}
+
+
+/* --- SAVED PLACES: THEME-SPECIFIC BACKGROUNDS --- */
+
+/* LIGHT MODE: White background with very subtle border */
+[data-theme="light"] .place-item {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #000000 !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .place-item:hover {
+    background-color: #f8fafc !important; /* Extremely light blue-tinted white */
+    border-color: var(--accent) !important;
+}
+
+/* DARK MODE: Transparent glass look (removes the solid gray) */
+[data-theme="dark"] .place-item {
+    background-color: rgba(26, 26, 26, 0.03) !important; /* Frosted look */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .place-item:hover {
+    background-color: rgba(45, 138, 138, 0.15) !important; /* Teak-tinted glow */
+    border-color: var(--accent) !important;
+}
+
+/* --- SCROLLBAR REFINEMENT --- */
+/* Makes the list look cleaner while scrolling */
+.places-list::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.places-list::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.places-list::-webkit-scrollbar-thumb {
+    background: var(--accent) !important;
+    border-radius: 10px !important;
+}
+
+/* Ensure the text coordinates are readable */
+.place-item span {
+    display: block !important;
+    font-size: 11px !important;
+    opacity: 0.7 !important;
+    margin-top: 4px !important;
+}
+
+
+
+
+
+
+
+/* --- FORCED EDGE-TO-EDGE PINNING --- */
+
+/* 1. Global Reset: This targets the root and removes the default 8px browser margin */
+html, body, #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    position: absolute !important; /* Pins the root to the top-left */
+    overflow-x: hidden !important;
+}
+
+@media (max-width: 1024px) {
+    /* 2. Force the App Shell to start at absolute 0,0 */
+    .app-shell {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 3. Remove any side gaps from the Sidebar and Main Content */
+    .sidebar, .main-content {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: 0 !important;
+        position: relative !important;
+    }
+
+    /* 4. Flush Title/Header: Remove top padding that creates a gap */
+    .sidebar-top {
+        margin: 0 !important;
+        padding: 10px 15px !important; /* Internal padding only */
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 5. Map & Results: Ensure no margins push them away from the edges */
+    .map-container, .results-container {
+        width: 100% !important;
+        margin: 0 !important;
+        left: 0 !important;
+    }
+
+    /* 6. Fix for the results grid touching the edges */
+    .results-grid {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 15px !important; /* Spacing inside, not outside */
+        box-sizing: border-box !important;
+    }
+}
+
+
+/* --- ULTIMATE FORCED RESET (Top-Left 0,0) --- */
+html, body, #root, .app-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+    html, body, #root, .app-shell {
+        position: relative !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        display: block !important;
+    }
+}
+
+/* --- TEAK BRANDING & UI FIXES --- */
+:root {
+  --accent: #2d8a8a;
+  --accent-hover: #1f6363;
+}
+
+.brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 18px !important;
+  border-radius: 12px !important;
+  font-size: 24px !important;
+  background: rgba(45, 138, 138, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(45, 138, 138, 0.2) !important;
+  background-image: linear-gradient(135deg, var(--accent) 0%, #114444 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.brand-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+
+/* Input Visibility */
+[data-theme="dark"] .field input { color: #fff !important; background: rgba(255,255,255,0.05) !important; }
+
+/* Responsive Grid Occupy Full Width */
+.results-grid { width: 100% !important; max-width: 100% !important; margin: 0 !important; }
+
+.btn-row-flex { display: flex; gap: 8px; margin-top: 8px; }
+
+.debug-checkbox { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; opacity: 0.8; }
+
+
+
+
+
+
+/* --- GLASSMORPHIC HERO SCORE CARD --- */
+
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px !important;
+  z-index: 1;
+}
+
+/* Creating the glowing orb behind the number */
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140px;
+  height: 140px;
+  background: var(--accent);
+  filter: blur(60px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.25;
+  z-index: -1;
+}
+
+/* .score-value {
+  font-size: 96px !important; 
+  font-weight: 900 !important;
+  letter-spacing: -4px !important;
+  margin: 10px 0 !important;
+  
+  background: linear-gradient(180deg, #ffffff 30%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+
+  filter: drop-shadow(0 0 15px rgba(45, 138, 138, 0.4));
+  line-height: 1;
+} */
+
+.status-pill {
+  margin-top: 15px;
+  padding: 8px 24px !important;
+  border-radius: 50px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+/* Dynamic glow colors based on status */
+.status-pill.low { background: rgba(16, 185, 129, 0.2) !important; color: #10b981 !important; }
+.status-pill.moderate { background: rgba(245, 158, 11, 0.2) !important; color: #f59e0b !important; }
+.status-pill.high { background: rgba(239, 68, 68, 0.2) !important; color: #ef4444 !important; }
+
+
+
+
+
+
+/* --- REFINED GLASS SCORE (All Themes) --- */
+
 .score-value {
-  color: var(--accent) !important;
-  text-shadow: 0 0 20px rgba(45, 138, 138, 0.2) !important;
+  font-size: 72px !important; /* Reduced from 96px */
+  font-weight: 900 !important;
+  letter-spacing: -2px !important;
+  margin: 5px 0 !important;
+  line-height: 1 !important;
+  transition: all 0.3s ease !important;
+}
+
+/* LIGHT THEME VISIBILITY FIX */
+/* [data-theme="light"] .score-value {
+
+  background: linear-gradient(180deg, #114444 0%, var(--accent) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+} */
+
+[data-theme="light"] .hero-card {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* DARK THEME REMAINS VIBRANT */
+/* [data-theme="dark"] .score-value {
+  background: linear-gradient(180deg, #ffffff 30%, var(--accent) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 15px rgba(45, 138, 138, 0.4)) !important;
+} */
+
+/* ADJUSTING THE GLOW ORB FOR LIGHT THEME */
+[data-theme="light"] .hero-card::before {
+  opacity: 0.1 !important; /* Fainter glow in light mode */
+  background: var(--accent) !important;
+  width: 100px;
+  height: 100px;
+}
+
+
+
+/* --- FORCED VISIBILITY FOR FACTOR LABELS --- */
+
+/* This targets the specific text labels for each individual factor */
+[data-theme="dark"] .factors-card .FactorBar-label, 
+[data-theme="dark"] .factors-card span,
+[data-theme="dark"] .FactorBar label {
+    color: #ffffff !important; /* Pure white for maximum visibility */
+    opacity: 1 !important;     /* Remove any transparency */
+    font-weight: 600 !important; /* Make it slightly bolder */
+    letter-spacing: 0.3px !important;
+}
+
+/* If your FactorBar component uses a separate class for the values (numbers) */
+[data-theme="dark"] .factor-value {
+    color: var(--accent) !important; /* Keep the numbers in Teak to stand out */
+    font-weight: 700 !important;
+}
+
+/* Ensure the container background isn't swallowing the text */
+[data-theme="dark"] .factors-card {
+    background: rgba(26, 26, 26, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+
+
+
+/* --- MOBILE-ONLY ZERO-GAP COORDINATE RESET --- */
+@media (max-width: 1024px) {
+    /* 1. Force the root containers to the extreme top-left */
+    html, 
+    body, 
+    #root, 
+    .app-shell, 
+    .App {
+        margin: 0 !important;
+        padding: 0 !important;
+        position: relative !important; /* Switch to relative for natural vertical flow */
+        display: block !important;
+        width: 100vw !important;
+        left: 0 !important;
+        top: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* 2. Eliminate the specific top/left gaps on containers */
+    .sidebar, 
+    .main-content {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        border: none !important;
+    }
+
+    /* 3. Flush Header: Removes any margin above the GeoAI logo */
+    .sidebar-top {
+        margin: 0 !important;
+        padding: 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* 4. Map & Results: Occupy 100% width with no side padding */
+    .map-container, 
+    .results-container {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: 0 !important;
+    }
+
+    /* 5. Results Grid: Ensure internal spacing doesn't create external gaps */
+    .results-grid {
+        width: 100% !important;
+        padding: 15px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 6. Fix for Leaflet's internal 1px offset */
+    .leaflet-container {
+        width: 100% !important;
+        margin: 0 !important;
+        border: none !important;
+    }
+}
+
+/* --- DESKTOP SAFETY LOCK --- */
+/* This ensures that on large screens, we stay in the original Flex mode */
+@media (min-width: 1025px) {
+    .app-shell {
+        display: flex !important;
+        position: absolute !important;
+        top: 0;
+        left: 0;
+    }
+}
+
+
+
+
+
+
+
+
+
+/* --- DYNAMIC EVIDENCE BACKGROUNDS --- */
+
+.evidence-entry {
+    padding: 15px !important;
+    border-radius: 12px !important;
+    margin-bottom: 15px !important;
+    border-left: 5px solid transparent !important;
+    transition: transform 0.2s ease !important;
+}
+
+/* Background for Red (Lesser/Risk) */
+.tone-red {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: #ef4444 !important;
+}
+[data-theme="dark"] .tone-red {
+    background: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Background for Yellow (Moderate) */
+.tone-yellow {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-color: #f59e0b !important;
+}
+[data-theme="dark"] .tone-yellow {
+    background: rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Background for Green (Safe/Good) */
+.tone-green {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: #10b981 !important;
+}
+[data-theme="dark"] .tone-green {
+    background: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Typography adjustments inside Evidence entries */
+.evidence-entry strong {
+    font-size: 13px !important;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.evidence-entry p {
+    margin: 5px 0 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    opacity: 0.9;
+}
+
+.evidence-entry small {
+    display: block;
+    margin-top: 8px;
+    opacity: 0.7;
+    font-size: 11px !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* --- UNIVERSAL COLOR SYSTEM --- */
+
+/* EVIDENCE BACKGROUNDS (The cards you requested) */
+.evidence-entry.tone-red {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-left: 5px solid #ef4444 !important;
+}
+.evidence-entry.tone-yellow {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-left: 5px solid #f59e0b !important;
+}
+.evidence-entry.tone-green {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-left: 5px solid #10b981 !important;
+}
+
+/* TERRAIN FACTOR BARS (Inside the FactorBar component) */
+/* We force these based on the internal classes often used in FactorBar */
+
+.factor-bar-fill.red, .bar-red { 
+    background: linear-gradient(90deg, #ef4444, #ff7b7b) !important; 
+}
+.factor-bar-fill.yellow, .bar-yellow { 
+    background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; 
+}
+.factor-bar-fill.green, .bar-green { 
+    background: linear-gradient(90deg, #10b981, #34d399) !important; 
+}
+
+
+
+
+/* --- FACTOR BAR DARK MODE VISIBILITY --- */
+[data-theme="dark"] .FactorBar-label {
+    color: #ffffff !important; /* Forces white text for Rainfall, Flood, etc. */
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important;
+}
+
+[data-theme="dark"] .factor-value {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
+    font-weight: 700 !important;
+}
+
+/* Ensure the empty bar background is visible in the dark */
+.bar {
+    background: rgba(255, 255, 255, 0.1) !important;
+    height: 8px !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    margin-top: 6px !important;
+}
+
+.bar-fill {
+    height: 100% !important;
+    border-radius: 10px !important;
+}
+
+
+
+
+
+
+/* --- DELETE BUTTON STYLING --- */
+
+.btn-delete {
+    background: transparent !important;
+    border: none !important;
+    color: #ef4444 !important; /* Red color for danger */
+    padding: 8px !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    font-size: 14px !important;
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
+
+/* Ensure the place item container handles the flex layout correctly */
+.place-item {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Specific fix for text wrapping so it doesn't collide with the button */
+.place-item strong {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* --- REFINED THEME TOGGLE --- */
+.theme-toggle {
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid var(--border) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Dark Mode Toggle: Black background, White icon/text */
+[data-theme="dark"] .theme-toggle {
+    background-color: #e2dcdc !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Light Mode Toggle: White background, Black icon/text */
+[data-theme="light"] .theme-toggle {
+    background-color: #0a0a0a !important;
+    color: #000000 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+/* --- PROJECT TEAM HOVER EFFECTS --- */
+.team-grid span {
+    font-size: 11px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    border: 1px solid var(--border) !important;
+    transition: all 0.3s ease !important;
+    color: var(--text) !important;
+    cursor: default;
+}
+
+.team-grid span:hover {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    border-color: var(--accent) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(45, 138, 138, 0.4) !important;
+    /* letter-spacing: 0.5px; */
+}
+
+
+
+
+
+/* --- ATTRACTIVE CARD ENHANCEMENTS --- */
+.card {
+    background: var(--card) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    margin-bottom: 20px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle glow effect on the cards */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(45, 138, 138, 0.4) !important;
+}
+
+/* Heading styles inside cards */
+.card h3 {
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    color: var(--accent) !important;
+    margin-bottom: 20px !important;
+    font-weight: 800 !important;
+}
+
+/* Projective Card - Specific style for Risk Card to make it pop */
+.risk-card {
+    border-left: 4px solid #ef4444 !important;
+    background: linear-gradient(145deg, var(--card), rgba(239, 68, 68, 0.02)) !important;
+}
+
+
+
+
+.glass-morphic {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* The glow behind the score */
+.glass-morphic::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+
+/* Container for the Glassmorphic effect */
+.glass-morphic {
+    background: rgba(255, 255, 255, 0.05); /* Slight white tint */
+    backdrop-filter: blur(12px) saturate(180%); /* Frosted glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Red glow effect specifically for low scores/water */
+.hero-card.glass-morphic::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.score-value {
+    font-size: 4rem;
+    font-weight: 800;
+    z-index: 1; /* Stay above the glow */
+    transition: color 0.3s ease; /* Smooth color transition */
+}
+
+
+
+
+
+/* Core Glassmorphism */
+.glass-morphic {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+}
+
+/* Red Danger Score Styling */
+.score-value {
+    font-size: 4.5rem; /* Large size as seen in image_f8b54b.png */
+    font-weight: 900;
+    transition: all 0.4s ease;
+}
+
+/* The red glow effect for 0.0 scores */
+.danger-glow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+
+
+
+
+/* 2. Restore Glassmorphism to the Hero Card */
+.results-grid .hero-card.glass-morphic {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 3. The Red "Danger" Glow behind the 0.0 score */
+.hero-card.danger-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.2) 0%, transparent 70%) !important;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 4. Fix for the Water Alert on the Right */
+.col-2 .water-alert-box {
+    grid-column: auto !important; /* Forces it to stay in the right column */
+    width: 100% !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid #ef4444 !important;
+}
+
+
+
+
+
+
+/* DARK/LIGHT THEME VARIABLES - DEEP BLACK */
+:root {
+  --bg: #ffffff;
+  --side: #f0f0f0;
+  --card: #ffffff;
+  --text: #000000;
+  --border: #dddddd;
+  --accent: #2563eb;
+}
+
+[data-theme="dark"] {
+  --bg: #000000;
+  --side: #0f0f0f;
+  --card: #1a1a1a;
+  --text: #ffffff;
+  --border: #222222;
+  --accent: #3b82f6;
+}
+
+* { box-sizing: border-box; }
+body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: 'Inter', sans-serif; }
+
+.app-shell { display: flex; height: 100vh; width: 100vw; background: var(--bg); color: var(--text); }
+
+/* SIDEBAR - ZERO GAP */
+.sidebar {
+  width: 280px;
+  background: var(--side);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-top { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.brand { font-size: 22px; font-weight: 800; color: var(--accent); }
+
+.sidebar-scrollable { flex: 1; overflow-y: auto; padding: 20px; }
+.control-group h3, .saved-places h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: var(--accent); }
+
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 11px; margin-bottom: 4px; opacity: 0.7; }
+.field input { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 4px; }
+
+.btn-analyze { width: 100%; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 4px; font-weight: 700; cursor: pointer; margin: 10px 0; }
+.btn-save { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 4px; cursor: pointer; }
+
+.place-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.place-item:hover { background: var(--border); }
+.place-item span { display: block; font-size: 11px; opacity: 0.6; }
+
+.sidebar-footer { padding: 20px; background: var(--card); border-top: 1px solid var(--border); }
+.team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; margin: 10px 0; }
+.guide-tag { font-weight: bold; font-size: 12px; border-top: 1px dashed var(--border); padding-top: 10px; }
+
+/* RIGHT CONTENT - STACKED */
+.main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; }
+.map-container { height: 50vh; width: 100%; border-bottom: 1px solid var(--border); }
+.results-container { height: 50vh; width: 100%; overflow-y: auto; background: var(--bg); padding: 25px; }
+
+/* TWO COLUMN LAYOUT FOR RESULTS */
+.results-grid { display: grid; grid-template-columns: 380px 1fr; gap: 25px; max-width: 1400px; margin: 0 auto; }
+.card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+
+
+.status-pill { text-align: center; padding: 6px; border-radius: 20px; font-size: 13px; font-weight: bold; text-transform: uppercase; }
+.status-pill.low { background: #10b981; color: white; }
+.status-pill.moderate { background: #f59e0b; color: white; }
+.status-pill.high { background: #ef4444; color: white; }
+
+.risk-item { border-left: 4px solid #ef4444; padding-left: 15px; margin-bottom: 15px; font-size: 14px; }
+.evidence-entry { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+.evidence-entry p { font-size: 13px; line-height: 1.5; margin: 5px 0; }
+
+.empty-results { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border); font-size: 20px; }
+
+/* Custom Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+
+
+
+/* ADD THIS TO REMOVE THE LEFT/TOP GAPS */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* Prevents unwanted scrollbars */
+}
+
+/* Ensure the app shell is pinned to the absolute 0,0 position */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* REST OF YOUR STYLING */
+.sidebar {
+  width: 280px;
+  background: var(--side);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* RESULTS GRID REORGANIZED */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr; /* Score/Bars on left, Details on right */
+  gap: 20px;
+  padding: 20px;
+}
+
+
+
+
+
+
+
+
+/* 1. Glassmorphic Brand Title */
+.brand {
+  font-size: 24px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--accent);
+  letter-spacing: -1px;
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+/* 2. Fix Sidebar Heights to stop overall scrolling */
+.sidebar-scrollable {
+  flex: 1; 
+  overflow: hidden; /* Prevent this container from scrolling */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* 3. Allow ONLY Saved Places to scroll */
+.places-list {
+  flex: 1; /* Takes up remaining space in middle section */
+  overflow-y: auto; 
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.1);
+}
+
+/* 4. Attractive Project Team Card */
+.sidebar-footer {
+  padding: 15px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  margin: 15px; /* Adds space around the "card" */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.sidebar-footer h4 {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-align: center;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.team-grid span {
+  font-size: 11px;
+  background: var(--bg);
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.guide-tag {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 11px;
+  padding: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  color: var(--accent);
+}
+
+
+
+/* Glassmorphic Brand Container */
+.sidebar-top {
+  padding: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  padding: 10px 18px;
+  
+  /* The Glass Effect */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+  /* The Gradient Text */
+  background-image: linear-gradient(135deg, #3b82f6 0%, #ffffff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Subtle Glow behind the text */
+.brand::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  background: rgba(59, 130, 246, 0.2);
+  filter: blur(25px);
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+
+
+
+/* --- THE NEW TEAK ACCENT & HOVER STYLES --- */
+:root {
+  --accent: #2d8a8a; /* Deep Teak / Seafoam Teal */
+  --accent-hover: #1f6363;
+}
+
+/* 1. TITLE REFINEMENT (Visible in both modes) */
+.brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 20px !important;
+  border-radius: 12px !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  
+  /* Glassmorphism that works in light & dark */
+  background: rgba(45, 138, 138, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(45, 138, 138, 0.2) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  
+  /* Gradient Text - Darker bottom for light mode visibility */
+  background-image: linear-gradient(135deg, var(--accent) 0%, #114444 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Dot Indicator using Teak */
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+/* 2. SAVE PLACE BUTTON - MODERN HOVER */
+.btn-save {
+  width: 100%;
+  background: transparent !important;
+  border: 1px solid var(--accent) !important;
+  color: var(--text) !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.btn-save:hover {
+  background: var(--accent) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(45, 138, 138, 0.3) !important;
+  letter-spacing: 0.5px !important;
+}
+
+.btn-save:active {
+  transform: translateY(0) !important;
+}
+
+/* 3. UPDATING OTHER BLUE ELEMENTS TO TEAK */
+.btn-analyze {
+  background: var(--accent) !important;
+  transition: background 0.3s ease !important;
+}
+.btn-analyze:hover {
+  background: var(--accent-hover) !important;
 }
 
 
@@ -790,21 +2166,20 @@ html, body, #root, .app-shell {
   z-index: -1;
 }
 
-.score-value {
-  font-size: 96px !important; /* Larger, more impactful */
+/* .score-value {
+  font-size: 96px !important; 
   font-weight: 900 !important;
   letter-spacing: -4px !important;
   margin: 10px 0 !important;
   
-  /* Gradient text for the number */
   background: linear-gradient(180deg, #ffffff 30%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   
-  /* Outer glow */
+
   filter: drop-shadow(0 0 15px rgba(45, 138, 138, 0.4));
   line-height: 1;
-}
+} */
 
 .status-pill {
   margin-top: 15px;
@@ -840,14 +2215,14 @@ html, body, #root, .app-shell {
 }
 
 /* LIGHT THEME VISIBILITY FIX */
-[data-theme="light"] .score-value {
-  /* Use a darker teak-to-black gradient for contrast on white */
+/* [data-theme="light"] .score-value {
+
   background: linear-gradient(180deg, #114444 0%, var(--accent) 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
-}
+} */
 
 [data-theme="light"] .hero-card {
   background: rgba(0, 0, 0, 0.02) !important;
@@ -856,13 +2231,13 @@ html, body, #root, .app-shell {
 }
 
 /* DARK THEME REMAINS VIBRANT */
-[data-theme="dark"] .score-value {
+/* [data-theme="dark"] .score-value {
   background: linear-gradient(180deg, #ffffff 30%, var(--accent) 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   filter: drop-shadow(0 0 15px rgba(45, 138, 138, 0.4)) !important;
-}
+} */
 
 /* ADJUSTING THE GLOW ORB FOR LIGHT THEME */
 [data-theme="light"] .hero-card::before {
@@ -1251,4 +2626,23 @@ html, body, #root, .app-shell {
 .risk-card {
     border-left: 4px solid #ef4444 !important;
     background: linear-gradient(145deg, var(--card), rgba(239, 68, 68, 0.02)) !important;
+}
+
+
+
+
+
+
+
+
+/* ================================
+   🧬 SCORE COLOR SYSTEM (FINAL)
+   ================================ */
+
+.results-grid .score-value {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: var(--score-color) !important;
+    color: var(--score-color) !important;
+    text-shadow: none !important;
 }
