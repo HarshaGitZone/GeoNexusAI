@@ -2241,6 +2241,9 @@ def suitability():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/", defaults={"path": ""})
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "ok"}), 200
 @app.route("/<path:path>")
 def serve_react(path):
     build_dir = app.static_folder
