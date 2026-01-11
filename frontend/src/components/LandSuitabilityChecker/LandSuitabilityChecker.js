@@ -136,16 +136,47 @@ export default function LandSuitabilityChecker() {
     catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
-  const handleCompareSelect = async (tLat, tLng, existingName = null) => {
+  // const handleCompareSelect = async (tLat, tLng, existingName = null) => {
+  //   setIsSelectingB(false);
+  //   let name = existingName || prompt("Enter name for Location B:") || "Site B";
+  //   setCompareName(name);
+  //   setCompareLoading(true);
+  //   setIsCompareMode(true);
+  //   try { const data = await performAnalysis(tLat, tLng); setCompareResult(data); }
+  //   catch (err) { console.error(err); } finally { setCompareLoading(false); }
+  // };
+const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     setIsSelectingB(false);
+    
+    // UPDATE THESE TWO LINES: Fill the inputs with the selected coordinates
+    setBLatInput(tLat.toString());
+    setBLngInput(tLng.toString());
+
     let name = existingName || prompt("Enter name for Location B:") || "Site B";
     setCompareName(name);
     setCompareLoading(true);
     setIsCompareMode(true);
-    try { const data = await performAnalysis(tLat, tLng); setCompareResult(data); }
-    catch (err) { console.error(err); } finally { setCompareLoading(false); }
+    try { 
+      const data = await performAnalysis(tLat, tLng); 
+      setCompareResult(data); 
+    }
+    catch (err) { console.error(err); } 
+    finally { setCompareLoading(false); }
   };
-
+  <LocationMarker 
+  lat={lat} 
+  lng={lng} 
+  setLat={setLat} 
+  setLng={setLng} 
+  setZoom={setZoom} 
+  isSelectingB={isSelectingB} 
+  onSelectB={(tLat, tLng) => {
+    // When map is clicked for B, update the inputs immediately
+    setBLatInput(tLat.toString());
+    setBLngInput(tLng.toString());
+    handleCompareSelect(tLat, tLng);
+  }} 
+/>
   const handleMyLocation = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos) => {
@@ -161,24 +192,60 @@ export default function LandSuitabilityChecker() {
   };
 
   // Components for layout
-  const FactorsSection = ({ data }) => (
-    <>
-      <div className={`card hero-card glass-morphic ${data.suitability_score < 40 ? 'danger-glow' : ''}`}>
-        <h3>Overall Suitability</h3>
-        <div className="score-value" style={{ "--score-color": data.suitability_score < 40 ? "#ef4444" : data.suitability_score < 70 ? "#f59e0b" : "#10b981"}}>
-          {data.suitability_score?.toFixed(1)}
-        </div>
-        <div className={`status-pill ${data.label?.toLowerCase().replace(/\s+/g, '-')}`}>{data.label}</div>
-      </div>
-      <div className="card factors-card">
-        <h3>Terrain Factors</h3>
-        {['rainfall', 'flood', 'landslide', 'soil', 'proximity', 'water', 'pollution', 'landuse'].map(f => (
-          <FactorBar key={f} label={f.charAt(0).toUpperCase() + f.slice(1)} value={data.factors[f] ?? 0} />
-        ))}
-      </div>
-    </>
-  );
+  // const FactorsSection = ({ data }) => (
+  //   <>
+  //     <div className={`card hero-card glass-morphic ${data.suitability_score < 40 ? 'danger-glow' : ''}`}>
+  //       {/* Added Coordinates Display */}
+  //       <div className="card-coordinates">
+  //         <span>LAT: {latVal ? parseFloat(latVal).toFixed(4) : "0.0000"}</span>
+  //         <span>LNG: {lngVal ? parseFloat(lngVal).toFixed(4) : "0.0000"}</span>
+  //       </div>
+  //       <h3>Overall Suitability</h3>
+  //       <div className="score-value" style={{ "--score-color": data.suitability_score < 40 ? "#ef4444" : data.suitability_score < 70 ? "#f59e0b" : "#10b981"}}>
+  //         {data.suitability_score?.toFixed(1)}
+  //       </div>
+  //       <div className={`status-pill ${data.label?.toLowerCase().replace(/\s+/g, '-')}`}>{data.label}</div>
+  //     </div>
+  //     <div className="card factors-card">
+  //       <h3>Terrain Factors</h3>
+  //       {['rainfall', 'flood', 'landslide', 'soil', 'proximity', 'water', 'pollution', 'landuse'].map(f => (
+  //         <FactorBar key={f} label={f.charAt(0).toUpperCase() + f.slice(1)} value={data.factors[f] ?? 0} />
+  //       ))}
+  //     </div>
+  //   </>
+  // );
+// Components for layout - Strict Data Isolation
+ const FactorsSection = ({ data, latVal, lngVal }) => {
+    // Use a helper to check if value is a valid number and not just an empty string
+    const formatCoord = (val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) ? num.toFixed(4) : "..."; 
+    };
 
+    return (
+      <>
+        <div className={`card hero-card glass-morphic ${data.suitability_score < 40 ? 'danger-glow' : ''}`}>
+          <div className="card-coordinates">
+            <span>LAT: {formatCoord(latVal)}</span>
+            <span>LNG: {formatCoord(lngVal)}</span>
+          </div>
+          
+          <h3>Overall Suitability</h3>
+          <div className="score-value" style={{ "--score-color": data.suitability_score < 40 ? "#ef4444" : data.suitability_score < 70 ? "#f59e0b" : "#10b981"}}>
+            {data.suitability_score?.toFixed(1)}
+          </div>
+          <div className={`status-pill ${data.label?.toLowerCase().replace(/\s+/g, '-')}`}>{data.label}</div>
+        </div>
+        
+        <div className="card factors-card">
+          <h3>Terrain Factors</h3>
+          {['rainfall', 'flood', 'landslide', 'soil', 'proximity', 'water', 'pollution', 'landuse'].map(f => (
+            <FactorBar key={f} label={f.charAt(0).toUpperCase() + f.slice(1)} value={data.factors[f] ?? 0} />
+          ))}
+        </div>
+      </>
+    );
+  };
   const EvidenceSection = ({ data }) => (
     <div className="card evidence-card" style={{ height: '100%' }}>
       <h3>Evidence Details</h3>
@@ -309,9 +376,12 @@ export default function LandSuitabilityChecker() {
           {result && !isCompareMode && (
             /* STANDARD VIEW: SIDE BY SIDE LAYOUT */
             <div className="results-grid">
-              <div className="col-1">
+              {/* <div className="col-1">
                 <FactorsSection data={result} />
-              </div>
+              </div> */}
+              <div className="col-1">
+  <FactorsSection data={result} latVal={lat} lngVal={lng} />
+</div>
               <div className="col-2">
                 <EvidenceSection data={result} />
               </div>
@@ -321,12 +391,17 @@ export default function LandSuitabilityChecker() {
           {result && isCompareMode && (
             /* COMPARE VIEW: SPLIT SCREEN VERTICAL STACKS */
             <div className="compare-layout-ditto" style={{ display: 'flex', height: '100%', width: '100%' }}>
-              <div className="compare-pane-ditto">
+              {/* <div className="compare-pane-ditto">
                 <h4 className="pane-header">SITE A: CURRENT</h4>
                 <FactorsSection data={result} />
                 <EvidenceSection data={result} />
-              </div>
+              </div> */}
               <div className="compare-pane-ditto">
+  <h4 className="pane-header">SITE A: CURRENT</h4>
+  <FactorsSection data={result} latVal={lat} lngVal={lng} />
+  <EvidenceSection data={result} />
+</div>
+              {/* <div className="compare-pane-ditto">
                 <h4 className="pane-header">SITE B: {compareName.toUpperCase()}</h4>
                 {compareResult ? (
                   <>
@@ -334,7 +409,23 @@ export default function LandSuitabilityChecker() {
                     <EvidenceSection data={compareResult} />
                   </>
                 ) : <div className="empty-results">Waiting for selection...</div>}
-              </div>
+              </div> */}
+              <div className="compare-pane-ditto">
+  <h4 className="pane-header">SITE B: {compareName.toUpperCase()}</h4>
+  {compareResult ? (
+    <>
+      {/* IMPORTANT: Use the coordinates that were actually analyzed 
+         (passed from the handleCompareSelect function) 
+      */}
+      <FactorsSection 
+        data={compareResult} 
+        latVal={compareResult.latitude || bLatInput} 
+        lngVal={compareResult.longitude || bLngInput} 
+      />
+      <EvidenceSection data={compareResult} />
+    </>
+  ) : <div className="empty-results">Waiting for selection...</div>}
+</div>
             </div>
           )}
         </section>

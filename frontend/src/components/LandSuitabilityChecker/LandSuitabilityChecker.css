@@ -3461,3 +3461,91 @@ html, body, #root, .app-shell {
     z-index: 1 !important;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- COORDINATES IN CARD --- */
+.card-coordinates {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-family: monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    opacity: 0.8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* --- FULL CONTENT EXPANSION --- */
+/* Remove height restrictions from ALL containers to ensure everything shows */
+.results-container,
+.results-grid,
+.compare-layout-ditto,
+.compare-pane-ditto,
+.vertical-stack-ditto,
+.evidence-card {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0;
+    overflow: visible !important; /* Allow the content to define the height */
+}
+
+/* Ensure the main results-container handles the main scrollbar */
+.results-container {
+    overflow-y: auto !important;
+    padding-bottom: 50px !important; /* Extra space so last item isn't cut off */
+}
+
+/* Fix for independent columns in comparison */
+.compare-pane-ditto {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    /* This ensures they stay side-by-side but grow with content */
+}
+
+/* Ensure Evidence Entries don't shrink */
+.evidence-entry {
+    flex-shrink: 0 !important;
+}
+
+
+
+/* --- COORDINATES IN CARD (Theme Responsive) --- */
+.card-coordinates {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-family: monospace;
+    font-size: 10px;
+    font-weight: 700; /* Made slightly bolder for better visibility */
+    
+    /* Use the variable that switches between Black and White */
+    color: var(--text) !important; 
+    
+    /* Adjusting opacity for a professional look */
+    opacity: 0.9; 
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* Optional: Slight Teak glow in dark mode for the coordinates */
+[data-theme="dark"] .card-coordinates {
+    text-shadow: 0 0 8px rgba(45, 138, 138, 0.3);
+}
+
+
+
+
