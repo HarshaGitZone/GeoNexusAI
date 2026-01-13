@@ -3163,16 +3163,6 @@ html, body, #root, .app-shell {
   overflow-y: auto; 
   padding-right: 5px; 
 }
-
-
-
-
-
-
-
-
-
-
 /* Sidebar Input Consistency */
 .compact-row { display: flex !important; gap: 8px !important; width: 100% !important; align-items: flex-end; }
 .input-label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 2px; color: var(--primary); }
@@ -3461,18 +3451,6 @@ html, body, #root, .app-shell {
     z-index: 1 !important;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* --- COORDINATES IN CARD --- */
 .card-coordinates {
     display: flex;
@@ -3486,7 +3464,6 @@ html, body, #root, .app-shell {
     margin-bottom: 8px;
     text-transform: uppercase;
 }
-
 /* --- FULL CONTENT EXPANSION --- */
 /* Remove height restrictions from ALL containers to ensure everything shows */
 .results-container,
@@ -3521,27 +3498,20 @@ html, body, #root, .app-shell {
     flex-shrink: 0 !important;
 }
 
-
-
-/* --- COORDINATES IN CARD (Theme Responsive) --- */
 .card-coordinates {
     display: flex;
     justify-content: center;
     gap: 15px;
     font-family: monospace;
     font-size: 10px;
-    font-weight: 700; /* Made slightly bolder for better visibility */
-    
-    /* Use the variable that switches between Black and White */
+    font-weight: 700; 
     color: var(--text) !important; 
-    
-    /* Adjusting opacity for a professional look */
     opacity: 0.9; 
     margin-bottom: 8px;
     text-transform: uppercase;
 }
 
-/* Optional: Slight Teak glow in dark mode for the coordinates */
+
 [data-theme="dark"] .card-coordinates {
     text-shadow: 0 0 8px rgba(45, 138, 138, 0.3);
 }

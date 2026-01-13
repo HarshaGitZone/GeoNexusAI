@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./LandSuitabilityChecker.css";
 
-// Fix default marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -39,7 +38,6 @@ function LocationMarker({ lat, lng, setLat, setLng, setZoom, isSelectingB, onSel
 }
 
 export default function LandSuitabilityChecker() {
-  // 1. INITIALIZATION & PERSISTENCE
   const [lat, setLat] = useState(() => localStorage.getItem("geo_lat") || "17.385");
   const [lng, setLng] = useState(() => localStorage.getItem("geo_lng") || "78.4867");
   const [zoom, setZoom] = useState(() => Number(localStorage.getItem("geo_zoom")) || 13);
@@ -51,14 +49,10 @@ export default function LandSuitabilityChecker() {
     const saved = localStorage.getItem("geo_last_result");
     return saved ? JSON.parse(saved) : null;
   });
-
-  // RESIZABLE DIMENSIONS
   const [sidebarWidth, setSidebarWidth] = useState(() => Number(localStorage.getItem("sidebar_width")) || 320);
   const [bottomHeight, setBottomHeight] = useState(() => Number(localStorage.getItem("bottom_height")) || 380);
   const isResizingSide = useRef(false);
   const isResizingBottom = useRef(false);
-
-  // COMPARISON STATES
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [compareResult, setCompareResult] = useState(null);
   const [compareName, setCompareName] = useState("");
@@ -74,6 +68,7 @@ export default function LandSuitabilityChecker() {
     return stored ? JSON.parse(stored) : [];
   });
 
+const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
   useEffect(() => {
     localStorage.setItem("geo_lat", lat);
     localStorage.setItem("geo_lng", lng);
@@ -85,8 +80,6 @@ export default function LandSuitabilityChecker() {
     if (result) localStorage.setItem("geo_last_result", JSON.stringify(result));
     document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
   }, [lat, lng, zoom, isDarkMode, sidebarWidth, bottomHeight, result, savedPlaces]);
-
-  // DRAG HANDLERS (With Dependencies for Build)
   const handleMouseMove = useCallback((e) => {
     if (isResizingSide.current) {
       const newWidth = e.clientX;
@@ -129,26 +122,35 @@ export default function LandSuitabilityChecker() {
     return await response.json();
   };
 
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    setResult(null); setCompareResult(null); setIsCompareMode(false); setLoading(true);
-    try { const data = await performAnalysis(lat, lng); setResult(data); }
-    catch (err) { console.error(err); } finally { setLoading(false); }
-  };
-
-  // const handleCompareSelect = async (tLat, tLng, existingName = null) => {
-  //   setIsSelectingB(false);
-  //   let name = existingName || prompt("Enter name for Location B:") || "Site B";
-  //   setCompareName(name);
-  //   setCompareLoading(true);
-  //   setIsCompareMode(true);
-  //   try { const data = await performAnalysis(tLat, tLng); setCompareResult(data); }
-  //   catch (err) { console.error(err); } finally { setCompareLoading(false); }
+  // const handleSubmit = async (e) => {
+  //   if (e) e.preventDefault();
+  //   setResult(null); setCompareResult(null); setIsCompareMode(false); setLoading(true);
+  //   try { const data = await performAnalysis(lat, lng); setResult(data); }
+  //   catch (err) { console.error(err); } finally { setLoading(false); }
   // };
+  const handleSubmit = async (e) => {
+  if (e) e.preventDefault();
+  setResult(null); 
+  setCompareResult(null); 
+  setIsCompareMode(false); 
+  setLoading(true);
+
+  try { 
+    const data = await performAnalysis(lat, lng); 
+    setResult(data); 
+    // SAVE THE COORDINATES HERE
+    setAnalyzedCoords({ lat: lat, lng: lng }); 
+  }
+  catch (err) { 
+    console.error(err); 
+  } finally { 
+    setLoading(false); 
+  }
+};
+
+ 
 const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     setIsSelectingB(false);
-    
-    // UPDATE THESE TWO LINES: Fill the inputs with the selected coordinates
     setBLatInput(tLat.toString());
     setBLngInput(tLng.toString());
 
@@ -171,7 +173,6 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
   setZoom={setZoom} 
   isSelectingB={isSelectingB} 
   onSelectB={(tLat, tLng) => {
-    // When map is clicked for B, update the inputs immediately
     setBLatInput(tLat.toString());
     setBLngInput(tLng.toString());
     handleCompareSelect(tLat, tLng);
@@ -191,32 +192,7 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     setSavedPlaces([...savedPlaces, { name, lat: parseFloat(lat), lng: parseFloat(lng) }]);
   };
 
-  // Components for layout
-  // const FactorsSection = ({ data }) => (
-  //   <>
-  //     <div className={`card hero-card glass-morphic ${data.suitability_score < 40 ? 'danger-glow' : ''}`}>
-  //       {/* Added Coordinates Display */}
-  //       <div className="card-coordinates">
-  //         <span>LAT: {latVal ? parseFloat(latVal).toFixed(4) : "0.0000"}</span>
-  //         <span>LNG: {lngVal ? parseFloat(lngVal).toFixed(4) : "0.0000"}</span>
-  //       </div>
-  //       <h3>Overall Suitability</h3>
-  //       <div className="score-value" style={{ "--score-color": data.suitability_score < 40 ? "#ef4444" : data.suitability_score < 70 ? "#f59e0b" : "#10b981"}}>
-  //         {data.suitability_score?.toFixed(1)}
-  //       </div>
-  //       <div className={`status-pill ${data.label?.toLowerCase().replace(/\s+/g, '-')}`}>{data.label}</div>
-  //     </div>
-  //     <div className="card factors-card">
-  //       <h3>Terrain Factors</h3>
-  //       {['rainfall', 'flood', 'landslide', 'soil', 'proximity', 'water', 'pollution', 'landuse'].map(f => (
-  //         <FactorBar key={f} label={f.charAt(0).toUpperCase() + f.slice(1)} value={data.factors[f] ?? 0} />
-  //       ))}
-  //     </div>
-  //   </>
-  // );
-// Components for layout - Strict Data Isolation
  const FactorsSection = ({ data, latVal, lngVal }) => {
-    // Use a helper to check if value is a valid number and not just an empty string
     const formatCoord = (val) => {
       const num = parseFloat(val);
       return !isNaN(num) ? num.toFixed(4) : "..."; 
@@ -373,15 +349,17 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
         <section className="results-container" style={{ height: `${bottomHeight}px`, flex: `0 0 ${bottomHeight}px`, overflowY: 'auto' }}>
           {(loading || compareLoading) && <div className="loading-overlay">Analyzing Terrain Data...</div>}
           
+          
           {result && !isCompareMode && (
-            /* STANDARD VIEW: SIDE BY SIDE LAYOUT */
             <div className="results-grid">
-              {/* <div className="col-1">
-                <FactorsSection data={result} />
-              </div> */}
               <div className="col-1">
-  <FactorsSection data={result} latVal={lat} lngVal={lng} />
-</div>
+                {/* Change latVal and lngVal to use analyzedCoords */}
+                <FactorsSection 
+                  data={result} 
+                  latVal={analyzedCoords.lat} 
+                  lngVal={analyzedCoords.lng} 
+                />
+              </div>
               <div className="col-2">
                 <EvidenceSection data={result} />
               </div>
@@ -389,43 +367,31 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
           )}
 
           {result && isCompareMode && (
-            /* COMPARE VIEW: SPLIT SCREEN VERTICAL STACKS */
             <div className="compare-layout-ditto" style={{ display: 'flex', height: '100%', width: '100%' }}>
-              {/* <div className="compare-pane-ditto">
-                <h4 className="pane-header">SITE A: CURRENT</h4>
-                <FactorsSection data={result} />
-                <EvidenceSection data={result} />
-              </div> */}
-              <div className="compare-pane-ditto">
-  <h4 className="pane-header">SITE A: CURRENT</h4>
-  <FactorsSection data={result} latVal={lat} lngVal={lng} />
-  <EvidenceSection data={result} />
-</div>
-              {/* <div className="compare-pane-ditto">
-                <h4 className="pane-header">SITE B: {compareName.toUpperCase()}</h4>
-                {compareResult ? (
-                  <>
-                    <FactorsSection data={compareResult} />
-                    <EvidenceSection data={compareResult} />
-                  </>
-                ) : <div className="empty-results">Waiting for selection...</div>}
-              </div> */}
-              <div className="compare-pane-ditto">
-  <h4 className="pane-header">SITE B: {compareName.toUpperCase()}</h4>
-  {compareResult ? (
-    <>
-      {/* IMPORTANT: Use the coordinates that were actually analyzed 
-         (passed from the handleCompareSelect function) 
-      */}
-      <FactorsSection 
-        data={compareResult} 
-        latVal={compareResult.latitude || bLatInput} 
-        lngVal={compareResult.longitude || bLngInput} 
-      />
-      <EvidenceSection data={compareResult} />
-    </>
-  ) : <div className="empty-results">Waiting for selection...</div>}
-</div>
+            <div className="compare-pane-ditto">
+              <h4 className="pane-header">SITE A: CURRENT</h4>
+              {/* Replaced lat/lng with analyzedCoords to "lock" the data */}
+              <FactorsSection 
+                data={result} 
+                latVal={analyzedCoords.lat} 
+                lngVal={analyzedCoords.lng} 
+              />
+              <EvidenceSection data={result} />
+            </div>
+
+            <div className="compare-pane-ditto">
+              <h4 className="pane-header">SITE B: {compareName.toUpperCase()}</h4>
+              {compareResult ? (
+                <>
+                  <FactorsSection 
+                    data={compareResult} 
+                    latVal={compareResult.latitude || bLatInput} 
+                    lngVal={compareResult.longitude || bLngInput} 
+                  />
+                  <EvidenceSection data={compareResult} />
+                </>
+              ) : <div className="empty-results">Waiting for selection...</div>}
+            </div>
             </div>
           )}
         </section>
