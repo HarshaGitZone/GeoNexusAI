@@ -69,6 +69,9 @@ export default function LandSuitabilityChecker() {
   });
 
 const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
+  const [showNearby, setShowNearby] = useState(false);
+  const [nearbyData, setNearbyData] = useState(null);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
   useEffect(() => {
     localStorage.setItem("geo_lat", lat);
     localStorage.setItem("geo_lng", lng);
@@ -164,6 +167,25 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     }
     catch (err) { console.error(err); } 
     finally { setCompareLoading(false); }
+  };
+
+  const handleNearbyPlaces = async () => {
+    setNearbyLoading(true);
+    try {
+      const res = await fetch("http://127.0.0.1:5000/nearby_places", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lng) }),
+      });
+
+      const data = await res.json();
+      setNearbyData(data);
+      setShowNearby(true);
+    } catch (err) {
+      console.error("Failed to load nearby places", err);
+    } finally {
+      setNearbyLoading(false);
+    }
   };
   <LocationMarker 
   lat={lat} 
@@ -274,6 +296,11 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
               <button type="submit" className="btn-analyze" disabled={loading} style={{marginTop: '8px', width: '100%'}}>
                 {loading ? "Analyzing..." : "Analyze Location"}
               </button>
+              {result && (
+                <button type="button" onClick={handleNearbyPlaces} className="btn-analyze" disabled={nearbyLoading} style={{marginTop: '8px', width: '100%', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)'}}>
+                  {nearbyLoading ? "Loading..." : "🏘️ Nearby Places"}
+                </button>
+              )}
             </form>
           </section>
 
@@ -395,6 +422,58 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
             </div>
           )}
         </section>
+
+        {showNearby && (
+          <div className="modal-overlay" onClick={() => setShowNearby(false)}>
+            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Nearby Places (1.5 km)</h3>
+                <button className="modal-close" onClick={() => setShowNearby(false)}>✖</button>
+              </div>
+
+              <div className="modal-body">
+                {nearbyData?.places?.length ? (
+                  (() => {
+                    const schools = nearbyData.places.filter(p => p.type === "school");
+                    const hospitals = nearbyData.places.filter(p => p.type === "hospital");
+                    const colleges = nearbyData.places.filter(
+                      p => p.type === "college" || p.type === "university"
+                    );
+
+                    const Section = ({ title, items }) => (
+                      <div className="nearby-section">
+                        <h4>{title} ({items.length})</h4>
+                        {items.length ? (
+                          items.map((p, i) => (
+                            <div key={i} className="nearby-item">
+                              <span className="nearby-name">{p.name}</span>
+                              <span className="nearby-distance">{p.distance_km} km</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="nearby-empty">No nearby {title.toLowerCase()} found.</div>
+                        )}
+                      </div>
+                    );
+
+                    return (
+                      <>
+                        <Section title="🏫 Schools" items={schools} />
+                        <Section title="🏥 Hospitals" items={hospitals} />
+                        <Section title="🎓 Colleges & Universities" items={colleges} />
+                      </>
+                    );
+                  })()
+                ) : (
+                  <div className="nearby-empty">
+                    No mapped amenities within 1.5 km.<br />
+                    This likely indicates a rural or low-density region.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

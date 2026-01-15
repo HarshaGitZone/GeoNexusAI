@@ -339,6 +339,7 @@ from backend.integrations import (
     infer_landuse_score,
     estimate_soil_quality_score,
     estimate_rainfall_score,
+    nearby_places,
 )
 
 # --- Flask App Initialization ---
@@ -462,6 +463,30 @@ def suitability():
     except Exception as e:
         logger.exception(f"Suitability error: {e}")
         return jsonify({"error": str(e)}), 500
+
+@app.route("/nearby_places", methods=["POST", "OPTIONS"])
+def nearby_places_route():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    try:
+        data = request.json or {}
+        lat = float(data["latitude"])
+        lon = float(data["longitude"])
+
+        places = nearby_places.get_nearby_named_places(lat, lon)
+
+        return jsonify({
+            "count": len(places),
+            "places": places
+        })
+
+    except Exception as e:
+        return jsonify({
+            "count": 0,
+            "places": [],
+            "error": str(e)
+        }), 200
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
