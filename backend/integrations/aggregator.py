@@ -52,8 +52,15 @@ def compute_suitability_score(
             "proximity": 0.10, "water": 0.18, "pollution": 0.10, "landuse": 0.10,
         }
         score = round(sum(factors[k] * weights[k] for k in weights), 2)
-        # 3. 🚨 SAFETY CLAMP: Forest / Protected land is NON-BUILDABLE
-        # If landuse logic returned <= 20 (Forest), the TOTAL score cannot exceed 20.
-        if factors["landuse"] <= 20.0:
-            score = min(score, 20.0)
+        
+        # 🚨 SAFETY CLAMP: Forest / Protected land is NON-BUILDABLE
+        # If landuse_score indicates forest/protected (<=20), clamp total score
+        if landuse_score is not None:
+            try:
+                lu_raw = float(landuse_score)
+            except (ValueError, TypeError):
+                lu_raw = None
+
+            if lu_raw is not None and lu_raw <= 20:
+                score = min(score, 20.0)
     return {"score": score, "factors": factors, "is_hard_unsuitable": is_hard_unsuitable}

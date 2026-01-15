@@ -72,6 +72,11 @@ const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
   const [showNearby, setShowNearby] = useState(false);
   const [nearbyData, setNearbyData] = useState(null);
   const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [showNearbyB, setShowNearbyB] = useState(false);
+  const [nearbyDataB, setNearbyDataB] = useState(null);
+  const [nearbyLoadingB, setNearbyLoadingB] = useState(false);
+  const [analyzedCoordsB, setAnalyzedCoordsB] = useState({ lat: null, lng: null });
+  const [isBFromSavedPlace, setIsBFromSavedPlace] = useState(false);
   useEffect(() => {
     localStorage.setItem("geo_lat", lat);
     localStorage.setItem("geo_lng", lng);
@@ -161,9 +166,15 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     setCompareName(name);
     setCompareLoading(true);
     setIsCompareMode(true);
+    // Clear previous result when analyzing a new location B
+    setCompareResult(null);
+    // Track if B is from saved places (existingName means it came from saved places)
+    setIsBFromSavedPlace(!!existingName);
     try { 
       const data = await performAnalysis(tLat, tLng); 
-      setCompareResult(data); 
+      setCompareResult(data);
+      // Save Location B coordinates for nearby places
+      setAnalyzedCoordsB({ lat: tLat.toString(), lng: tLng.toString() });
     }
     catch (err) { console.error(err); } 
     finally { setCompareLoading(false); }
@@ -185,6 +196,25 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
       console.error("Failed to load nearby places", err);
     } finally {
       setNearbyLoading(false);
+    }
+  };
+
+  const handleNearbyPlacesB = async () => {
+    setNearbyLoadingB(true);
+    try {
+      const res = await fetch("http://127.0.0.1:5000/nearby_places", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude: parseFloat(analyzedCoordsB.lat), longitude: parseFloat(analyzedCoordsB.lng) }),
+      });
+
+      const data = await res.json();
+      setNearbyDataB(data);
+      setShowNearbyB(true);
+    } catch (err) {
+      console.error("Failed to load nearby places for Location B", err);
+    } finally {
+      setNearbyLoadingB(false);
     }
   };
   <LocationMarker 
@@ -212,6 +242,19 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     const name = prompt("Enter a name for this location:");
     if (!name) return;
     setSavedPlaces([...savedPlaces, { name, lat: parseFloat(lat), lng: parseFloat(lng) }]);
+  };
+
+  const handleMyLocationB = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setBLatInput(pos.coords.latitude.toString());
+      setBLngInput(pos.coords.longitude.toString());
+    });
+  };
+
+  const handleSavePlaceB = () => {
+    if (!compareName) return;
+    setSavedPlaces([...savedPlaces, { name: compareName, lat: parseFloat(bLatInput), lng: parseFloat(bLngInput) }]);
   };
 
  const FactorsSection = ({ data, latVal, lngVal }) => {
@@ -293,49 +336,75 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
                 <button type="button" onClick={handleMyLocation} className="btn-save same-size">📍 My Location</button>
                 <button type="button" onClick={handleSavePlace} className="btn-save same-size">⭐ Save Place</button>
               </div>
-              <button type="submit" className="btn-analyze" disabled={loading} style={{marginTop: '8px', width: '100%'}}>
-                {loading ? "Analyzing..." : "Analyze Location"}
-              </button>
-              {result && (
-                <button type="button" onClick={handleNearbyPlaces} className="btn-analyze" disabled={nearbyLoading} style={{marginTop: '8px', width: '100%', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)'}}>
-                  {nearbyLoading ? "Loading..." : "🏘️ Nearby Places"}
+              <div className="compact-row" style={{marginTop: '8px', gap: '6px'}}>
+                <button type="submit" className="btn-analyze" disabled={loading} style={{flex: 1, padding: '10px'}}>
+                  {loading ? "Analyzing..." : "Analyze A"}
                 </button>
-              )}
+                <button 
+                  type="button" 
+                  onClick={handleNearbyPlaces} 
+                  disabled={!result || nearbyLoading} 
+                  className="btn-analyze" 
+                  style={{flex: 1, padding: '10px', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)'}}
+                >
+                  {nearbyLoading ? "Loading..." : "🏘️ Nearby"}
+                </button>
+              </div>
             </form>
           </section>
 
-          {result && (
-            <section className="control-group comparison-box compact">
-              <h3>Compare with Location B</h3>
-              <div className="compact-row">
-                <button className="btn-save mini" onClick={() => setIsSelectingB(!isSelectingB)} style={{ flex: 1, border: isSelectingB ? '1px solid #ef4444' : '' }}>
-                   {isSelectingB ? "Cancel" : "🖱️ Map"}
-                </button>
-                <select className="btn-save mini" style={{ flex: 1.5 }} onChange={(e) => {
-                    const p = savedPlaces[e.target.value];
-                    handleCompareSelect(p.lat, p.lng, p.name);
-                }} value="">
-                  <option value="" disabled>Saved Places...</option>
-                  {savedPlaces.map((p, i) => <option key={i} value={i}>{p.name}</option>)}
-                </select>
+          <section className="control-group comparison-box compact">
+            <h3>Location B (Optional)</h3>
+            <div className="compact-row">
+              <button className="btn-save mini" onClick={() => setIsSelectingB(!isSelectingB)} style={{ flex: 1, border: isSelectingB ? '1px solid #ef4444' : '', padding: '8px' }}>
+                 {isSelectingB ? "Cancel" : "🗺️ Map"}
+              </button>
+              <select className="btn-save mini" style={{ flex: 1.5, padding: '8px' }} onChange={(e) => {
+                  const p = savedPlaces[e.target.value];
+                  handleCompareSelect(p.lat, p.lng, p.name);
+              }} value="">
+                <option value="" disabled>Saved Places...</option>
+                {savedPlaces.map((p, i) => <option key={i} value={i}>{p.name}</option>)}
+              </select>
               </div>
-              <div className="compact-row" style={{marginTop: '8px'}}>
-                <div className="field">
-                  <label className="input-label">Lat B</label>
+              <div className="compact-row" style={{marginTop: '6px'}}>
+                <div className="field" style={{marginBottom: '6px', flex: 1}}>
+                  <label className="input-label" style={{fontSize: '10px'}}>Lat B</label>
                   <input type="text" value={bLatInput} onChange={e => setBLatInput(e.target.value)} 
-                         onKeyDown={e => e.key === 'Enter' && bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)} className="highlighted-box" />
+                         onKeyDown={e => e.key === 'Enter' && bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)} className="highlighted-box" style={{padding: '6px'}} />
                 </div>
-                <div className="field">
-                  <label className="input-label">Lng B</label>
+                <div className="field" style={{marginBottom: '6px', flex: 1}}>
+                  <label className="input-label" style={{fontSize: '10px'}}>Lng B</label>
                   <input type="text" value={bLngInput} onChange={e => setBLngInput(e.target.value)} 
-                         onKeyDown={e => e.key === 'Enter' && bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)} className="highlighted-box" />
+                         onKeyDown={e => e.key === 'Enter' && bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)} className="highlighted-box" style={{padding: '6px'}} />
                 </div>
+                <button 
+                  type="button" 
+                  onClick={() => bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)} 
+                  disabled={!bLatInput || !bLngInput || compareLoading}
+                  className="btn-analyze"
+                  style={{alignSelf: 'flex-end', marginBottom: '6px', padding: '6px 10px', fontSize: '12px', flex: 0.4, background: 'linear-gradient(135deg, #06b6d4, #0891b2)'}}
+                >
+                  {compareLoading ? "..." : "Go"}
+                </button>
               </div>
-              {isCompareMode && <button onClick={() => setIsCompareMode(false)} className="btn-delete-wide" style={{marginTop: '8px'}}>Exit Compare</button>}
+              <div className="compact-row" style={{marginTop: '6px', gap: '4px'}}>
+                <button type="button" onClick={handleMyLocationB} className="btn-save" style={{flex: 0.7, padding: '8px', fontSize: '12px'}}>📍</button>
+                <button type="button" onClick={handleSavePlaceB} disabled={isBFromSavedPlace} className="btn-save" style={{flex: 0.7, padding: '8px', fontSize: '12px', opacity: isBFromSavedPlace ? 0.5 : 1}}>⭐</button>
+                <button 
+                  type="button" 
+                  onClick={handleNearbyPlacesB} 
+                  disabled={!analyzedCoordsB.lat || !analyzedCoordsB.lng || nearbyLoadingB}
+                  className="btn-analyze"
+                  style={{flex: 1, padding: '8px', fontSize: '12px', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)'}}
+                >
+                  {nearbyLoadingB ? "..." : "🏘️ Nearby"}
+                </button>
+              </div>
+              {isCompareMode && <button onClick={() => setIsCompareMode(false)} className="btn-delete-wide" style={{marginTop: '6px', padding: '8px'}}>Exit Compare</button>}
             </section>
-          )}
 
-          <section className="saved-places-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <section className="saved-places-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <h3>Saved Places</h3>
             <div className="places-grid attractive-scroll" style={{ flex: 1, overflowY: 'auto' }}>
               {savedPlaces.map((p, i) => (
@@ -437,6 +506,58 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
                     const schools = nearbyData.places.filter(p => p.type === "school");
                     const hospitals = nearbyData.places.filter(p => p.type === "hospital");
                     const colleges = nearbyData.places.filter(
+                      p => p.type === "college" || p.type === "university"
+                    );
+
+                    const Section = ({ title, items }) => (
+                      <div className="nearby-section">
+                        <h4>{title} ({items.length})</h4>
+                        {items.length ? (
+                          items.map((p, i) => (
+                            <div key={i} className="nearby-item">
+                              <span className="nearby-name">{p.name}</span>
+                              <span className="nearby-distance">{p.distance_km} km</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="nearby-empty">No nearby {title.toLowerCase()} found.</div>
+                        )}
+                      </div>
+                    );
+
+                    return (
+                      <>
+                        <Section title="🏫 Schools" items={schools} />
+                        <Section title="🏥 Hospitals" items={hospitals} />
+                        <Section title="🎓 Colleges & Universities" items={colleges} />
+                      </>
+                    );
+                  })()
+                ) : (
+                  <div className="nearby-empty">
+                    No mapped amenities within 1.5 km.<br />
+                    This likely indicates a rural or low-density region.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showNearbyB && (
+          <div className="modal-overlay" onClick={() => setShowNearbyB(false)}>
+            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Nearby Places - Location B (1.5 km)</h3>
+                <button className="modal-close" onClick={() => setShowNearbyB(false)}>✖</button>
+              </div>
+
+              <div className="modal-body">
+                {nearbyDataB?.places?.length ? (
+                  (() => {
+                    const schools = nearbyDataB.places.filter(p => p.type === "school");
+                    const hospitals = nearbyDataB.places.filter(p => p.type === "hospital");
+                    const colleges = nearbyDataB.places.filter(
                       p => p.type === "college" || p.type === "university"
                     );
 
