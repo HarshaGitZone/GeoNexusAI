@@ -77,6 +77,11 @@ const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
   const [nearbyLoadingB, setNearbyLoadingB] = useState(false);
   const [analyzedCoordsB, setAnalyzedCoordsB] = useState({ lat: null, lng: null });
   const [isBFromSavedPlace, setIsBFromSavedPlace] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingName, setEditingName] = useState("");
+  const [locationAName, setLocationAName] = useState("Site A");
+  const [locationBName, setLocationBName] = useState("Site B");
+  const [showLocationB, setShowLocationB] = useState(false);
   useEffect(() => {
     localStorage.setItem("geo_lat", lat);
     localStorage.setItem("geo_lng", lng);
@@ -162,14 +167,28 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
     setBLatInput(tLat.toString());
     setBLngInput(tLng.toString());
 
-    let name = existingName || prompt("Enter name for Location B:") || "Site B";
+    // FIRST: Check if coordinates match a saved place
+    const matchedPlace = savedPlaces.find(p => 
+      p.lat.toFixed(4) === parseFloat(tLat).toFixed(4) && 
+      p.lng.toFixed(4) === parseFloat(tLng).toFixed(4)
+    );
+    
+    // Use matched place name, or existingName, or prompt as last resort
+    let name = existingName || (matchedPlace ? matchedPlace.name : null);
+    
+    // Only prompt if no name found from existing or saved places
+    if (!name) {
+      name = prompt("Enter name for Location B:") || "Site B";
+    }
+    
     setCompareName(name);
+    setLocationBName(name);
     setCompareLoading(true);
     setIsCompareMode(true);
     // Clear previous result when analyzing a new location B
     setCompareResult(null);
-    // Track if B is from saved places (existingName means it came from saved places)
-    setIsBFromSavedPlace(!!existingName);
+    // Track if B is from saved places
+    setIsBFromSavedPlace(!!existingName || !!matchedPlace);
     try { 
       const data = await performAnalysis(tLat, tLng); 
       setCompareResult(data);
@@ -233,10 +252,21 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
   }} 
 />
   const handleMyLocation = () => {
+    // Get device's actual current location
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos) => {
-      setLat(pos.coords.latitude.toString());
-      setLng(pos.coords.longitude.toString());
+      const deviceLat = pos.coords.latitude;
+      const deviceLng = pos.coords.longitude;
+      
+      setLat(deviceLat.toString());
+      setLng(deviceLng.toString());
+      setLocationAName("My Location");
+      
+      // Auto-save "My Location" with device's actual coordinates (no prompt)
+      const myLocExists = savedPlaces.some(p => p.name === "My Location");
+      if (!myLocExists) {
+        setSavedPlaces([...savedPlaces, { name: "My Location", lat: deviceLat, lng: deviceLng }]);
+      }
     });
   };
 
@@ -247,10 +277,22 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
   };
 
   const handleMyLocationB = () => {
+    // Get device's actual current location
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos) => {
-      setBLatInput(pos.coords.latitude.toString());
-      setBLngInput(pos.coords.longitude.toString());
+      const deviceLat = pos.coords.latitude;
+      const deviceLng = pos.coords.longitude;
+      
+      setBLatInput(deviceLat.toString());
+      setBLngInput(deviceLng.toString());
+      setLocationBName("My Location");
+      handleCompareSelect(deviceLat, deviceLng, "My Location");
+      
+      // Auto-save "My Location" with device's actual coordinates (no prompt)
+      const myLocExists = savedPlaces.some(p => p.name === "My Location");
+      if (!myLocExists) {
+        setSavedPlaces([...savedPlaces, { name: "My Location", lat: deviceLat, lng: deviceLng }]);
+      }
     });
   };
 
@@ -322,7 +364,7 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
 
         <div className="sidebar-scrollable" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <section className="control-group compact-group">
-            <h3>Location A</h3>
+            <h3>📍 Location A: {locationAName}</h3>
             <form onSubmit={handleSubmit}>
               <div className="compact-row">
                 <div className="field">
@@ -352,11 +394,38 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
                   {nearbyLoading ? "Loading..." : "🏘️ Nearby"}
                 </button>
               </div>
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (showLocationB) {
+                    // Close Location B
+                    setShowLocationB(false);
+                  } else {
+                    // Open Location B
+                    setShowLocationB(true);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  marginTop: '6px',
+                  padding: '8px',
+                  background: showLocationB ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #ec4899, #f43f5e)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {showLocationB ? '✕ Close Comparing with B' : '🔄 Compare with B'}
+              </button>
             </form>
           </section>
 
-          <section className="control-group comparison-box compact">
-            <h3>Location B (Optional)</h3>
+          <section className="control-group comparison-box compact" style={{ display: showLocationB ? 'block' : 'none' }}>
+            <h3>📍 Location B: {locationBName} (Optional)</h3>
             <div className="compact-row">
               <button className="btn-save mini" onClick={() => setIsSelectingB(!isSelectingB)} style={{ flex: 1, border: isSelectingB ? '1px solid #ef4444' : '', padding: '8px' }}>
                  {isSelectingB ? "Cancel" : "🗺️ Map"}
@@ -411,12 +480,54 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
             <div className="places-grid attractive-scroll" style={{ flex: 1, overflowY: 'auto' }}>
               {savedPlaces.map((p, i) => (
                 <div key={i} className="place-card-compact" onClick={() => {setLat(p.lat.toString()); setLng(p.lng.toString())}}>
-                  <div className="place-info-mini"><strong>{p.name}</strong><span>{p.lat.toFixed(2)}, {p.lng.toFixed(2)}</span></div>
-                  <button className="btn-cross" onClick={(e) => {
-                    e.stopPropagation();
-                    const updated = savedPlaces.filter((_, idx) => idx !== i);
-                    setSavedPlaces(updated);
-                  }}>✕</button>
+                  <div className="place-info-mini">
+                    {editingIndex === i ? (
+                      <input 
+                        type="text" 
+                        value={editingName} 
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const updated = [...savedPlaces];
+                            updated[i].name = editingName || p.name;
+                            setSavedPlaces(updated);
+                            setEditingIndex(null);
+                          } else if (e.key === 'Escape') {
+                            setEditingIndex(null);
+                          }
+                        }}
+                        className="highlighted-box"
+                        style={{ padding: '4px', fontSize: '12px' }}
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <strong>{p.name}</strong><span>{p.lat.toFixed(2)}, {p.lng.toFixed(2)}</span>
+                      </>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {editingIndex !== i && (
+                      <button 
+                        className="btn-edit" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingIndex(i);
+                          setEditingName(p.name);
+                        }}
+                        style={{ padding: '4px 8px', fontSize: '10px', background: '#3b82f6', border: 'none', color: 'white', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        ✎
+                      </button>
+                    )}
+                    <button className="btn-cross" onClick={(e) => {
+                      e.stopPropagation();
+                      const updated = savedPlaces.filter((_, idx) => idx !== i);
+                      setSavedPlaces(updated);
+                      if (editingIndex === i) setEditingIndex(null);
+                    }}>✕</button>
+                  </div>
                 </div>
               ))}
             </div>

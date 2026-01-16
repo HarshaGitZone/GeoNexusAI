@@ -3249,45 +3249,46 @@ html, body, #root, .app-shell {
 
 /* 1. COMPACT SIDEBAR OVERRIDES */
 .sidebar-scrollable {
-    gap: 4px !important; /* Tightens the vertical space between groups */
-    padding: 8px !important;
+    gap: 2px !important; /* Ultra-tight vertical space */
+    padding: 6px !important;
 }
 
 .control-group.compact-group {
-    padding: 6px 10px !important;
-    margin-bottom: 2px !important;
+    padding: 4px 8px !important;
+    margin-bottom: 1px !important;
+    border-radius: 4px;
 }
 
 .control-group h3 {
-    margin: 0 0 4px 0 !important; /* Reduces gap under headers */
-    font-size: 11px !important;
+    margin: 0 0 3px 0 !important; /* Minimal gap under headers */
+    font-size: 10px !important;
     text-transform: uppercase;
     opacity: 0.8;
 }
 
 /* 2. COMPACT INPUTS & BUTTONS */
 .highlighted-box {
-    padding: 4px 8px !important;
+    padding: 3px 6px !important;
     height: 30px !important;
     font-size: 12px !important;
 }
 
 .input-label {
-    font-size: 9px !important;
+    font-size: 8px !important;
     margin-bottom: 1px !important;
 }
 
 .btn-save.same-size, .btn-analyze {
-    height: 30px !important;
-    padding: 0 8px !important;
-    font-size: 11px !important;
-    margin-top: 4px !important;
+    height: 26px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    margin-top: 2px !important;
 }
 
 /* 3. RESPONSIVE SAVED PLACES GRID */
 .saved-places-section {
-    margin-top: 8px !important;
-    padding: 0 10px !important;
+    margin-top: 4px !important;
+    padding: 0 8px !important;
 }
 
 .places-grid.attractive-scroll {

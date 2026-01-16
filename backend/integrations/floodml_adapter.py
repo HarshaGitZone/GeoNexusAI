@@ -44,56 +44,112 @@ from backend.integrations.water_adapter import estimate_water_proximity_score
 
 def estimate_flood_risk_score(latitude: float, longitude: float) -> Optional[float]:
     """
-    Estimate flood risk by leveraging water proximity and FloodML artifacts.
+    Estimate flood risk by combining RAINFALL DATA + WATER PROXIMITY.
     
-    Logic:
-    - Water bodies (0.0 score) = 0.0 flood risk
-    - Near water (15-55) = Higher flood risk (reciprocal scoring)
-    - Far from water (75-90) = Lower flood risk
+    Key Logic:
+    - Rainfall alone doesn't cause floods (drainage systems handle normal rain)
+    - Water proximity alone isn't definitive (small rivers, drainage capacity varies)
+    - COMBINATION matters: Heavy rainfall + nearby water body = HIGH FLOOD RISK
+    
+    Scoring approach:
+    1. Check if location is ON water (immediate disqualification)
+    2. Get rainfall data (60-day average)
+    3. Get water proximity distance
+    4. COMBINE both factors for realistic assessment
     """
     
-    # 1. Get water proximity data - this includes accurate distance
+    # 1. WATER BODY CHECK: If ON water, flood risk is catastrophic
     w_score, w_dist, w_meta = estimate_water_proximity_score(latitude, longitude)
-    
-    # 2. If ON water, flood risk is catastrophic
     if w_score == 0.0 or (w_dist is not None and w_dist < 0.02):
-        return 0.0  # On water = 0.0 score (unsuitable)
+        return 0.0  # On water = unsuitable
     
-    # 3. If NEAR water, use distance-based flood risk
-    # The water proximity score inversely relates to flood risk
-    # w_score 15 (very near) -> flood_risk 85
-    # w_score 35 (near) -> flood_risk 65
-    # w_score 55 (moderate) -> flood_risk 45
-    # w_score 75 (far) -> flood_risk 25
-    # w_score 90 (very far) -> flood_risk 10
-    if w_dist is not None and w_dist < 5.0:
-        # Use distance-based accurate scoring for flood risk
-        if w_dist < 0.3:
-            flood_risk = 85.0  # Extremely high risk (on river banks)
-        elif w_dist < 0.8:
-            flood_risk = 65.0  # High risk (near river)
-        elif w_dist < 1.5:
-            flood_risk = 45.0  # Moderate risk (buffer zone)
-        elif w_dist < 3.0:
-            flood_risk = 25.0  # Lower risk
+    # 2. GET RAINFALL DATA: Critical for realistic flood assessment
+    try:
+        from backend.integrations.rainfall_adapter import _fetch_open_meteo_sum
+        rain_mm_60d = _fetch_open_meteo_sum(latitude, longitude, 60)
+    except Exception:
+        rain_mm_60d = None
+    
+    # 3. COMBINED FLOOD RISK ASSESSMENT
+    # Only HIGH rainfall + nearby water = serious flood risk
+    
+    if w_dist is None or w_dist >= 5.0:
+        # FAR FROM WATER: Very low flood risk regardless of rainfall
+        # Even heavy rain drains naturally away from rivers
+        return 15.0  # Minimal flood risk
+    
+    # NEAR WATER (< 5km): Assess based on rainfall + distance
+    if w_dist < 0.3:  # ON RIVER BANKS (< 300m)
+        # Extreme risk zone - any significant rainfall causes flooding
+        if rain_mm_60d is not None and rain_mm_60d > 300:
+            flood_risk = 90.0  # CRITICAL: Heavy monsoon + river bank
+        elif rain_mm_60d is not None and rain_mm_60d > 100:
+            flood_risk = 80.0  # HIGH: Moderate rain on river bank
         else:
-            flood_risk = 10.0  # Very low risk but still near water
+            flood_risk = 70.0  # Baseline: Even light rain risky at river edge
         
-        return float(round(flood_risk, 2))
+        explanation_detail = (
+            f"CRITICAL FLOOD ZONE. Location is {round(w_dist*1000, 0)}m from river/water body (river bank). "
+            f"Rainfall: {rain_mm_60d}mm/60d. Any significant precipitation causes immediate flooding. "
+            f"100+ year flood events occur at this proximity level."
+        )
     
-    # 4. For land far from water, use FloodML artifacts for baseline scoring
-    floodml_path = get_project_path("FloodML")
-    if floodml_path:
-        model_pickle = os.path.join(floodml_path, "model.pickle")
-        if os.path.exists(model_pickle):
-            try:
-                # Generate baseline flood risk for land coordinates
-                seed = int(round(latitude * 1000)) ^ int(round(longitude * 1000))
-                # Score between 15 and 40 (lower = safer for land far from water)
-                flood_risk = 15.0 + (seed % 26)
-                return float(round(flood_risk, 2))
-            except Exception:
-                pass
+    elif w_dist < 0.8:  # NEAR WATER (300m - 800m)
+        # High-risk zone - flooding occurs with moderate-to-heavy rainfall
+        if rain_mm_60d is not None and rain_mm_60d > 400:
+            flood_risk = 75.0  # VERY HIGH: Heavy rainfall near water
+        elif rain_mm_60d is not None and rain_mm_60d > 150:
+            flood_risk = 60.0  # HIGH: Moderate rainfall near water
+        else:
+            flood_risk = 45.0  # MODERATE: Low rainfall, but still risky
+        
+        explanation_detail = (
+            f"HIGH FLOOD RISK. Location is {round(w_dist*1000, 0)}m from water body. "
+            f"Rainfall: {rain_mm_60d}mm/60d. With monsoon or heavy rain (>150mm/month), "
+            f"overflow risk is significant. 10-25 year flood probability."
+        )
     
-    # 5. Default conservative estimate
-    return 30.0
+    elif w_dist < 1.5:  # BUFFER ZONE (800m - 1.5km)
+        # Moderate risk - only floods with EXCEPTIONAL rainfall
+        if rain_mm_60d is not None and rain_mm_60d > 600:
+            flood_risk = 55.0  # MODERATE-HIGH: Extreme rainfall + buffer zone
+        elif rain_mm_60d is not None and rain_mm_60d > 250:
+            flood_risk = 40.0  # MODERATE: Significant rainfall
+        else:
+            flood_risk = 25.0  # LOW: Normal rainfall, buffer provides safety
+        
+        explanation_detail = (
+            f"MODERATE FLOOD RISK. Location is in {round(w_dist*1000, 0)}m buffer zone from water. "
+            f"Rainfall: {rain_mm_60d}mm/60d. Flooding occurs only with exceptional rainfall "
+            f"(>250mm in 60 days) combined with water overflow. Normally safe with proper drainage."
+        )
+    
+    elif w_dist < 3.0:  # MODERATE DISTANCE (1.5km - 3km)
+        # Low-to-moderate risk - mostly safe unless EXTREME rainfall + water overflow
+        if rain_mm_60d is not None and rain_mm_60d > 700:
+            flood_risk = 40.0  # MODERATE: Only extreme rainfall causes flooding
+        else:
+            flood_risk = 20.0  # LOW: Natural drainage easily handles rainfall
+        
+        explanation_detail = (
+            f"LOW TO MODERATE FLOOD RISK. Location is {round(w_dist, 2)}km from water body. "
+            f"Rainfall: {rain_mm_60d}mm/60d. Flooding extremely unlikely unless catastrophic rainfall "
+            f"(>250mm in month) + simultaneous water overflow. Standard drainage sufficient."
+        )
+    
+    else:  # > 3km from water
+        # Very low risk - considered safe
+        flood_risk = 10.0
+        explanation_detail = (
+            f"VERY LOW FLOOD RISK. Location is {round(w_dist, 2)}km from nearest water body. "
+            f"Rainfall: {rain_mm_60d}mm/60d. Distance and topography provide natural protection. "
+            f"Standard building practices sufficient."
+        )
+    
+    # Store explanation for use in app.py
+    import threading
+    if not hasattr(estimate_flood_risk_score, '_explanation'):
+        estimate_flood_risk_score._explanation = {}
+    estimate_flood_risk_score._explanation[f"{latitude}_{longitude}"] = explanation_detail
+    
+    return float(round(flood_risk, 2))
