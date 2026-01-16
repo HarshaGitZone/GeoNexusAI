@@ -183,7 +183,8 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
   const handleNearbyPlaces = async () => {
     setNearbyLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/nearby_places", {
+      // const res = await fetch("http://127.0.0.1:5000/nearby_places", {
+        const res = await fetch("/nearby_places", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lng) }),
@@ -202,7 +203,8 @@ const handleCompareSelect = async (tLat, tLng, existingName = null) => {
   const handleNearbyPlacesB = async () => {
     setNearbyLoadingB(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/nearby_places", {
+      // const res = await fetch("http://127.0.0.1:5000/nearby_places", {
+      const res = await fetch("/nearby_places", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ latitude: parseFloat(analyzedCoordsB.lat), longitude: parseFloat(analyzedCoordsB.lng) }),
