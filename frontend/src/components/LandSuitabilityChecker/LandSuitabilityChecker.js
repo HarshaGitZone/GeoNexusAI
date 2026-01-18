@@ -1722,11 +1722,11 @@ export default function LandSuitabilityChecker() {
   });
 
   const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
-  const [showNearby, setShowNearby] = useState(false);
-  const [nearbyData, setNearbyData] = useState(null);
+  const [setShowNearby] = useState(false);
+  const [setNearbyData] = useState(null);
   const [nearbyLoading, setNearbyLoading] = useState(false);
-  const [showNearbyB, setShowNearbyB] = useState(false);
-  const [nearbyDataB, setNearbyDataB] = useState(null);
+  const [setShowNearbyB] = useState(false);
+  const [setNearbyDataB] = useState(null);
   const [nearbyLoadingB, setNearbyLoadingB] = useState(false);
   const [analyzedCoordsB, setAnalyzedCoordsB] = useState({ lat: null, lng: null });
   const [isBFromSavedPlace, setIsBFromSavedPlace] = useState(false);
