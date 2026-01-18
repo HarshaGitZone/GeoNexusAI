@@ -1,0 +1,138 @@
+.sidebar-search-section {
+  padding: 20px 15px;
+  position: relative;
+  z-index: 10;
+}
+
+.search-wrapper.glass-morphic {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.sidebar-search-input {
+  background: transparent;
+  border: none;
+  color: white;
+  margin-left: 10px;
+  width: 100%;
+  outline: none;
+  font-size: 14px;
+}
+
+.sidebar-suggestions {
+  position: absolute;
+  top: 70px;
+  left: 15px;
+  right: 15px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.suggestion-item {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.main-name { font-weight: 600; font-size: 13px; color: #fff; }
+.sub-name { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+
+
+/* Sidebar Search Container */
+.sidebar-search-section {
+  padding: 15px;
+  position: relative;
+  font-family: 'Inter', 'Segoe UI', sans-serif; /* Clean, professional font */
+}
+
+/* Smart Search Input - Dynamic Theming */
+.sidebar-search-input {
+  width: 100%;
+  padding: 12px 15px 12px 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+}
+
+/* Light Theme: High Contrast Text */
+[data-theme="light"] .sidebar-search-input {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1a1a1a; /* Deep black for readability */
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme: Subtle Translucency */
+[data-theme="dark"] .sidebar-search-input {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Suggestions Dropdown - Liquid Glass */
+.sidebar-suggestions {
+  position: absolute;
+  top: 65px;
+  left: 15px;
+  right: 15px;
+  z-index: 1000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+[data-theme="light"] .sidebar-suggestions {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .sidebar-suggestions {
+  background: rgba(30, 30, 30, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.suggestion-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+[data-theme="light"] .suggestion-item:hover { background: rgba(0, 0, 0, 0.05); }
+[data-theme="dark"] .suggestion-item:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* Suggestion Typography */
+.suggestion-main { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+[data-theme="light"] .suggestion-main { color: #111; }
+[data-theme="dark"] .suggestion-main { color: #eee; }
+
+.suggestion-sub { font-size: 11px; opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-theme="light"] .suggestion-sub { color: #444; }
+[data-theme="dark"] .suggestion-sub { color: #bbb; }
+
+
+
+
+
+
