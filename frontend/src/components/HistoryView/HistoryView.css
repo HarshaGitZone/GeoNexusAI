@@ -1,0 +1,345 @@
+/* HistoryView.css - Professional Environmental Analytics Suite */
+
+:root {
+  --blur-intensity: 60px; /* Increased for that ultra-deep bokeh look */
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --accent-blue: #3b82f6;
+  --danger-red: #ef4444;
+  --safe-green: #10b981;
+}
+
+/* 1. Main Overlay: The Deep Frost Engine */
+.history-page-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 20px;
+  overflow-y: auto;
+  
+  /* Intense Blur & Saturation for the "Time Machine" vibe */
+  backdrop-filter: blur(var(--blur-intensity)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-intensity)) saturate(180%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Theme Awareness for Overlay Tint */
+[data-theme="dark"] .history-page-overlay {
+  background: rgba(10, 10, 10, 0.82);
+  color: #f8fafc;
+}
+
+[data-theme="light"] .history-page-overlay {
+  background: rgba(255, 255, 255, 0.78);
+  color: #0f172a;
+}
+
+/* 2. Content Wrapper & Animations */
+.history-content-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  animation: slideUpReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpReveal {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 3. Top Navigation & Headers */
+.history-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+  padding-bottom: 25px;
+}
+
+.back-link-glass {
+  background: rgba(128, 128, 128, 0.1);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  color: inherit;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.back-link-glass:hover {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+  transform: translateX(-5px);
+}
+
+.location-info-center h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* 4. Time Range Picker */
+.range-picker-container {
+  display: flex;
+  background: rgba(128, 128, 128, 0.1);
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+.range-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.range-btn.active {
+  background: var(--accent-blue);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* 5. The Professional Grid & Cards */
+.history-main-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+}
+
+.insight-card {
+  border-radius: 24px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .insight-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme="light"] .insight-card {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.satellite-indices { grid-column: span 2; }
+
+/* 6. Satellite Indices Display */
+.indices-flex {
+  display: flex;
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.index-box {
+  flex: 1;
+  padding: 25px;
+  border-radius: 18px;
+  background: rgba(128, 128, 128, 0.05);
+  border-left: 5px solid var(--accent-blue);
+}
+
+.comparison-display {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.old-val {
+  font-size: 1.8rem;
+  opacity: 0.3;
+  font-weight: 300;
+  text-decoration: line-through;
+}
+
+.arrow-icon {
+  color: var(--accent-blue);
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.new-val {
+  font-size: 3rem;
+  font-weight: 900;
+  color: inherit;
+}
+
+/* Adds a subtle glow to numbers in dark mode */
+[data-theme="dark"] .new-val {
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.status-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.trend-down { background: rgba(239, 68, 68, 0.15); color: var(--danger-red); }
+.trend-stable { background: rgba(16, 185, 129, 0.15); color: var(--safe-green); }
+
+/* 7. Factors & Lists */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+  opacity: 0.8;
+}
+
+.card-icon { font-size: 1.5rem; }
+
+.factors-list-scrollable {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* 8. GeoGPT Block */
+.gpt-content {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.gpt-content strong { color: var(--accent-blue); }
+
+.analysis-points {
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+}
+
+.analysis-points li {
+  padding-left: 30px;
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.analysis-points li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: var(--accent-blue);
+}
+
+
+
+
+
+
+
+
+.nav-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.live-clock {
+  font-family: 'Inter', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--accent-blue);
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.coord-badge {
+  display: inline-flex;
+  background: rgba(128, 128, 128, 0.1);
+  padding: 6px 15px;
+  border-radius: 30px;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 5px;
+  color: var(--accent-blue);
+}
+
+.separator {
+  margin: 0 10px;
+  opacity: 0.3;
+}
+
+.full-width-card {
+  grid-column: span 2;
+}
+
+.glitch-text {
+  text-shadow: 2px 0px 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Scrollbar for Factors */
+.factors-list-scrollable {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.factors-list-scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.factors-list-scrollable::-webkit-scrollbar-thumb {
+  background: var(--accent-blue);
+  border-radius: 10px;
+}
+
+
+
+
+.history-page-overlay {
+  backdrop-filter: blur(50px) saturate(200%); /* Ultra-deep blur */
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="light"] .history-page-overlay {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.full-width-card {
+  grid-column: span 2;
+}
+
+.factors-list-scrollable {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 15px;
+}
+
+
+
+
+

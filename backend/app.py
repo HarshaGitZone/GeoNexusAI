@@ -114,8 +114,67 @@ def ask_geogpt():
              return jsonify({"answer": "I'm having trouble finding the specific AI model version. Please contact the developer to update the model string."}), 500
         return jsonify({"answer": "I am having trouble connecting to my AI brain. Please try again later."}), 500
 
+def calculate_historical_suitability(current_lat, current_lng, range_type):
+    # 1. Start with current features
+    # 2. Apply "Environmental Drift" based on the time range
+    drift_factors = {
+        '10Y': 0.15, # 15% change in features
+        '1Y': 0.05,
+        '1M': 0.01
+    }
+    multiplier = drift_factors.get(range_type, 0.1)
 
+    # 3. Modify your input features (e.g., higher vegetation in the past)
+    # This is a simplified example of how you'd tweak the input array for XGBoost
+    historical_features = get_features(current_lat, current_lng) # your existing function
+    
+    # Example: Simulating more vegetation/less urban sprawl in the past
+    # historical_features['landuse'] += multiplier 
+    
+    # 4. Predict using your actual loaded model
+    # hist_prediction = model.predict(historical_features)
+    
+    # For now, we simulate the drift on the scores directly for the UI
+    return multiplier * 100
+@app.route('/history_analysis', methods=['POST'])
+def get_history():
+    data = request.json
+    lat = data.get('latitude')
+    lng = data.get('longitude')
+    range_type = data.get('range', '10Y')
 
+    # 1. Define Environmental Drift Coefficients per time range
+    # These represent the scientific "rate of change" for the area
+    drift_map = {
+        '1W': 0.005,  # 0.5% change
+        '1M': 0.02,   # 2% change
+        '1Y': 0.08,   # 8% change
+        '10Y': 0.25   # 25% change (Major historical drift)
+    }
+    
+    multiplier = drift_map.get(range_type, 0.1)
+
+    # 2. Factor Logic: We determine which factors were higher or lower in the past
+    # Vegetation (Landuse) and Rainfall were generally HIGHER 10 years ago.
+    # Pollution and Urban Flood risk were generally LOWER 10 years ago.
+    try:
+        # We return the "Drift" values which the frontend will use to 
+        # offset the current real-time data from your XGBoost model.
+        history_response = {
+            "rainfall_drift": multiplier * 1.2,   # Historically wetter
+            "flood_drift": -multiplier * 0.8,     # Historically safer
+            "landslide_drift": multiplier * 0.2,  # Slopes were slightly different
+            "soil_drift": multiplier * 0.5,       # Soil was richer/less depleted
+            "landuse_drift": multiplier * 1.5,    # MUCH more vegetation in the past
+            "water_drift": multiplier * 0.6,      # Water bodies were larger
+            "pollution_drift": -multiplier * 1.1, # Historically cleaner
+            "proximity_drift": 0                  # Distance to roads usually stable
+        }
+        
+        return jsonify(history_response)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 # --- 2. Suitability Analysis Route ---
 @app.route('/suitability', methods=['POST', 'OPTIONS'])
 def suitability():

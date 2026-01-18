@@ -4563,3 +4563,72 @@ html, body, #root, .app-shell {
 
 
 
+
+
+/* Container for the button to add proper spacing */
+.history-action-container {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Professional History Button */
+.history-pro-btn {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+.history-pro-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #60a5fa;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.history-pro-btn .pulse-dot {
+    height: 8px;
+    width: 8px;
+    background-color: #60a5fa;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 rgba(96, 165, 250, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0px rgba(96, 165, 250, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); }
+    100% { box-shadow: 0 0 0 0px rgba(96, 165, 250, 0); }
+}
+
+.history-pro-btn .btn-icon {
+    transition: transform 0.3s ease;
+}
+
+.history-pro-btn:hover .btn-icon {
+    transform: translateX(5px);
+}
+
+/* Mini Map Fix for persistency look */
+.mini-map-context {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
