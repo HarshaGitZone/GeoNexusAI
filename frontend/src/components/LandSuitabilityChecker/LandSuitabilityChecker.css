@@ -3574,53 +3574,89 @@ html, body, #root, .app-shell {
   padding: 20px;
   overflow-y: auto;
   flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  align-content: start;
 }
 
-/* Sections */
+/* Sections - responsive grid layout */
 .nearby-section {
   background: rgba(255, 255, 255, 0.03);
   padding: 14px;
   border-radius: 10px;
-  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.nearby-section:hover {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 
 .nearby-section h4 {
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   color: var(--accent);
   font-size: 14px;
+  font-weight: 600;
 }
 
-/* Items */
+/* Items container */
+.nearby-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Individual item card */
 .nearby-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 13px;
-  padding: 6px 0;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
 }
 
-.nearby-item:last-child {
-  border-bottom: none;
+.nearby-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(2px);
 }
 
 .nearby-name {
   color: var(--text);
   flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nearby-distance {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(59, 130, 246, 0.8);
   font-size: 12px;
-  margin-left: 10px;
+  margin-left: 8px;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 /* Empty message */
 .nearby-empty {
   font-size: 13px;
   opacity: 0.7;
-  padding: 8px 0;
+  padding: 12px;
   text-align: center;
   color: var(--text);
+  grid-column: 1 / -1;
 }
 
 /* Close button */
@@ -3635,5 +3671,104 @@ html, body, #root, .app-shell {
 
 .modal-close:hover {
   color: white;
+}
+
+/* ==================== RESPONSIVE NEARBY PLACES ==================== */
+
+/* Large screens (default) - 3 columns */
+@media (min-width: 1200px) {
+  .modal-body {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablets (1024px to 1199px) - 2 columns */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .modal-body {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile phones (< 768px) - 1 column */
+@media (max-width: 767px) {
+  .modal-card {
+    width: 95%;
+    max-height: 80vh;
+  }
+
+  .modal-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .nearby-section {
+    padding: 12px;
+  }
+
+  .nearby-section h4 {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .nearby-item {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .nearby-name {
+    font-size: 12px;
+  }
+
+  .nearby-distance {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+}
+
+/* Ultra small screens (< 480px) */
+@media (max-width: 479px) {
+  .modal-card {
+    width: 98%;
+    max-height: 85vh;
+  }
+
+  .modal-header {
+    padding: 12px;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .nearby-section {
+    padding: 10px;
+  }
+
+  .nearby-section h4 {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .nearby-item {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+
+  .nearby-name {
+    font-size: 11px;
+  }
+
+  .nearby-distance {
+    font-size: 10px;
+    padding: 1px 3px;
+    margin-left: 4px;
+  }
 }
 
