@@ -217,11 +217,11 @@ export default function SideBar({
               {pdfLoading ? (
                 <span className="pdf-loader-text">⏳ Generating...</span>
               ) : (
-                "⬇️ Report"
+                "⬇️ Generate Report"
               )}
             </button>
             <button type="button" className="btn-save" onClick={generateShareLink} style={{ flex: 1, padding: '6px 8px', fontSize: '11px' }}>
-              🔗 Share
+              🔗 Share this Link
             </button>
           </div>
         </section>
@@ -249,7 +249,7 @@ export default function SideBar({
                 {loading ? "..." : "Analyze"}
               </button>
               <button type="button" onClick={handleNearbyPlaces} disabled={!result || nearbyLoading} className="btn-analyze" style={{ flex: 1, padding: '6px 8px', fontSize: '11px' }}>
-                {nearbyLoading ? "..." : "🏘️ Near"}
+                {nearbyLoading ? "..." : "🏘️ NearBy Places"}
               </button>
             </div>
           </form>
@@ -382,7 +382,7 @@ export default function SideBar({
             cursor: "pointer",
           }}
         >
-          {showLocationB ? "✕ Close" : "🔄 Compare"}
+          {showLocationB ? "✕ Close Comparison" : "🔄 Compare with Location B"}
         </button>
 
         {/* Saved Places Section */}

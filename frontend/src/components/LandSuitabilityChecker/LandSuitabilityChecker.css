@@ -4632,3 +4632,146 @@ html, body, #root, .app-shell {
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+
+
+
+
+
+
+
+.potential-item {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid transparent;
+    transition: transform 0.2s;
+}
+
+.pot-green { background: rgba(16, 185, 129, 0.08); border-left-color: #10b981; }
+.pot-blue { background: rgba(59, 130, 246, 0.08); border-left-color: #3b82f6; }
+.pot-purple { background: rgba(139, 92, 246, 0.08); border-left-color: #8b5cf6; }
+.pot-red { background: rgba(239, 68, 68, 0.08); border-left-color: #ef4444; }
+
+.potential-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    color: var(--text-color);
+}
+
+.potential-reason {
+    font-size: 0.85rem;
+    margin-top: 5px;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+.ai-badge {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+
+
+
+
+
+
+
+/* Potential Analysis Card Layout */
+.potential-card {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.potential-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    margin-top: 2px;
+}
+
+/* Sustainability Grade Seal */
+.rating-badge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rating-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+    opacity: 0.7;
+    margin-bottom: -2px;
+}
+
+.rating-letter {
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+/* Grade Colors */
+.grade-A { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+.grade-B { color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+.grade-C { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+.grade-F { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+
+/* Dynamic Items */
+.potential-item {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid transparent;
+    transition: transform 0.2s;
+}
+
+.pot-green { background: rgba(16, 185, 129, 0.08); border-left-color: #10b981; }
+.pot-blue { background: rgba(59, 130, 246, 0.08); border-left-color: #3b82f6; }
+.pot-purple { background: rgba(139, 92, 246, 0.08); border-left-color: #8b5cf6; }
+.pot-red { background: rgba(239, 68, 68, 0.08); border-left-color: #ef4444; }
+.pot-gray { background: rgba(156, 163, 175, 0.08); border-left-color: #9ca3af; }
+
+.potential-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.potential-icon { font-size: 1.1rem; }
+.potential-label { font-weight: 700; font-size: 0.9rem; }
+.potential-reason { font-size: 0.82rem; line-height: 1.4; opacity: 0.8; }
+
+/* AI Badge Overlay */
+.ai-badge {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9px;
+    color: white;
+    font-weight: 800;
+    box-shadow: 0 2px 10px rgba(168, 85, 247, 0.3);
+}
