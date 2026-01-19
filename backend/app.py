@@ -7,12 +7,18 @@ import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask import Flask, request, jsonify
+
+
 # --- CRITICAL: Path Injection to ensure geogpt_config is found ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 from google import genai 
 from geogpt_config import generate_system_prompt 
+from backend.reports.pdf_generator import generate_land_report
+from backend.integrations.nearby_places import get_nearby_named_places
+
+from flask import send_file
 from dotenv import load_dotenv
 load_dotenv()
 # Import your AI library (OpenAI/Gemini/etc.)
@@ -376,6 +382,7 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             final_score = agg.get("score")
             model_used = "Weighted Aggregator (Fallback)"
 
+
         # 4. FINAL RESPONSE WITH METADATA (Populates Evidence Detail Section)
         return {
             "suitability_score": final_score,
@@ -453,6 +460,32 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
             "location": {"latitude": latitude, "longitude": longitude}
         }
+@app.route("/generate_report", methods=["POST"])
+def generate_report():
+    data = request.json
+
+    lat = data["location"]["latitude"]
+    lng = data["location"]["longitude"]
+
+    # Get nearby places from backend
+    try:
+        places = get_nearby_named_places(lat, lng)
+        data["nearby_places"] = {"places": places}
+        print(f"Nearby places added: {len(places)}")
+    except Exception as e:
+        print("Nearby fetch failed:", e)
+        data["nearby_places"] = {"places": []}
+
+    pdf_buffer = generate_land_report(data)
+
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name="Land_Suitability_Report.pdf",
+        mimetype="application/pdf"
+    )
+
+
 
 @app.route("/nearby_places", methods=["POST", "OPTIONS"])
 def nearby_places_route():
