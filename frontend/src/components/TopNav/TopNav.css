@@ -174,8 +174,8 @@
   top: 15px;
   left: 50%;
   transform: translateX(-50%) translateY(-150%);
-  width: 90%;
-  max-width: 1000px;
+  width: 60%;
+  max-width: 600px;
   height: 55px;
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(16px);
@@ -537,8 +537,151 @@
 
 
 
+/* ============================================================
+   FORCE OVERRIDE: FIXED PILL NAV & RESPONSIVE BEHAVIOR
+   ============================================================ */
+
+/* Force the container into a centered floating pill */
+nav.top-nav-floating {
+    width: 600px !important;            /* Fixed width for desktop dominance */
+    max-width: 90vw !important;         /* Safety margin for smaller screens */
+    min-width: unset !important;        /* Reset any conflicting min-widths */
+    left: 50% !important;
+    right: auto !important;
+    top: 20px !important;
+    transform: translateX(-50%) translateY(-120%) !important; /* Start hidden */
+    
+    /* Visual Overrides */
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 100px !important;    /* Force Pill Shape */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    padding: 0 15px !important;
+    display: block !important;          /* Ensure it's not hidden by display:none elsewhere */
+}
+
+/* Dark mode forced background */
+[data-theme="dark"] nav.top-nav-floating {
+    background: rgba(15, 20, 25, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Force show state */
+nav.top-nav-floating.visible {
+    transform: translateX(-50%) translateY(0) !important;
+    opacity: 1 !important;
+}
+
+/* Force Inner Layout to stay centered and spaced */
+.nav-inner {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 56px !important;
+    gap: 20px !important;
+}
+
+/* Force Team Dropdown to align with the narrow bar */
+.team-dropdown {
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: translateY(15px) !important; /* Move down slightly from the bar */
+    border-radius: 24px !important;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.3) !important;
+}
+
+/* COMPLETELY RESPONSIVE: Force Full Width on Mobile */
+@media (max-width: 768px) {
+    nav.top-nav-floating {
+        width: 100% !important;
+        max-width: 100% !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;      /* Disable translate center on mobile */
+        border-radius: 0 !important;     /* Square edges for mobile */
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+    
+    .nav-inner {
+        padding: 0 15px !important;
+    }
+}
 
 
 
+/* ============================================================
+   FORCE OVERRIDE: RESPONSIVE NAV STATES
+   ============================================================ */
 
+/* 1. Desktop: Centered Floating Pill */
+nav.top-nav-floating {
+    width: 600px !important;            /* Reduced width for desktop */
+    max-width: 90vw !important;
+    left: 50% !important;
+    top: 20px !important;
+    transform: translateX(-50%) translateY(-120%) !important; /* Hidden state */
+    position: fixed !important;
+    border-radius: 100px !important;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    z-index: 1000 !important;
+    opacity: 0 !important;
+}
 
+/* Force visible state on desktop hover */
+nav.top-nav-floating.visible {
+    transform: translateX(-50%) translateY(0) !important;
+    opacity: 1 !important;
+}
+
+/* 2. Mobile: Force Fixed Top Bar (Completely Responsive) */
+@media (max-width: 767px) {
+    nav.top-nav-floating, 
+    nav.top-nav-floating.mobile-fixed {
+        width: 100% !important;         /* Full width on mobile */
+        max-width: 100% !important;
+        top: 0 !important;              /* Snap to very top */
+        left: 0 !important;
+        transform: none !important;      /* Remove centering transform */
+        border-radius: 0 !important;     /* Remove pill edges */
+        opacity: 1 !important;           /* Always visible */
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        background: rgba(15, 23, 42, 0.95) !important; /* Force solid-ish dark bg */
+        backdrop-filter: blur(10px) !important;
+    }
+
+    .nav-inner {
+        padding: 0 15px !important;
+        height: 56px !important;        /* Standard mobile nav height */
+    }
+
+    /* Hide desktop-specific center actions if necessary */
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+/* ============================================================
+   CONTENT BUFFER FOR FIXED MOBILE NAVBAR
+   ============================================================ */
+
+@media (max-width: 1000px) {
+    /* Target the main container that holds the map and results */
+    .main-content {
+        margin-top: 60px !important; /* Buffer height (Navbar 56px + 4px gap) */
+        height: calc(100vh - 60px) !important; /* Recalculate height to prevent double scrollbars */
+    }
+
+    /* If your sidebar also needs to shift down on mobile */
+    .sidebar {
+        top: 60px !important;
+        height: calc(100vh - 60px) !important;
+    }
+}

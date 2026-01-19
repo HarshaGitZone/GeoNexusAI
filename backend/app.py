@@ -460,32 +460,51 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
             "location": {"latitude": latitude, "longitude": longitude}
         }
+
 @app.route("/generate_report", methods=["POST"])
 def generate_report():
-    data = request.json
-
-    lat = data["location"]["latitude"]
-    lng = data["location"]["longitude"]
-
-    # Get nearby places from backend
     try:
-        places = get_nearby_named_places(lat, lng)
-        data["nearby_places"] = {"places": places}
-        print(f"Nearby places added: {len(places)}")
+        data = request.json
+        if not data:
+            return jsonify({"error": "No data received"}), 400
+        
+        # 1. Prepare Site A Intelligence
+        loc_a = data.get("location")
+        if loc_a:
+            try:
+                places_a = get_nearby_named_places(loc_a.get("latitude"), loc_a.get("longitude"))
+                data["nearby_places"] = {"places": places_a}
+            except:
+                data["nearby_places"] = {"places": []}
+
+        # 2. Prepare Site B Intelligence (if provided)
+        compare_data = data.get("compareData")
+        if compare_data:
+            loc_b = compare_data.get("location")
+            if loc_b:
+                try:
+                    places_b = get_nearby_named_places(loc_b.get("latitude"), loc_b.get("longitude"))
+                    data["compareData"]["nearby_places"] = {"places": places_b}
+                except:
+                    data["compareData"]["nearby_places"] = {"places": []}
+
+        # 3. Generate PDF Buffer using the helper-based pdf_generator
+        pdf_buffer = generate_land_report(data)
+        pdf_buffer.seek(0)
+
+        # 4. Generate dynamic filename for the browser
+        location_name = data.get("locationName", "Analysis")
+        clean_name = str(location_name).replace(" ", "_")
+
+        return send_file(
+            pdf_buffer,
+            as_attachment=True,
+            download_name=f"GeoAI_{clean_name}.pdf",
+            mimetype="application/pdf"
+        )
     except Exception as e:
-        print("Nearby fetch failed:", e)
-        data["nearby_places"] = {"places": []}
-
-    pdf_buffer = generate_land_report(data)
-
-    return send_file(
-        pdf_buffer,
-        as_attachment=True,
-        download_name="Land_Suitability_Report.pdf",
-        mimetype="application/pdf"
-    )
-
-
+        logger.exception("Internal PDF Generation Error")
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/nearby_places", methods=["POST", "OPTIONS"])
 def nearby_places_route():
@@ -510,6 +529,7 @@ def nearby_places_route():
             "places": [],
             "error": str(e)
         }), 200
+
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")

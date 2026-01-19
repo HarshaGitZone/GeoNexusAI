@@ -6,6 +6,7 @@ export default function SideBar({
   loading, handleSubmit,
   handleMyLocation, handleSavePlace,
   handleNearbyPlaces, result,
+  compareResult, 
   nearbyLoading,
   showLocationB, setShowLocationB,
   locationBName, isSelectingB,
@@ -73,44 +74,120 @@ export default function SideBar({
 
   /* ---------------- SHARE + PDF ---------------- */
 
-  const generateShareLink = async () => {
-    const link = `${window.location.origin}?lat=${lat}&lng=${lng}`;
-    await navigator.clipboard.writeText(link);
-    alert("Shareable link copied to clipboard!");
-  };
+  // const generateShareLink = async () => {
+  //   const link = `${window.location.origin}?lat=${lat}&lng=${lng}`;
+  //   await navigator.clipboard.writeText(link);
+  //   alert("Shareable link copied to clipboard!");
+  // };
+  /* ---------------- SHARE + PDF ---------------- */
 
-  const downloadPDF = async () => {
-    if (!result) {
-      alert("Please analyze a location first");
-      return;
+  // const generateShareLink = async () => {
+  //   // Start with Location A
+  //   let shareUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lng=${lng}`;
+
+  //   // If Comparison mode is active, append Location B coordinates
+  //   if (isCompareMode && bLatInput && bLngInput) {
+  //     shareUrl += `&bLat=${bLatInput}&bLng=${bLngInput}&compare=true`;
+  //   }
+
+  //   try {
+  //     await navigator.clipboard.writeText(shareUrl);
+  //     alert(isCompareMode ? "Comparison share link copied!" : "Shareable link copied!");
+  //   } catch (err) {
+  //     console.error("Failed to copy link:", err);
+  //     // Fallback if clipboard fails
+  //     prompt("Copy this link to share:", shareUrl);
+  //   }
+  // };
+  const generateShareLink = async () => {
+    // 1. Base URL with Location A
+    let shareUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lng=${lng}`;
+
+    // 2. Add Location B only if in compare mode AND coordinates exist
+    if (isCompareMode && bLatInput && bLngInput) {
+      // Use encodeURIComponent to ensure special characters (like negative signs) are handled
+      shareUrl += `&bLat=${encodeURIComponent(bLatInput)}&bLng=${encodeURIComponent(bLngInput)}&compare=true`;
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/generate_report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result),
-      });
-
-      const blob = await res.blob();
-      if (!blob || blob.size === 0) {
-        alert("PDF generation failed");
-        return;
-      }
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Land_Suitability_Report.pdf";
-      a.click();
-      window.URL.revokeObjectURL(url);
-
+      await navigator.clipboard.writeText(shareUrl);
+      alert(isCompareMode ? "Comparison link copied to clipboard!" : "Shareable link copied!");
     } catch (err) {
-      console.error("PDF Error:", err);
-      alert("Error generating PDF");
+      console.error("Clipboard failed:", err);
+      // Fallback for some browsers/environments
+      prompt("Copy this link to share your analysis:", shareUrl);
     }
   };
 
+ 
+const [pdfLoading, setPdfLoading] = useState(false);
+
+  const downloadPDF = async () => {
+    if (!result) {
+        alert("Please analyze a location first");
+        return;
+    }
+
+    setPdfLoading(true);
+
+    try {
+        const payload = {
+            ...result,
+            locationName: locationAName,
+            location: {
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng)
+            },
+            compareData: (isCompareMode && compareResult) ? {
+                ...compareResult,
+                locationName: locationBName,
+                location: {
+                    latitude: parseFloat(bLatInput),
+                    longitude: parseFloat(bLngInput)
+                }
+            } : null
+        };
+
+        const res = await fetch("http://127.0.0.1:5000/generate_report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) throw new Error("Backend failed to generate report");
+
+        // --- THE CRITICAL DOWNLOAD TRIGGER ---
+        const blob = await res.blob();
+        
+        // Use a hidden link trick that works in all browsers
+        const downloadUrl = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        
+        // Define Filename
+        const cleanName = locationAName.replace(/\s+/g, '_');
+        const fileName = isCompareMode ? 
+            `Comparison_${cleanName}_vs_${locationBName.replace(/\s+/g, '_')}.pdf` : 
+            `GeoAI_Report_${cleanName}.pdf`;
+        
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link); // Append to body
+        
+        link.click(); // Trigger click
+        
+        // Cleanup delay to ensure browser processed the click
+        setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        }, 100);
+
+    } catch (err) {
+        console.error("PDF Error:", err);
+        alert("Report download failed. Check if your browser is blocking pop-ups.");
+    } finally {
+        setPdfLoading(false);
+    }
+};
   /* ------------------------------------------------ */
 
   return (
@@ -124,10 +201,43 @@ export default function SideBar({
         flexDirection: "column",
       }}
     >
-      <div style={{ height: "50px", width: "100%" }}></div>
+      <div style={{ height: "20px", width: "100%" }}></div>
 
       <div className="sidebar-scrollable" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+         {/* 📄 REPORT ACTIONS */}
+        <section className="control-group compact-group" style={{ marginTop: "6px" }}>
+          <h3 style={{ marginBottom: '8px', fontSize: '14px' }}>📄 Actions</h3>
 
+          <div className="compact-row" style={{ gap: "4px" }}>
+            {/* <button type="button" className="btn-save" onClick={downloadPDF} disabled={!result} style={{flex: 1, padding: '6px 8px', fontSize: '11px'}}>
+              ⬇️ Report
+            </button> */}
+            <button 
+              type="button" 
+              className="btn-save" 
+              onClick={downloadPDF} 
+              disabled={!result || pdfLoading} // Disable while loading
+              style={{
+                flex: 1, 
+                padding: '6px 8px', 
+                fontSize: '11px',
+                position: 'relative'
+              }}
+            >
+              {pdfLoading ? (
+                <span className="pdf-loader-text">
+                  ⏳ Generating...
+                </span>
+              ) : (
+                "⬇️ Report"
+              )}
+            </button>
+
+            <button type="button" className="btn-save" onClick={generateShareLink} style={{flex: 1, padding: '6px 8px', fontSize: '11px'}}>
+              🔗 Share
+            </button>
+          </div>
+        </section>
         {/* SEARCH SECTION */}
         <section className="sidebar-search-section" ref={searchContainerRef}>
           <div className="search-wrapper">
@@ -181,82 +291,114 @@ export default function SideBar({
               </div>
             </div>
 
-            <div className="compact-row" style={{ marginTop: "8px" }}>
-              <button type="button" onClick={handleMyLocation} className="btn-save">📍 My Location</button>
-              <button type="button" onClick={handleSavePlace} className="btn-save">⭐ Save Place</button>
+            <div className="compact-row" style={{ marginTop: "6px", gap: "4px" }}>
+              <button type="button" onClick={handleMyLocation} className="btn-save" style={{flex: 1, padding: '6px 8px', fontSize: '11px'}}>📍 My Loc</button>
+              <button type="button" onClick={handleSavePlace} className="btn-save" style={{flex: 1, padding: '6px 8px', fontSize: '11px'}}>⭐ Save</button>
             </div>
 
-            <div className="compact-row" style={{ marginTop: "8px" }}>
-              <button type="submit" className="btn-analyze" disabled={loading}>
-                {loading ? "Analyzing..." : "Analyze"}
+            <div className="compact-row" style={{ marginTop: "4px", gap: "4px" }}>
+              <button type="submit" className="btn-analyze" disabled={loading} style={{flex: 1, padding: '6px 8px', fontSize: '11px'}}>
+                {loading ? "..." : "Analyze"}
               </button>
 
-              <button type="button" onClick={handleNearbyPlaces} disabled={!result || nearbyLoading} className="btn-analyze">
-                {nearbyLoading ? "Loading..." : "🏘️ Nearby"}
+              <button type="button" onClick={handleNearbyPlaces} disabled={!result || nearbyLoading} className="btn-analyze" style={{flex: 1, padding: '6px 8px', fontSize: '11px'}}>
+                {nearbyLoading ? "..." : "🏘️ Near"}
               </button>
             </div>
           </form>
         </section>
-        {/* 🔁 LOCATION B COMPARE SECTION */}
-<section
-  className="control-group comparison-box compact"
-  style={{ display: showLocationB ? "block" : "none", marginTop: "10px" }}
->
-  <h3>📍 Location B: {locationBName || "Not Selected"}</h3>
+        {/* Comparison Section B */}
+        <section
+          className="control-group comparison-box compact"
+          style={{ display: showLocationB ? "block" : "none" }}
+        >
+          <h3>📍 Location B: {locationBName}</h3>
+          <div className="compact-row">
+            <button
+              className="btn-save mini"
+              onClick={() => setIsSelectingB(!isSelectingB)}
+              style={{
+                flex: 1,
+                border: isSelectingB ? "1px solid #ef4444" : "",
+                padding: "4px 6px",
+                fontSize: "10px",
+              }}
+            >
+              {isSelectingB ? "Cancel" : "🗺️ Map"}
+            </button>
+            <select
+              className="btn-save mini"
+              style={{ flex: 1.5, padding: "4px 6px", fontSize: "10px" }}
+              onChange={(e) => {
+                const p = savedPlaces[e.target.value];
+                if (p && p.lat !== undefined) {
+                  handleCompareSelect(p.lat, p.lng, p.name);
+                }
+              }}
+              value=""
+            >
+              <option value="" disabled>Saved Places...</option>
+              {savedPlaces.map((p, i) => (
+                <option key={i} value={i}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="compact-row" style={{ marginTop: "6px" }}>
+            <div className="field" style={{ marginBottom: "6px", flex: 1 }}>
+              <label className="input-label" style={{ fontSize: "10px" }}>Lat B</label>
+              <input
+                type="text"
+                value={bLatInput}
+                onChange={(e) => setBLatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
+                className="highlighted-box"
+                style={{ padding: "4px", fontSize: "10px" }}
+              />
+            </div>
+            <div className="field" style={{ marginBottom: "6px", flex: 1 }}>
+              <label className="input-label" style={{ fontSize: "10px" }}>Lng B</label>
+              <input
+                type="text"
+                value={bLngInput}
+                onChange={(e) => setBLngInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
+                className="highlighted-box"
+                style={{ padding: "4px", fontSize: "10px" }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
+              disabled={!bLatInput || !bLngInput || compareLoading}
+              className="btn-analyze"
+              style={{
+                alignSelf: "flex-end",
+                marginBottom: "6px",
+                padding: "4px 6px",
+                fontSize: "10px",
+                flex: 0.4,
+                background: "linear-gradient(135deg, #06b6d4, #0891b2)",
+              }}
+            >
+              {compareLoading ? "..." : "Go"}
+            </button>
+          </div>
 
-  <div className="compact-row">
-    <button
-      className="btn-save mini"
-      onClick={() => setIsSelectingB(!isSelectingB)}
-      style={{ flex: 1, border: isSelectingB ? "1px solid #ef4444" : "", padding: "8px" }}
-    >
-      {isSelectingB ? "Cancel" : "🗺️ Map"}
-    </button>
-
-    <select
-      className="btn-save mini"
-      style={{ flex: 1.5, padding: "8px" }}
-      onChange={(e) => {
-        const p = savedPlaces[e.target.value];
-        if (p) handleCompareSelect(p.lat, p.lng, p.name);
-      }}
-      value=""
-    >
-      <option value="" disabled>Saved Places...</option>
-      {savedPlaces.map((p, i) => (
-        <option key={i} value={i}>{p.name}</option>
-      ))}
-    </select>
-  </div>
-
-  <div className="compact-row" style={{ marginTop: "6px" }}>
-    <div className="field">
-      <label>Lat B</label>
-      <input value={bLatInput} onChange={(e) => setBLatInput(e.target.value)} className="highlighted-box" />
-    </div>
-    <div className="field">
-      <label>Lng B</label>
-      <input value={bLngInput} onChange={(e) => setBLngInput(e.target.value)} className="highlighted-box" />
-    </div>
-
-    <button
-      onClick={() => bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
-      disabled={!bLatInput || !bLngInput || compareLoading}
-      className="btn-analyze"
-    >
-      {compareLoading ? "..." : "Compare"}
-    </button>
-  </div>
-
-  <div className="compact-row" style={{ marginTop: "6px" }}>
-    <button onClick={handleMyLocationB} className="btn-save">📍 My Location</button>
-    <button onClick={handleSavePlaceB} disabled={isBFromSavedPlace} className="btn-save">⭐ Save</button>
-
-    <button onClick={handleNearbyPlacesB} disabled={!analyzedCoordsB?.lat || nearbyLoadingB} className="btn-analyze">
-      {nearbyLoadingB ? "Loading..." : "🏘️ Nearby"}
-    </button>
-  </div>
-</section>
+          <div className="compact-row" style={{ marginTop: "6px", gap: "4px" }}>
+            <button type="button" onClick={handleMyLocationB} className="btn-save" style={{flex: 0.7, padding: '4px', fontSize: '10px'}}>📍</button>
+            <button type="button" onClick={handleSavePlaceB} disabled={isBFromSavedPlace} className="btn-save" style={{flex: 0.7, padding: '4px', fontSize: '10px', opacity: isBFromSavedPlace ? 0.5 : 1}}>⭐</button>
+            <button 
+              type="button" 
+              onClick={handleNearbyPlacesB} 
+              disabled={!analyzedCoordsB?.lat || nearbyLoadingB}
+              className="btn-analyze"
+              style={{flex: 1, padding: '4px 6px', fontSize: '10px', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)'}}
+            >
+              {nearbyLoadingB ? "..." : "🏘️ Nearby"}
+            </button>
+          </div>
+          {isCompareMode && <button onClick={() => setIsCompareMode(false)} className="btn-delete-wide" style={{marginTop: '6px', padding: '4px', fontSize: '10px'}}>Exit Compare</button>}
+        </section>
 
 {/* 🔄 TOGGLE BUTTON FOR LOCATION B */}
 <button
@@ -264,66 +406,80 @@ export default function SideBar({
   className="compare-toggle-btn"
   style={{
     width: "calc(100% - 20px)",
-    margin: "8px 10px",
-    padding: "10px",
+    margin: "6px 10px",
+    padding: "4px",
     background: showLocationB
       ? "linear-gradient(135deg, #ef4444, #dc2626)"
       : "linear-gradient(135deg, #ec4899, #f43f5e)",
     color: "white",
     border: "none",
     borderRadius: "6px",
-    fontSize: "13px",
+    fontSize: "10px",
     fontWeight: "bold",
     cursor: "pointer",
   }}
 >
-  {showLocationB ? "✕ Close Compare" : "🔄 Compare with B"}
+  {showLocationB ? "✕ Close" : "🔄 Compare"}
 </button>
 
         
 
-        {/* 📄 REPORT ACTIONS */}
-        <section className="control-group compact-group" style={{ marginTop: "10px" }}>
-          <h3>📄 Report Actions</h3>
+       
 
-          <button type="button" className="btn-save" onClick={downloadPDF} disabled={!result}>
-            ⬇️ Download Report
-          </button>
-
-          <button type="button" className="btn-save" onClick={generateShareLink}>
-            🔗 Share Analysis
-          </button>
-        </section>
-
-        {/* SAVED PLACES */}
-        <section className="saved-places-section">
+        {/* Saved Places Section */}
+        <section className="saved-places-section" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
           <h3>Saved Places</h3>
-          {savedPlaces.map((p, i) => (
-            <div key={i} className="place-card-compact" onClick={() => { setLat(p.lat.toString()); setLng(p.lng.toString()); }}>
-              {editingIndex === i ? (
-                <input
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      const updated = [...savedPlaces];
-                      updated[i].name = editingName || p.name;
-                      setSavedPlaces(updated);
-                      setEditingIndex(null);
-                    } else if (e.key === "Escape") setEditingIndex(null);
-                  }}
-                  autoFocus
-                />
-              ) : (
-                <>
-                  <strong>{p.name}</strong>
-                  <span>{p.lat.toFixed(2)}, {p.lng.toFixed(2)}</span>
-                </>
-              )}
-              <button onClick={(e) => { e.stopPropagation(); setEditingIndex(i); setEditingName(p.name); }}>✎</button>
-              <button onClick={(e) => { e.stopPropagation(); setSavedPlaces(savedPlaces.filter((_, idx) => idx !== i)); }}>✕</button>
-            </div>
-          ))}
+          <div className="places-grid attractive-scroll" style={{ flex: 1, overflowY: "auto" }}>
+            {savedPlaces.map((p, i) => (
+              <div
+                key={i}
+                className="place-card-compact"
+                onClick={() => {
+                  setLat(p.lat.toString());
+                  setLng(p.lng.toString());
+                }}
+              >
+                <div className="place-info-mini">
+                  {editingIndex === i ? (
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const updated = [...savedPlaces];
+                          updated[i].name = editingName || p.name;
+                          setSavedPlaces(updated);
+                          setEditingIndex(null);
+                        } else if (e.key === "Escape") setEditingIndex(null);
+                      }}
+                      className="highlighted-box"
+                      style={{ padding: "4px", fontSize: "12px" }}
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      <strong>{p.name}</strong>
+                      <span>{p.lat.toFixed(2)}, {p.lng.toFixed(2)}</span>
+                    </>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {editingIndex !== i && (
+                    <button className="btn-edit" onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingIndex(i);
+                      setEditingName(p.name);
+                    }}>✎</button>
+                  )}
+                  <button className="btn-cross" onClick={(e) => {
+                    e.stopPropagation();
+                    setSavedPlaces(savedPlaces.filter((_, idx) => idx !== i));
+                  }}>✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
       </div>
