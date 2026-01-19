@@ -222,6 +222,10 @@ const FactorsSection = memo(({ data, latVal, lngVal, locationName, isDarkMode, v
 });
 
 export default function LandSuitabilityChecker() {
+  // 1. Add this state
+  const [analysisHistory, setAnalysisHistory] = useState(() => 
+      JSON.parse(localStorage.getItem("analysis_history")) || []
+  );
   const BACKEND_URL = window.location.hostname === "localhost" 
     ? "http://localhost:5000" : "https://geoai-major-vnrvjiet22-26-itb.onrender.com";
 
@@ -463,16 +467,71 @@ export default function LandSuitabilityChecker() {
         tasks.push(performAnalysis(bLatInput, bLngInput));
     }
 
+    // try { 
+    //   const results = await Promise.allSettled(tasks);
+    //   if (results[0].status === 'fulfilled') {
+    //       setResult(results[0].value);
+    //       setAnalyzedCoords({ lat: lat, lng: lng });
+    //       // ADD TO HISTORY HERE
+    //         const newHistoryEntry = {
+    //             name: nameA,
+    //             lat: lat,
+    //             lng: lng,
+    //             score: data.suitability_score,
+    //             timestamp: new Date().getTime()
+    //         };
+            
+    //         setAnalysisHistory(prev => {
+    //             const updated = [newHistoryEntry, ...prev].slice(0, 20); // Keep last 20
+    //             localStorage.setItem("analysis_history", JSON.stringify(updated));
+    //             return updated;
+    //         });
+    //   }
+      
+    //   if (results[1] && results[1].status === 'fulfilled') {
+    //       setCompareResult(results[1].value);
+    //       setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+    //   }
     try { 
       const results = await Promise.allSettled(tasks);
+      
       if (results[0].status === 'fulfilled') {
-          setResult(results[0].value);
+          // Define a local variable for the result data
+          const analysisData = results[0].value; 
+          
+          setResult(analysisData);
           setAnalyzedCoords({ lat: lat, lng: lng });
+
+          // RECORD HISTORY Logic using the defined 'analysisData'
+          const newHistoryEntry = {
+              name: locationAName, // Using current state name
+              lat: lat,
+              lng: lng,
+              score: analysisData.suitability_score, // Accessing defined variable
+              timestamp: new Date().getTime()
+          };
+          
+          setAnalysisHistory(prev => {
+              const updated = [newHistoryEntry, ...prev].slice(0, 20);
+              localStorage.setItem("analysis_history", JSON.stringify(updated));
+              return updated;
+          });
       }
       
       if (results[1] && results[1].status === 'fulfilled') {
-          setCompareResult(results[1].value);
+          const compareData = results[1].value;
+          setCompareResult(compareData);
           setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+          
+          // Optional: Add Compare Site B to history as well
+          const historyEntryB = {
+            name: locationBName,
+            lat: bLatInput,
+            lng: bLngInput,
+            score: compareData.suitability_score,
+            timestamp: new Date().getTime()
+          };
+          setAnalysisHistory(prev => [historyEntryB, ...prev].slice(0, 20));
       }
     } catch (err) { console.error(err); } 
     finally { 
@@ -577,7 +636,7 @@ export default function LandSuitabilityChecker() {
 
   return (
     <div className="app-shell">
-      <TopNav isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} onSearchResult={handleSearchResult} />
+      <TopNav isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} analysisHistory={analysisHistory} onSearchResult={handleSearchResult} />
       
       <SideBar
         onSearchResult={handleSearchResult}
