@@ -1,451 +1,742 @@
-/* --- Desktop Floating Logic --- */
+/* --- 1. Interaction Logic (Ensures Visibility) --- */
 .nav-trigger-zone {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 15px;
-  z-index: 1010;
+  height: 40px; /* Large enough to catch mouse movement at the top */
+  z-index: 9998;
   background: transparent;
 }
 
-.top-nav-floating {
-  position: absolute;
+.geo-navbar {
+  position: fixed;
   top: 15px;
   left: 50%;
-  transform: translateX(-50%) translateY(-150%);
+  transform: translateX(-50%) translateY(-120%); /* Hidden state */
   width: 90%;
-  max-width: 1000px;
-  height: 55px;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  z-index: 1011;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 850px;
+  height: 64px;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
-.top-nav-floating.visible {
+/* Force visible state when active class is present */
+.geo-navbar.is-visible {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+  pointer-events: all;
 }
 
-/* --- Mobile / Small Screen "Always On" Logic --- */
-@media (max-width: 767px) {
-  .top-nav-floating.mobile-fixed {
-    position: relative; /* Change from absolute to relative to push content down */
-    top: 0;
-    left: 0;
-    transform: none;
-    width: 100%;
-    max-width: none;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    opacity: 1;
-    background: #0f172a; /* Solid background for mobile */
-    padding: 10px 15px;
-  }
-
-  .desktop-only {
-    display: none; /* Hides extra buttons on mobile for space */
-  }
-
-  .nav-trigger-zone {
-    display: none;
-  }
-}
-
-/* Common Inner Styles */
-.nav-inner {
+/* --- 2. The Glass Morphic Container --- */
+.nav-content-shell {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  height: 100%;
+  padding: 0 24px;
+  border-radius: 20px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
-.brand {
+/* Dark Theme Palette */
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Light Theme Palette */
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* --- 3. Left Section: System & History --- */
+.nav-group.left {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 1.2rem;
-  color: white;
-  letter-spacing: -0.5px;
+  gap: 16px;
+  flex: 1;
 }
 
-.brand-dot {
+.system-data {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 14px;
+  border-radius: 12px;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+}
+
+[data-theme="light"] .system-data { background: rgba(0, 0, 0, 0.04); }
+
+.geo-label { color: #8b5cf6; font-weight: 800; font-size: 0.65rem; }
+.date-display { color: #94a3b8; }
+.time-display { color: #fff; font-weight: 700; }
+[data-theme="light"] .time-display { color: #1e293b; }
+
+.nav-icon-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.nav-icon-btn:hover { transform: scale(1.1) rotate(-5deg); }
+
+/* --- 4. Center Section: Branding --- */
+.nav-group.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-main {
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -1px;
+  color: #fff;
+}
+
+[data-theme="light"] .logo-main { color: #0f172a; }
+.logo-alt { color: #8b5cf6; }
+
+.pulse-dot {
   width: 10px;
   height: 10px;
   background: #8b5cf6;
   border-radius: 50%;
-  box-shadow: 0 0 10px #8b5cf6;
-}
-
-.nav-center-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.nav-btn {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: 0.2s;
-}
-
-.nav-btn:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.nav-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.theme-toggle-nav {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  width: 35px;
-  height: 35px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  transition: 0.2s;
-}
-
-/* Light Mode Support */
-[data-theme="light"] .top-nav-floating {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-}
-
-@media (max-width: 767px) {
-  [data-theme="light"] .top-nav-floating.mobile-fixed {
-    background: #ffffff;
-  }
-}
-
-[data-theme="light"] .brand,
-[data-theme="light"] .nav-btn,
-[data-theme="light"] .theme-toggle-nav {
-  color: #1e293b;
-}
-
-
-
-/* --- Desktop Floating Logic --- */
-.nav-trigger-zone {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 15px;
-  z-index: 1010;
-  background: transparent;
-}
-
-.top-nav-floating {
-  position: absolute;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-150%);
-  width: 60%;
-  max-width: 600px;
-  height: 55px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  z-index: 1011;
-  transition: all 0.5s cubic-bezier(0.2, 1, 0.2, 1);
-  opacity: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.top-nav-floating.visible {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-/* --- Professional Branding (No Borders) --- */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: default;
-  /* Removed any previous border or background here */
-}
-
-.brand-text {
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  font-family: 'Inter', sans-serif; /* Modern font preference */
-}
-
-.brand-dot {
-  width: 8px;
-  height: 8px;
-  background: #a855f7; /* Brighter purple */
-  border-radius: 50%;
+  box-shadow: 0 0 12px #8b5cf6;
   position: relative;
 }
 
-/* Subtle pulse effect for a "live" professional feel */
-.brand-dot::after {
+.pulse-dot::after {
   content: '';
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background: inherit;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   border-radius: 50%;
-  animation: pulse 2s infinite;
-  opacity: 0.5;
+  background: inherit;
+  animation: pulse-ring 2.5s infinite;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(2.5); opacity: 0; }
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.8); opacity: 0; }
 }
 
-/* --- Mobile / Small Screen FIX --- */
-@media (max-width: 767px) {
-  .top-nav-floating.mobile-fixed {
-    position: relative;
-    top: 0;
-    left: 0; /* Resets desktop 50% */
-    transform: none; /* Resets desktop -50% centering */
-    width: 100%;
-    max-width: none;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    opacity: 1;
-    background: #0f172a; /* Solid slate */
-    padding: 10px 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  .desktop-only { display: none; }
-  .nav-trigger-zone { display: none; }
-}
-
-/* --- Navigation Controls --- */
-.nav-center-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.nav-btn {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.nav-btn:hover {
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.nav-right {
+/* --- 5. Right Section: Tools --- */
+.nav-group.right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: 1;
 }
 
-.nav-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.theme-toggle-nav {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  width: 38px;
-  height: 38px;
+.text-tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 8px 14px;
   border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.text-tool-btn:hover {
+  color: #fff;
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="light"] .text-tool-btn:hover { color: #8b5cf6; }
+
+.mode-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
-  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: 0.3s;
 }
 
-.theme-toggle-nav:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+.mode-toggle:hover {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
   transform: rotate(15deg);
 }
 
-/* --- Light Mode Refinements --- */
-[data-theme="light"] .top-nav-floating {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .brand-text { color: #1e293b; }
-[data-theme="light"] .nav-btn { color: #64748b; }
-[data-theme="light"] .nav-btn:hover { color: #0f172a; background: rgba(0,0,0,0.04); }
-[data-theme="light"] .theme-toggle-nav { color: #1e293b; border-color: rgba(0,0,0,0.1); }
-
+/* --- 6. Mobile Logic (Always Visible) --- */
 @media (max-width: 767px) {
-  [data-theme="light"] .top-nav-floating.mobile-fixed { background: #ffffff; }
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none;
+    width: 100%; max-width: none;
+    height: 60px;
+    border-radius: 0; opacity: 1; pointer-events: all;
+  }
+  .nav-content-shell { border-radius: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .desktop-only { display: none; }
 }
 
 
-/* Update this section in your TopNav.css */
-.brand {
+
+
+
+
+/* --- Core Structure --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; width: 100%; height: 35px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  width: auto;
+  min-width: 600px; /* Much more compact */
+  height: 52px; /* Slightly shorter */
+  z-index: 9999;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- Glassmorphism & Themes --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 16px;
+  border-radius: 100px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* --- Left Section --- */
+.nav-group { display: flex; align-items: center; gap: 12px; }
+
+.compact-sys {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+[data-theme="light"] .compact-sys { background: rgba(0,0,0,0.05); color: #475569; }
+
+.time-val { font-weight: 800; color: #8b5cf6; }
+.date-val { color: #94a3b8; font-size: 0.65rem; }
+
+/* --- Brand Logo --- */
+.logo {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin: 0;
+  color: #fff;
+}
+[data-theme="light"] .logo { color: #0f172a; }
+.logo span { color: #8b5cf6; }
+
+.status-dot {
+  width: 6px; height: 6px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #8b5cf6;
+}
+
+/* --- Team Dropdown (The New Style) --- */
+.team-trigger-wrapper { position: relative; }
+
+.compact-team-pane {
+  position: absolute;
+  top: 140%;
+  right: 0;
+  width: 220px;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+[data-theme="light"] .compact-team-pane { background: #fff; color: #1e293b; border-color: #e2e8f0; }
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.compact-team-pane label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #8b5cf6;
+  margin-bottom: 4px;
+}
+
+.guide-section { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.guide-section p { font-size: 0.8rem; font-weight: 700; margin: 0; }
+
+.members-section span {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 3px;
+  opacity: 0.9;
+}
+
+/* --- Buttons & Symbols --- */
+.icon-btn {
+  background: none; border: none;
+  font-size: 1.1rem; cursor: pointer; color: #94a3b8;
+  transition: 0.2s;
+}
+
+.icon-btn:hover { color: #8b5cf6; transform: scale(1.1); }
+
+.team-btn {
+  background: transparent; border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #94a3b8; font-size: 0.65rem; font-weight: 800;
+  padding: 4px 10px; border-radius: 6px; cursor: pointer;
+}
+
+.team-btn:hover, .team-btn.active { background: #8b5cf6; color: white; }
+
+.mode-toggle {
+  background: none; border: none; cursor: pointer; font-size: 1.1rem;
+}
+
+/* --- History Dropdown --- */
+.history-pane-floating {
+  position: absolute; top: 60px; left: 0;
+  width: 200px; background: rgba(15, 23, 42, 0.95);
+  border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none; width: 100%; border-radius: 0; opacity: 1;
+  }
+}
+
+
+
+
+
+
+/* --- Root Layout --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; width: 100%; height: 35px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: auto;
+  min-width: 650px;
+  height: 54px;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- Glass Container --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  border-radius: 100px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.nav-group { display: flex; align-items: center; gap: 15px; }
+
+/* --- Left: Date & Time --- */
+.compact-sys {
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: default;
-  
-  background: transparent;       /* Ensures no background box */
-  padding: 0;                    /* Resets any box-like padding */
-  outline: none;
-}
-
-.brand-text {
-  font-weight: 800;
-  font-size: 1.3rem;
-  color: #ffffff;
-  letter-spacing: -0.5px;
-  text-transform: none;          /* Ensures no forced caps if not wanted */
-
-}
-
-
-
-
-
-/* --- Team Dropdown Styling --- */
-.team-dropdown {
-  position: absolute;
-  top: 100%; /* Positions it exactly below the Nav bar */
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  width: 90%;
-  max-width: 500px;
-  background: rgba(15, 23, 42, 0.95); /* Darker for better contrast */
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: none; /* Merges it with the nav bar visually */
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  opacity: 0;
-  pointer-events: none; /* Prevents interaction when hidden */
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: -1; /* Sits behind the main nav bar to slide out from under it */
-}
-
-.team-dropdown.show {
-  opacity: 1;
-  pointer-events: all;
-  transform: translateX(-50%) translateY(0);
-  z-index: 1010;
-}
-
-.team-header {
-  text-align: center;
-  margin-bottom: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 10px;
-}
-
-.team-header h4 {
-  color: #178aa1; /* Matches your brand dot color */
-  margin: 0;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-}
-
-.team-header p {
-  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 5px 15px;
+  border-radius: 50px;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
-  margin: 5px 0 0;
 }
 
-.team-grid-nav {
+[data-theme="light"] .compact-sys { background: rgba(0,0,0,0.05); }
+
+.date-val { color: #94a3b8; font-weight: 500; }
+.time-val { color: #fff; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 10px; }
+[data-theme="light"] .time-val { color: #1e293b; border-left-color: rgba(0,0,0,0.1); }
+
+/* --- Center: Logo (Dot to the Left) --- */
+.brand-wrap { display: flex; align-items: center; gap: 10px; }
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+[data-theme="light"] .logo { color: #0f172a; }
+.logo span { color: #8b5cf6; }
+
+.status-dot {
+  width: 10px; height: 10px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #8b5cf6;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { opacity: 0.6; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+
+/* --- Right: Action Buttons --- */
+.icon-btn {
+  background: none; border: none; font-size: 1.2rem;
+  cursor: pointer; color: #94a3b8; transition: 0.3s;
+}
+.icon-btn:hover { color: #8b5cf6; transform: translateY(-2px); }
+
+.team-btn {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8b5cf6; font-size: 0.75rem; font-weight: 800;
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: 0.3s;
+}
+.team-btn:hover, .team-btn.active { background: #8b5cf6; color: white; }
+
+.mode-toggle { background: none; border: none; cursor: pointer; font-size: 1.2rem; }
+
+/* --- Team Panel Styling --- */
+.team-trigger-wrapper { position: relative; }
+
+.compact-team-pane {
+  position: absolute;
+  top: 60px; right: 0; width: 320px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; padding: 20px;
+  opacity: 0; visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.guide-label { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+.guide-name { font-size: 0.95rem; font-weight: 800; color: #00d2ff; margin: 2px 0 12px 0; }
+.header-divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 12px; }
+.team-label { font-size: 0.75rem; color: #8b5cf6; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px; }
+
+.team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.member-tag {
+  background: rgba(255,255,255,0.05); padding: 8px;
+  border-radius: 8px; font-size: 0.75rem; color: #fff; text-align: center;
+}
+
+[data-theme="light"] .compact-team-pane { background: #fff; border-color: #e2e8f0; }
+[data-theme="light"] .member-tag { background: #f1f5f9; color: #1e293b; }
+[data-theme="light"] .guide-name { color: #2563eb; }
+
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none; width: 100%; border-radius: 0; opacity: 1;
+  }
+  .compact-team-pane { width: calc(100vw - 40px); right: -10px; }
+}
+
+
+
+
+
+
+
+
+
+/* --- Root Layout --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; width: 100%; height: 35px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: auto;
+  min-width: 650px;
+  height: 54px;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- The Glass Shell --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  border-radius: 100px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.nav-group { display: flex; align-items: center; gap: 12px; }
+
+/* --- Left Elements --- */
+.compact-sys {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.date-val { color: #94a3b8; font-weight: 500; }
+.time-val { color: #fff; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; }
+
+/* --- Center Brand --- */
+.brand-wrap { display: flex; align-items: center; gap: 10px; }
+.logo { font-size: 1.3rem; font-weight: 900; color: #fff; margin: 0; }
+.logo span { color: #8b5cf6; }
+.status-dot { width: 8px; height: 8px; background: #8b5cf6; border-radius: 50%; box-shadow: 0 0 10px #8b5cf6; }
+
+/* --- Buttons & Tools --- */
+.icon-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #94a3b8; }
+.team-btn {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8b5cf6; font-size: 0.7rem; font-weight: 800;
+  padding: 5px 12px; border-radius: 8px; cursor: pointer;
+}
+
+/* --- Team Dropdown --- */
+.team-trigger-wrapper { position: relative; }
+.compact-team-pane {
+  position: absolute; top: 55px; right: 0; width: 280px;
+  background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px; padding: 15px; opacity: 0; visibility: hidden;
+  transform: translateY(10px); transition: 0.3s ease;
+}
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+.member-tag { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 6px; font-size: 0.7rem; text-align: center; color: white; }
+
+/* --- MOBILE OPTIMIZATIONS (COMPACT MODE) --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none; width: 100%; min-width: 100%;
+    height: 50px; border-radius: 0; opacity: 1; position: fixed;
+  }
+  
+  .nav-content-shell { padding: 0 10px; border-radius: 0; }
+  .nav-group { gap: 8px; }
+  .logo { font-size: 1.1rem; }
+  .team-btn { padding: 4px 8px; font-size: 0.65rem; }
+  
+  /* Create Gap between Navbar and Next Layer */
+  body { padding-top: 55px; } 
+  
+  /* Smaller Team Pane for Mobile */
+  .compact-team-pane { width: 240px; right: 5px; top: 45px; }
+}
+
+
+
+
+
+
+
+
+/* --- Team Dropdown Panel --- */
+.compact-team-pane {
+  position: absolute;
+  top: 65px;
+  right: 0;
+  width: 400px; /* Wider to match the 2x2 grid in your image */
+  background: rgba(22, 28, 45, 0.98); /* Deep dark blue-grey from image */
+  border-radius: 12px;
+  padding: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+}
+
+.compact-team-pane.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* --- Header Styling --- */
+.project-title {
+  color: #17a2b8; /* Cyan-blue title from image */
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 4px 0;
+}
+
+.guide-text {
+  color: #94a3b8; /* Muted guide text */
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.guide-text span {
+  color: #cbd5e1; /* Subtle highlight for name */
+  font-weight: 600;
+}
+
+.header-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 10px 0 20px 0;
+}
+
+/* --- Members Grid (2x2) --- */
+.team-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  text-align: center;
 }
 
-.team-grid-nav span {
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.05);
+.member-card {
+  background: rgba(30, 41, 59, 0.7); /* Darker button-like background */
+  color: #ffffff; /* Highly highlighted names */
+  padding: 6px;
   border-radius: 8px;
-  transition: background 0.3s;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.team-grid-nav span:hover {
-  background: rgba(78, 204, 175, 0.2); 
+/* Hover effect for the member cards */
+.member-card:hover {
+  background: #8b5cf6; /* Indigo highlight on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
-.nav-btn.team-toggle.active {
-  color: #ffffff;
-  background: rgba(168, 85, 247, 0.2);
-}
-
-[data-theme="light"] .team-dropdown {
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .team-header p,
-[data-theme="light"] .team-grid-nav span {
-  color: #1e293b;
-}
-
-[data-theme="light"] .team-grid-nav span {
-  background: rgba(0, 0, 0, 0.04);
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .compact-team-pane {
+    width: 320px;
+    right: -10px;
+  }
+  .team-grid {
+    grid-template-columns: 1fr; /* Stack members on very small screens */
+  }
 }
 
 
@@ -456,232 +747,105 @@
 
 
 
-
-
-
-
-.nav-search-container {
+/* --- Team Dropdown Panel --- */
+.team-trigger-wrapper {
   position: relative;
-  flex: 1;
-  max-width: 400px;
-  margin: 0 20px;
 }
 
-.search-wrapper {
+.compact-team-pane {
+  position: absolute;
+  top: 45px; /* Adjust based on your navbar height */
+  right: 50%; /* Starts from the middle of the 'Team' button */
+  transform: translateX(50%) translateY(15px); /* Centers it and hides it lower */
+  width: 420px;
+  background: rgba(13, 17, 23, 0.9); /* Deep obsidian glass */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 10000;
+}
+
+.compact-team-pane.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(50%) translateY(0);
+}
+
+/* --- Premium Typography --- */
+.project-title {
+  color: #00d2ff; /* Crisp professional cyan */
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.guide-text {
+  color: #8b949e; /* Muted slate */
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 4px 0 0 0;
+  font-weight: 500;
+}
+
+.guide-text span {
+  color: #f0f6fc; /* Bright contrast for the name */
+  font-weight: 600;
+}
+
+.header-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  margin: 15px 0;
+}
+
+/* --- Grid with Professional Cards --- */
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.member-card {
+  background: rgba(255, 255, 255, 0.03); /* Subtle glass buttons */
+  color: #e6edf3;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
-  background: var(--bg); /* Ensure this matches your CSS variables */
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  padding: 6px 12px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  justify-content: center;
 }
 
-.search-wrapper:focus-within {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-glow);
+.member-card:hover {
+  background: rgba(139, 92, 246, 0.15); /* Soft indigo glow */
+  border-color: #8b5cf6;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
 }
 
-.nav-search-input {
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  padding-left: 10px;
-  width: 100%;
-  font-size: 13px;
-  outline: none;
-}
-
-.search-suggestions-dropdown {
-  position: absolute;
-  top: 110%;
-  left: 0;
-  right: 0;
-  background: var(--side);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 2000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-}
-
-.suggestion-item {
-  padding: 10px 15px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
-  transition: background 0.2s;
-}
-
-.suggestion-item:hover {
-  background: rgba(45, 138, 138, 0.1);
-}
-
-.suggestion-main {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--accent-color);
-}
-
-.suggestion-sub {
-  font-size: 11px;
-  opacity: 0.7;
-  color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-
-/* ============================================================
-   FORCE OVERRIDE: FIXED PILL NAV & RESPONSIVE BEHAVIOR
-   ============================================================ */
-
-/* Force the container into a centered floating pill */
-nav.top-nav-floating {
-    width: 600px !important;            /* Fixed width for desktop dominance */
-    max-width: 90vw !important;         /* Safety margin for smaller screens */
-    min-width: unset !important;        /* Reset any conflicting min-widths */
-    left: 50% !important;
-    right: auto !important;
-    top: 20px !important;
-    transform: translateX(-50%) translateY(-120%) !important; /* Start hidden */
-    
-    /* Visual Overrides */
-    background: rgba(255, 255, 255, 0.8) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border-radius: 100px !important;    /* Force Pill Shape */
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
-    padding: 0 15px !important;
-    display: block !important;          /* Ensure it's not hidden by display:none elsewhere */
-}
-
-/* Dark mode forced background */
-[data-theme="dark"] nav.top-nav-floating {
-    background: rgba(15, 20, 25, 0.85) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Force show state */
-nav.top-nav-floating.visible {
-    transform: translateX(-50%) translateY(0) !important;
-    opacity: 1 !important;
-}
-
-/* Force Inner Layout to stay centered and spaced */
-.nav-inner {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    height: 56px !important;
-    gap: 20px !important;
-}
-
-/* Force Team Dropdown to align with the narrow bar */
-.team-dropdown {
-    width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    transform: translateY(15px) !important; /* Move down slightly from the bar */
-    border-radius: 24px !important;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.3) !important;
-}
-
-/* COMPLETELY RESPONSIVE: Force Full Width on Mobile */
-@media (max-width: 768px) {
-    nav.top-nav-floating {
-        width: 100% !important;
-        max-width: 100% !important;
-        top: 0 !important;
-        left: 0 !important;
-        transform: none !important;      /* Disable translate center on mobile */
-        border-radius: 0 !important;     /* Square edges for mobile */
-        border-top: none !important;
-        border-left: none !important;
-        border-right: none !important;
-    }
-    
-    .nav-inner {
-        padding: 0 15px !important;
-    }
-}
-
-
-
-/* ============================================================
-   FORCE OVERRIDE: RESPONSIVE NAV STATES
-   ============================================================ */
-
-/* 1. Desktop: Centered Floating Pill */
-nav.top-nav-floating {
-    width: 600px !important;            /* Reduced width for desktop */
-    max-width: 90vw !important;
-    left: 50% !important;
-    top: 20px !important;
-    transform: translateX(-50%) translateY(-120%) !important; /* Hidden state */
-    position: fixed !important;
-    border-radius: 100px !important;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    z-index: 1000 !important;
-    opacity: 0 !important;
-}
-
-/* Force visible state on desktop hover */
-nav.top-nav-floating.visible {
-    transform: translateX(-50%) translateY(0) !important;
-    opacity: 1 !important;
-}
-
-/* 2. Mobile: Force Fixed Top Bar (Completely Responsive) */
+/* --- Mobile Fix --- */
 @media (max-width: 767px) {
-    nav.top-nav-floating, 
-    nav.top-nav-floating.mobile-fixed {
-        width: 100% !important;         /* Full width on mobile */
-        max-width: 100% !important;
-        top: 0 !important;              /* Snap to very top */
-        left: 0 !important;
-        transform: none !important;      /* Remove centering transform */
-        border-radius: 0 !important;     /* Remove pill edges */
-        opacity: 1 !important;           /* Always visible */
-        border-top: none !important;
-        border-left: none !important;
-        border-right: none !important;
-        background: rgba(15, 23, 42, 0.95) !important; /* Force solid-ish dark bg */
-        backdrop-filter: blur(10px) !important;
-    }
-
-    .nav-inner {
-        padding: 0 15px !important;
-        height: 56px !important;        /* Standard mobile nav height */
-    }
-
-    /* Hide desktop-specific center actions if necessary */
-    .desktop-only {
-        display: none !important;
-    }
-}
-
-/* ============================================================
-   CONTENT BUFFER FOR FIXED MOBILE NAVBAR
-   ============================================================ */
-
-@media (max-width: 1000px) {
-    /* Target the main container that holds the map and results */
-    .main-content {
-        margin-top: 60px !important; /* Buffer height (Navbar 56px + 4px gap) */
-        height: calc(100vh - 60px) !important; /* Recalculate height to prevent double scrollbars */
-    }
-
-    /* If your sidebar also needs to shift down on mobile */
-    .sidebar {
-        top: 60px !important;
-        height: calc(100vh - 60px) !important;
-    }
+  .compact-team-pane {
+    width: 280px;
+    right: 50%;
+    transform: translateX(50%) translateY(10px);
+  }
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
 }

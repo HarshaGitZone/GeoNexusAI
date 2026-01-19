@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "./TopNav.css";
 
-export default function TopNav({ isDarkMode, setIsDarkMode }) {
+export default function TopNav({ isDarkMode, setIsDarkMode, searchHistory = [] }) {
   const [isVisible, setIsVisible] = useState(false);
-  const [showTeam, setShowTeam] = useState(false); 
+  const [showTeam, setShowTeam] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -17,66 +24,81 @@ export default function TopNav({ isDarkMode, setIsDarkMode }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  };
+
   return (
     <>
       {!isSmallScreen && (
         <div className="nav-trigger-zone" onMouseEnter={() => setIsVisible(true)} />
       )}
 
-      <nav
-        className={`top-nav-floating ${isVisible ? "visible" : ""} ${isSmallScreen ? "mobile-fixed" : ""}`}
+      <nav 
+        className={`geo-navbar ${isVisible ? "is-visible" : ""} ${isSmallScreen ? "is-mobile" : ""}`}
         onMouseLeave={() => {
-          if (!isSmallScreen) setIsVisible(false);
-          setShowTeam(false);
-          // REMOVED: setSuggestions([]); logic moved to SideBar.js
+          if (!isSmallScreen) {
+            setIsVisible(false);
+            setShowTeam(false);
+            setShowHistory(false);
+          }
         }}
       >
-        <div className="nav-inner">
-          <div className="brand">
-            <div className="brand-dot" />
-            <span className="brand-text">GeoAI</span>
+        <div className="nav-content-shell">
+          
+          {/* LEFT: History (Date/Time hidden on mobile to save space) */}
+          <div className="nav-group left">
+            {!isSmallScreen && (
+              <div className="compact-sys">
+                <span className="date-val">{currentTime.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                <span className="time-val">{currentTime.toLocaleTimeString([], { hour12: false })}</span>
+              </div>
+            )}
+            <button className="icon-btn" onClick={() => setShowHistory(!showHistory)}>🕒</button>
           </div>
 
-          <div className="nav-center-actions desktop-only">
-            {/* <button 
-              className={`nav-btn team-toggle ${showTeam ? "active" : ""}`} 
-              onClick={() => setShowTeam(!showTeam)}
-            >
-              👥 Team
-            </button> */}
-            <button
-  className={`nav-btn team-toggle ${showTeam ? "active" : ""}`}
-  onClick={() => setShowTeam(!showTeam)}
-  aria-expanded={showTeam}
->
-  <span className="nav-icon">Team</span>
-</button>
-
-            {/* <button className="nav-btn">Export as PDF</button> */}
+          {/* CENTER: Logo */}
+          <div className="nav-group center">
+            <div className="brand-wrap">
+              <div className="status-dot" />
+              <h1 className="logo">Geo<span>AI</span></h1>
+            </div>
           </div>
 
-          <div className="nav-right">
-            <div className="nav-divider desktop-only"></div>
-            <button
-              className="theme-toggle-nav"
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
+          {/* RIGHT: Tools */}
+          <div className="nav-group right">
+            <div className="team-trigger-wrapper" 
+              onMouseEnter={() => !isSmallScreen && setShowTeam(true)}
+              onMouseLeave={() => !isSmallScreen && setShowTeam(false)}>
+            <button className={`team-btn ${showTeam ? "active" : ""}`} onClick={() => setShowTeam(!showTeam)}>
+              Team
+            </button>
+  
+  {/* EXACT TEAM PANEL DESIGN */}
+              <div className={`compact-team-pane ${showTeam ? "show" : ""}`}>
+                <div className="pane-inner">
+                  <div className="pane-header">
+                      <h4 className="project-title">Project Development Team</h4>
+                      <p className="guide-text">Guided by: <span>Dr. G. Naga Chandrika</span></p>
+                      <div className="header-divider"></div>
+                  </div>
+                  <div className="team-grid">
+                      <div className="member-card">Adepu Vaishnavi</div>
+                      <div className="member-card">Chinni Jyothika</div>
+                      <div className="member-card">Harsha vardhan Botlagunta</div>
+                      <div className="member-card">Maganti Pranathi</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button className="icon-btn fs-toggle" onClick={toggleFullscreen}>⛶</button>
+            <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
               {isDarkMode ? "☀️" : "🌙"}
             </button>
-          </div>
-        </div>
-
-        {/* Team Dropdown Overlay */}
-        <div className={`team-dropdown ${showTeam ? "show" : ""}`}>
-          <div className="team-header">
-            <h4>Project Development Team</h4>
-            <p>Guided by: <strong>Dr. G. Naga Chandrika</strong></p>
-          </div>
-          <div className="team-grid-nav">
-            <span>Adepu Vaishnavi</span>
-            <span>Chinni Jyothika</span>
-            <span>Harsha vardhan Botlagunta</span>
-            <span>Maganti Pranathi</span>
           </div>
         </div>
       </nav>
