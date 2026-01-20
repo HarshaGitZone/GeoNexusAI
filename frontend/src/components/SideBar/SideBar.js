@@ -71,20 +71,38 @@ export default function SideBar({
     setSearchQuery("");
   };
 
-  const generateShareLink = async () => {
-    let shareUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lng=${lng}`;
-    if (isCompareMode && bLatInput && bLngInput) {
-      shareUrl += `&bLat=${encodeURIComponent(bLatInput)}&bLng=${encodeURIComponent(bLngInput)}&compare=true`;
-    }
+  // const generateShareLink = async () => {
+  //   let shareUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lng=${lng}`;
+  //   if (isCompareMode && bLatInput && bLngInput) {
+  //     shareUrl += `&bLat=${encodeURIComponent(bLatInput)}&bLng=${encodeURIComponent(bLngInput)}&compare=true`;
+  //   }
 
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      alert(isCompareMode ? "Comparison link copied to clipboard!" : "Shareable link copied!");
-    } catch (err) {
-      console.error("Clipboard failed:", err);
-      prompt("Copy this link to share your analysis:", shareUrl);
-    }
-  };
+  //   try {
+  //     await navigator.clipboard.writeText(shareUrl);
+  //     alert(isCompareMode ? "Comparison link copied to clipboard!" : "Shareable link copied!");
+  //   } catch (err) {
+  //     console.error("Clipboard failed:", err);
+  //     prompt("Copy this link to share your analysis:", shareUrl);
+  //   }
+  // };
+  // SideBar.js - inside generateShareLink function
+const generateShareLink = async () => {
+  // Add nameA to the link
+  let shareUrl = `${window.location.origin}${window.location.pathname}?lat=${lat}&lng=${lng}&nameA=${encodeURIComponent(locationAName)}`;
+  
+  // If in compare mode, add nameB as well
+  if (isCompareMode && bLatInput && bLngInput) {
+    shareUrl += `&bLat=${encodeURIComponent(bLatInput)}&bLng=${encodeURIComponent(bLngInput)}&nameB=${encodeURIComponent(locationBName)}&compare=true`;
+  }
+
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    alert(isCompareMode ? "Comparison link copied to clipboard!" : "Shareable link copied!");
+  } catch (err) {
+    console.error("Clipboard failed:", err);
+    prompt("Copy this link to share your analysis:", shareUrl);
+  }
+};
 
   const [pdfLoading, setPdfLoading] = useState(false);
 

@@ -30,6 +30,16 @@ const varieties = {
   watercolor: "https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg"
 };
 
+/** * UTILITY: Moved outside to avoid unnecessary dependency warnings 
+ */
+const isNearbyDevice = (lat1, lng1, deviceLoc) => {
+  if (!deviceLoc || !deviceLoc.lat || !deviceLoc.lng) return false;
+  return (
+    parseFloat(lat1).toFixed(4) === deviceLoc.lat &&
+    parseFloat(lng1).toFixed(4) === deviceLoc.lng
+  );
+};
+
 // --- DYNAMIC INFERENCE ENGINE ---
 const getSitePotential = (factors) => {
   const potentials = [];
@@ -208,7 +218,6 @@ const FactorsSection = memo(({ data, latVal, lngVal, locationName, isDarkMode, v
         </div>
       </div>
 
-      {/* Logic: If Compare Mode, Factors go ABOVE Potential Analysis. Otherwise, Potential stays out (handled in results-grid) */}
       {isCompareMode ? (
         <>
           {FactorCard}
@@ -222,7 +231,7 @@ const FactorsSection = memo(({ data, latVal, lngVal, locationName, isDarkMode, v
 });
 
 export default function LandSuitabilityChecker() {
-  // 1. Add this state
+  const [deviceLocation, setDeviceLocation] = useState({ lat: null, lng: null });
   const [analysisHistory, setAnalysisHistory] = useState(() => 
       JSON.parse(localStorage.getItem("analysis_history")) || []
   );
@@ -265,8 +274,7 @@ export default function LandSuitabilityChecker() {
   const [locationBName, setLocationBName] = useState("Site B");
   const [showLocationB, setShowLocationB] = useState(false);
   const [isBFromSavedPlace] = useState(false);
-  const [deviceLocation, setDeviceLocation] = useState({ lat: null, lng: null });
-
+  
   const [showNearby, setShowNearby] = useState(false);
   const [nearbyData, setNearbyData] = useState(null);
   const [nearbyLoading, setNearbyLoading] = useState(false);
@@ -279,6 +287,26 @@ export default function LandSuitabilityChecker() {
   const [userQuery, setUserQuery] = useState("");
   const [gptLoading, setGptLoading] = useState(false);
   const chatEndRef = useRef(null);
+
+  /**
+   * Resolve site name based on: Saved Places > My Location > Prompt
+   */
+  const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) => {
+    const curLat = parseFloat(targetLat).toFixed(4);
+    const curLng = parseFloat(targetLng).toFixed(4);
+
+    const matchedPlace = savedPlaces.find(p => 
+      p.lat.toFixed(4) === curLat && p.lng.toFixed(4) === curLng
+    );
+    if (matchedPlace) return matchedPlace.name;
+
+    if (isNearbyDevice(targetLat, targetLng, deviceLocation)) {
+      return "My Location";
+    }
+
+    const userName = prompt(`Enter a name for the site at ${curLat}, ${curLng}:`);
+    return userName || defaultFallback;
+  }, [savedPlaces, deviceLocation]);
 
   const performAnalysis = useCallback(async (tLat, tLng) => {
     try {
@@ -303,11 +331,7 @@ export default function LandSuitabilityChecker() {
       setBLatInput(tLat.toString());
       setBLngInput(tLng.toString());
       
-      const curLatB = parseFloat(tLat).toFixed(4);
-      const curLngB = parseFloat(tLng).toFixed(4);
-      const matchedPlaceB = savedPlaces.find(p => p.lat.toFixed(4) === curLatB && p.lng.toFixed(4) === curLngB);
-
-      let name = existingName || (isNearbyDevice(tLat, tLng, deviceLocation) ? "My Location" : (matchedPlaceB ? matchedPlaceB.name : (prompt("Enter name for Location B:") || "Site B")));
+      let name = existingName || resolveLocationName(tLat, tLng, "Site B");
       
       setCompareName(name);
       setLocationBName(name);
@@ -321,7 +345,7 @@ export default function LandSuitabilityChecker() {
         setAnalyzedCoordsB({ lat: tLat.toString(), lng: tLng.toString() });
       } catch (err) { console.error(err); } 
       finally { setCompareLoading(false); }
-  }, [savedPlaces, deviceLocation, performAnalysis]);
+  }, [resolveLocationName, performAnalysis]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -333,14 +357,6 @@ export default function LandSuitabilityChecker() {
       });
     }
   }, []);
-
-  const isNearbyDevice = (lat1, lng1, deviceLoc) => {
-    if (!deviceLoc.lat || !deviceLoc.lng) return false;
-    return (
-      parseFloat(lat1).toFixed(4) === deviceLoc.lat &&
-      parseFloat(lng1).toFixed(4) === deviceLoc.lng
-    );
-  };
 
   const scrollToBottom = useCallback(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -383,27 +399,58 @@ export default function LandSuitabilityChecker() {
     document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
   }, [lat, lng, zoom, isDarkMode, sidebarWidth, bottomHeight, result, savedPlaces, mapVariety]);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sharedLat = params.get("lat");
-    const sharedLng = params.get("lng");
-    const sharedBLat = params.get("bLat");
-    const sharedBLng = params.get("bLng");
-    const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const sharedLat = params.get("lat");
+  //   const sharedLng = params.get("lng");
+  //   const sharedBLat = params.get("bLat");
+  //   const sharedBLng = params.get("bLng");
+  //   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
 
-    if (sharedLat && sharedLng) {
-        setLat(sharedLat);
-        setLng(sharedLng);
-    }
+  //   if (sharedLat && sharedLng) {
+  //       setLat(sharedLat);
+  //       setLng(sharedLng);
+  //   }
 
-    if (isSharedCompare && sharedBLat && sharedBLng) {
-        setBLatInput(sharedBLat);
-        setBLngInput(sharedBLng);
-        setShowLocationB(true);
-        setIsCompareMode(true);
-        handleCompareSelect(sharedBLat, sharedBLng);
+  //   if (isSharedCompare && sharedBLat && sharedBLng) {
+  //       setBLatInput(sharedBLat);
+  //       setBLngInput(sharedBLng);
+  //       setShowLocationB(true);
+  //       setIsCompareMode(true);
+  //       handleCompareSelect(sharedBLat, sharedBLng);
+  //   }
+  // }, [handleCompareSelect]);
+  // LandSuitabilityChecker.js - inside the useEffect for URL params
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const sharedLat = params.get("lat");
+  const sharedLng = params.get("lng");
+  const sharedNameA = params.get("nameA"); // Get name A
+  const sharedBLat = params.get("bLat");
+  const sharedBLng = params.get("bLng");
+  const sharedNameB = params.get("nameB"); // Get name B
+  const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
+
+  if (sharedLat && sharedLng) {
+    setLat(sharedLat);
+    setLng(sharedLng);
+    if (sharedNameA) setLocationAName(sharedNameA); // Set name A
+  }
+
+  if (isSharedCompare && sharedBLat && sharedBLng) {
+    setBLatInput(sharedBLat);
+    setBLngInput(sharedBLng);
+    if (sharedNameB) {
+        setLocationBName(sharedNameB); // Set name B
+        setCompareName(sharedNameB);
     }
-  }, [handleCompareSelect]);
+    setShowLocationB(true);
+    setIsCompareMode(true);
+    
+    // Pass the name directly to handleCompareSelect to prevent logic triggering prompt
+    handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
+  }
+}, [handleCompareSelect]);
 
   const handleMouseMove = useCallback((e) => {
     if (isResizingSide.current) {
@@ -438,184 +485,74 @@ export default function LandSuitabilityChecker() {
     document.body.style.cursor = "row-resize";
   }, [handleMouseMove, stopResizing]);
 
-  // const handleSubmit = async (e) => {
-  //   if (e) e.preventDefault();
-  //   setResult(null); 
-  //   setCompareResult(null); 
-  //   setLoading(true);
-
-  //   if (showLocationB) {
-  //       setIsCompareMode(true);
-  //       setCompareLoading(true);
-  //   } else {
-  //       setIsCompareMode(false);
-  //   }
-
-  //   const curLat = parseFloat(lat).toFixed(4);
-  //   const curLng = parseFloat(lng).toFixed(4);
-  //   const matchedPlaceA = savedPlaces.find(p => p.lat.toFixed(4) === curLat && p.lng.toFixed(4) === curLng);
-  //   let nameA = isNearbyDevice(lat, lng, deviceLocation) ? "My Location" : (matchedPlaceA ? matchedPlaceA.name : (prompt("Enter name for analyzed Site A:") || "Site A"));
-  //   setLocationAName(nameA);
-
-  //   const tasks = [performAnalysis(lat, lng)];
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
     
-  //   if (showLocationB && bLatInput && bLngInput) {
-  //       const matchedPlaceB = savedPlaces.find(p => p.lat.toFixed(4) === parseFloat(bLatInput).toFixed(4) && p.lng.toFixed(4) === parseFloat(bLngInput).toFixed(4));
-  //       let nameB = isNearbyDevice(bLatInput, bLngInput, deviceLocation) ? "My Location" : (matchedPlaceB ? matchedPlaceB.name : (prompt("Enter name for analyzed Site B:") || "Site B"));
-  //       setLocationBName(nameB);
-  //       setCompareName(nameB);
-  //       tasks.push(performAnalysis(bLatInput, bLngInput));
-  //   }
+    const nameA = resolveLocationName(lat, lng, "Site A");
+    setLocationAName(nameA);
 
-  //   // try { 
-  //   //   const results = await Promise.allSettled(tasks);
-  //   //   if (results[0].status === 'fulfilled') {
-  //   //       setResult(results[0].value);
-  //   //       setAnalyzedCoords({ lat: lat, lng: lng });
-  //   //       // ADD TO HISTORY HERE
-  //   //         const newHistoryEntry = {
-  //   //             name: nameA,
-  //   //             lat: lat,
-  //   //             lng: lng,
-  //   //             score: data.suitability_score,
-  //   //             timestamp: new Date().getTime()
-  //   //         };
+    setResult(null); 
+    setCompareResult(null); 
+    setLoading(true);
+
+    if (showLocationB) {
+        setIsCompareMode(true);
+        setCompareLoading(true);
+        const nameB = resolveLocationName(bLatInput, bLngInput, "Site B");
+        setLocationBName(nameB);
+        setCompareName(nameB);
+    } else {
+        setIsCompareMode(false);
+    }
+
+    const tasks = [performAnalysis(lat, lng)];
+    if (showLocationB && bLatInput && bLngInput) {
+        tasks.push(performAnalysis(bLatInput, bLngInput));
+    }
+
+    try { 
+        const results = await Promise.allSettled(tasks);
+        
+        if (results[0].status === 'fulfilled') {
+            const analysisData = results[0].value; 
+            setResult(analysisData);
+            setAnalyzedCoords({ lat, lng });
+
+            const newHistoryEntry = {
+                name: nameA,
+                lat, lng,
+                score: analysisData.suitability_score,
+                timestamp: new Date().getTime()
+            };
             
-  //   //         setAnalysisHistory(prev => {
-  //   //             const updated = [newHistoryEntry, ...prev].slice(0, 20); // Keep last 20
-  //   //             localStorage.setItem("analysis_history", JSON.stringify(updated));
-  //   //             return updated;
-  //   //         });
-  //   //   }
-      
-  //   //   if (results[1] && results[1].status === 'fulfilled') {
-  //   //       setCompareResult(results[1].value);
-  //   //       setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
-  //   //   }
-  //   try { 
-  //     const results = await Promise.allSettled(tasks);
-      
-  //     if (results[0].status === 'fulfilled') {
-  //         // Define a local variable for the result data
-  //         const analysisData = results[0].value; 
-          
-  //         setResult(analysisData);
-  //         setAnalyzedCoords({ lat: lat, lng: lng });
-
-  //         // RECORD HISTORY Logic using the defined 'analysisData'
-  //         const newHistoryEntry = {
-  //             name: locationAName, // Using current state name
-  //             lat: lat,
-  //             lng: lng,
-  //             score: analysisData.suitability_score, // Accessing defined variable
-  //             timestamp: new Date().getTime()
-  //         };
-          
-  //         setAnalysisHistory(prev => {
-  //             const updated = [newHistoryEntry, ...prev].slice(0, 20);
-  //             localStorage.setItem("analysis_history", JSON.stringify(updated));
-  //             return updated;
-  //         });
-  //     }
-      
-  //     if (results[1] && results[1].status === 'fulfilled') {
-  //         const compareData = results[1].value;
-  //         setCompareResult(compareData);
-  //         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
-          
-  //         // Optional: Add Compare Site B to history as well
-  //         const historyEntryB = {
-  //           name: locationBName,
-  //           lat: bLatInput,
-  //           lng: bLngInput,
-  //           score: compareData.suitability_score,
-  //           timestamp: new Date().getTime()
-  //         };
-  //         setAnalysisHistory(prev => [historyEntryB, ...prev].slice(0, 20));
-  //     }
-  //   } catch (err) { console.error(err); } 
-  //   finally { 
-  //       setLoading(false); 
-  //       setCompareLoading(false);
-  //   }
-  // };
-// Inside LandSuitabilityChecker.js
-
-const handleSubmit = async (e) => {
-  if (e) e.preventDefault();
-  setResult(null); 
-  setCompareResult(null); 
-  setLoading(true);
-
-  if (showLocationB) {
-      setIsCompareMode(true);
-      setCompareLoading(true);
-  } else {
-      setIsCompareMode(false);
-  }
-
-  const tasks = [performAnalysis(lat, lng)];
-  
-  if (showLocationB && bLatInput && bLngInput) {
-      tasks.push(performAnalysis(bLatInput, bLngInput));
-  }
-
-  try { 
-    const results = await Promise.allSettled(tasks);
-    
-    if (results[0].status === 'fulfilled') {
-        const analysisData = results[0].value; 
-        setResult(analysisData);
-        setAnalyzedCoords({ lat: lat, lng: lng });
-
-        // --- NEW: Generate the share link logic ---
-        const currentShareLink = `${window.location.origin}${window.location.pathname}?lat=${lat}&lng=${lng}`;
-
-        const newHistoryEntry = {
-            name: locationAName, 
-            lat: lat,
-            lng: lng,
-            score: analysisData.suitability_score,
-            shareLink: currentShareLink, // Store the link here
-            timestamp: new Date().getTime()
-        };
+            setAnalysisHistory(prev => {
+                const updated = [newHistoryEntry, ...prev].slice(0, 20);
+                localStorage.setItem("analysis_history", JSON.stringify(updated));
+                return updated;
+            });
+        }
         
-        setAnalysisHistory(prev => {
-            const updated = [newHistoryEntry, ...prev].slice(0, 20);
-            localStorage.setItem("analysis_history", JSON.stringify(updated));
-            return updated;
-        });
+        if (results[1] && results[1].status === 'fulfilled') {
+            const compareData = results[1].value;
+            setCompareResult(compareData);
+            setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+            
+            const historyEntryB = {
+                name: locationBName,
+                lat: bLatInput, lng: bLngInput,
+                score: compareData.suitability_score,
+                timestamp: new Date().getTime()
+            };
+            setAnalysisHistory(prev => [historyEntryB, ...prev].slice(0, 20));
+        }
+    } catch (err) { 
+        console.error(err); 
+    } finally { 
+        setLoading(false); 
+        setCompareLoading(false);
     }
-    
-    if (results[1] && results[1].status === 'fulfilled') {
-        const compareData = results[1].value;
-        setCompareResult(compareData);
-        setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
-        
-        // --- NEW: Generate the share link for Site B ---
-        const bShareLink = `${window.location.origin}${window.location.pathname}?lat=${bLatInput}&lng=${bLngInput}`;
-
-        const historyEntryB = {
-          name: locationBName,
-          lat: bLatInput,
-          lng: bLngInput,
-          score: compareData.suitability_score,
-          shareLink: bShareLink, // Store the link here
-          timestamp: new Date().getTime()
-        };
-        setAnalysisHistory(prev => {
-            const updated = [historyEntryB, ...prev].slice(0, 20);
-            localStorage.setItem("analysis_history", JSON.stringify(updated));
-            return updated;
-        });
-    }
-  } catch (err) { 
-      console.error(err); 
-  } finally { 
-      setLoading(false); 
-      setCompareLoading(false);
-  }
 };
+
   const handleNearbyPlaces = async () => {
     if (!lat || !lng) return;
     setNearbyLoading(true);

@@ -1896,3 +1896,67 @@
     box-shadow: 0 0 8px var(--accent-glow);
     transform: translateY(-1px);
 }
+
+
+
+
+
+/* =========================================================
+   TEAM DROPDOWN – FORCED CENTER ALIGNMENT (ALL SCREENS)
+   ========================================================= */
+
+/* Anchor */
+.team-trigger-wrapper {
+  position: relative !important;
+}
+
+/* Base dropdown */
+.compact-team-pane {
+  position: absolute !important;
+  top: calc(100% + 12px) !important;
+
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) translateY(8px) !important;
+
+  width: min(420px, 92vw) !important;
+  max-width: 92vw !important;
+
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: 1000 !important;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease !important;
+}
+
+/* Visible state */
+.compact-team-pane.show {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+/* ===========================
+   MOBILE – VIEWPORT CENTERED
+   =========================== */
+@media (max-width: 768px) {
+  .compact-team-pane {
+    position: fixed !important;
+    top: 72px !important;
+
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+
+    width: 94vw !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+
+
+
+
