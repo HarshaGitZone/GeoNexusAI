@@ -1214,3 +1214,685 @@
 [data-theme="light"] .history-table-container::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.2) !important;
 }
+
+
+
+
+:root {
+  --accent-color: #8b5cf6; /* Default Purple */
+  --nav-bg-dark: rgba(15, 23, 42, 0.85);
+  --nav-bg-light: rgba(255, 255, 255, 0.9);
+}
+
+/* --- Floating Dock Logic --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 20px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.geo-navbar.is-floating {
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  min-width: 680px;
+  opacity: 0;
+}
+
+.geo-navbar.is-floating.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.geo-navbar.is-mobile {
+  top: 0; left: 0; width: 100%; opacity: 1; transform: none;
+}
+
+/* --- The Glass Shell --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  height: 56px;
+  border-radius: 100px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  background: var(--nav-bg-dark);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: var(--nav-bg-light);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Logo & Accent --- */
+.logo { font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; }
+[data-theme="light"] .logo { color: #0f172a; }
+.logo span { color: var(--accent-color); transition: color 0.3s; }
+
+.status-dot {
+  width: 8px; height: 8px; 
+  background: var(--accent-color); 
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-color);
+}
+
+/* --- Palette Picker --- */
+.palette-wrapper { position: relative; display: flex; align-items: center; }
+
+.palette-dropdown {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+.palette-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.color-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.color-dot:hover { transform: scale(1.2); border-color: #fff; }
+
+/* --- Team Panel (New Appearance) --- */
+.compact-team-pane {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  width: 350px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid var(--accent-color);
+  border-radius: 16px;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: 0.3s ease;
+}
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.project-title { color: var(--accent-color); text-align: center; margin-bottom: 5px; }
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.member-card {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.member-card:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+/* --- Shared Components --- */
+.compact-sys {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,0.2);
+  padding: 4px 12px; border-radius: 50px;
+  font-family: monospace; font-size: 0.75rem;
+}
+
+.time-val { border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; font-weight: bold; }
+
+.team-btn {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 5px 15px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.team-btn:hover, .team-btn.active { background: var(--accent-color); color: white; }
+
+.icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94a3b8; }
+
+
+
+
+
+
+
+:root {
+  --accent-color: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.3);
+  --nav-bg: rgba(15, 23, 42, 0.85);
+  --nav-height: 64px;
+}
+
+/* --- Interaction Logic --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 20px; z-index: 9998;
+}
+
+.nav-mobile-spacer {
+  height: var(--nav-height);
+  width: 100%;
+}
+
+.geo-navbar {
+  position: fixed;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Floating Dock (Desktop) */
+.geo-navbar.is-floating {
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: auto;
+  min-width: 680px;
+  opacity: 0;
+}
+
+.geo-navbar.is-floating.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Mobile Fixed Mode */
+.geo-navbar.is-mobile {
+  top: 0; left: 0; width: 100%; 
+  height: var(--nav-height);
+  transform: none; opacity: 1;
+}
+
+/* --- Container Shell --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: var(--nav-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.is-floating .nav-content-shell {
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Brand & Logo --- */
+.logo { font-size: 1.4rem; font-weight: 900; color: white; margin: 0; }
+.logo span { color: var(--accent-color); transition: color 0.3s; }
+.status-dot {
+  width: 8px; height: 8px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-color);
+}
+
+/* --- Palette Container --- */
+.palette-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.palette-bar {
+  display: flex;
+  gap: 8px;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.palette-bar.expanded {
+  width: 140px; /* Adjust based on colors */
+  opacity: 1;
+  margin-left: 10px;
+}
+
+.color-dot {
+  min-width: 18px; height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: transform 0.2s;
+}
+
+.color-dot:hover { transform: scale(1.2); border-color: white; }
+
+/* --- Team Dropdown --- */
+.team-trigger-wrapper { position: relative; }
+.team-btn {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 6px 16px; border-radius: 8px;
+  font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s;
+}
+
+.team-btn.active, .team-btn:hover { background: var(--accent-color); color: white; }
+
+.compact-team-pane {
+  position: absolute; top: 55px; right: 0; width: 350px;
+  background: rgba(13, 17, 23, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--accent-color);
+  border-radius: 16px; padding: 20px;
+  opacity: 0; visibility: hidden; transform: translateY(10px);
+  transition: 0.3s ease;
+}
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+/* --- Mobile Specific Overrides --- */
+@media (max-width: 767px) {
+  .nav-group.center { flex: 1; justify-content: center; }
+  .logo { font-size: 1.1rem; }
+  .nav-group.left, .nav-group.right { flex: 0; }
+  .team-btn { padding: 4px 8px; font-size: 0.65rem; }
+}
+
+
+
+
+
+
+/* Container for the palette logic */
+.palette-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the dropdown under the button */
+}
+
+/* The actual dropdown bar */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 10px); /* Positions it exactly below the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px); /* Centered and slightly offset for animation */
+  background: rgba(15, 23, 42, 0.9); /* Dark glass effect */
+  backdrop-filter: blur(12px);
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column; /* Vertical stack */
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Expansion state */
+.palette-dropdown.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Individual Color Dots */
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s, border 0.2s;
+  border: 2px solid transparent;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+  border-color: white;
+}
+
+/* Optional: Decorative arrow pointing to the button */
+.palette-arrow {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; 
+  height: 0; 
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid rgba(15, 23, 42, 0.9);
+}
+
+/* Mobile Adjustment: If screen is small, maybe switch back to horizontal 
+   to save vertical space, or keep as is if preferred */
+@media (max-width: 768px) {
+  .palette-dropdown {
+    flex-direction: row; /* Horizontal only on mobile to avoid covering content */
+    top: auto;
+    bottom: calc(100% + 10px); /* Pop UP on mobile if nav is at bottom */
+  }
+}
+
+
+
+/* Container to keep the trigger and dropdown together */
+.palette-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* The Horizontal Bar - Centered Below */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 12px); /* Space below the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px); /* Centered and slightly offset */
+  
+  display: flex;
+  flex-direction: row; /* Horizontal layout */
+  gap: 10px;
+  
+  background: rgba(15, 23, 42, 0.85); /* Dark professional glass */
+  backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-radius: 50px; /* Pill shape */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Animation trigger */
+.palette-dropdown.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Individual Color Dots */
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-dot:hover {
+  transform: scale(1.3);
+  border-color: #fff;
+}
+
+/* Decorative arrow pointing up to the icon */
+.palette-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid rgba(15, 23, 42, 0.85);
+}
+
+
+
+
+/* Container for the icon and the bar */
+.palette-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Horizontal Bar Dropdown */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 12px); /* Centered below the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  
+  display: flex;
+  flex-direction: row; /* Force horizontal dots */
+  gap: 12px;
+  
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(12px);
+  padding: 10px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+/* Show State */
+.palette-dropdown.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid transparent;
+}
+
+.color-dot:hover {
+  transform: scale(1.3);
+  border-color: white;
+}
+
+
+
+
+
+
+/* --- HISTORY MODAL PALETTE INTEGRATION --- */
+
+/* Highlight the header text and borders with the chosen palette */
+.history-table thead th {
+    color: var(--accent-color) !important;
+    border-bottom: 2px solid var(--accent-color) !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+/* Site names in the table use the palette color */
+.site-name {
+    color: var(--sb-text);
+    font-weight: 600;
+}
+
+/* 4th Row: Direct Link Styling */
+.history-direct-link {
+    color: var(--accent-color) !important;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+/* Hover effect for the link flips to the palette color background */
+.history-direct-link:hover {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Table Row Borders */
+.history-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.history-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Scrollbar in History Table syncs with Palette */
+.history-table-container::-webkit-scrollbar-thumb {
+    background: var(--accent-color) !important;
+}
+
+
+
+
+/* ============================================================
+   ANALYSIS HISTORY MODAL: HIGH-VISIBILITY & THEME SYNC
+   ============================================================ */
+
+/* 1. Modal Header & Heading */
+.history-table-card .modal-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Centers the heading */
+    justify-content: center !important;
+    padding: 20px 10px !important;
+    border-bottom: 2px solid var(--accent-color) !important; /* Palette color */
+    position: relative;
+}
+
+.history-table-card .modal-header h3 {
+    font-size: 24px !important; /* Bigger heading */
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    margin: 0 !important;
+    text-align: center !important;
+    /* Theme-specific text color */
+    color: #000000 !important; 
+}
+
+/* Dark Theme Text Switch */
+[data-theme="dark"] .history-table-card .modal-header h3 {
+    color: #ffffff !important;
+}
+
+/* 2. Forced Palette for Table Headers (Fixed for Light Theme) */
+.history-table thead th {
+    background-color: transparent !important;
+    color: var(--accent-color) !important; /* Force palette color */
+    border-bottom: 2px solid var(--accent-color) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+/* 3. Direct Link Button (Palette Sync) */
+.history-direct-link {
+    color: var(--accent-color) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    padding: 5px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+.history-direct-link:hover {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important; /* Contrast text on hover */
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 4. Score Badge Logic (Stays Functional) */
+.score-badge {
+    color: #ffffff !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+}
+
+/* 5. Modal Close Button Position */
+.modal-close {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 20px !important;
+    color: var(--sb-text-dim) !important;
+    cursor: pointer !important;
+}
+
+
+/* TopNav.css */
+.history-direct-link {
+    color: var(--accent-color) !important; /* Uses your palette color */
+    border: 1px solid var(--accent-color) !important;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.history-direct-link:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important; /* White text on palette background */
+    box-shadow: 0 0 8px var(--accent-glow);
+    transform: translateY(-1px);
+}

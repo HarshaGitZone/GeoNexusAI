@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import "./SideBar.css";
 export default function SideBar({
   lat, setLat, lng, setLng,
   locationAName, setLocationAName,
@@ -227,7 +227,7 @@ export default function SideBar({
         </section>
 
         {/* LOCATION A */}
-        <section className="control-group compact-group">
+        {/* <section className="control-group compact-group">
           <h3>📍 Location A: {locationAName}</h3>
           <form onSubmit={handleSubmit}>
             <div className="compact-row">
@@ -253,9 +253,27 @@ export default function SideBar({
               </button>
             </div>
           </form>
-        </section>
+        </section> */}
+        <section className="control-group compact-group">
+  <h3>📍 Location A: {locationAName}</h3>
+  <form onSubmit={handleSubmit}>
+    {/* ROW 1: Lat, Lng, and Analyze button in one compact line */}
+    <div className="geo-unified-logic-row">
+      <div className="field"><label>Lat</label><input value={lat} onChange={(e) => setLat(e.target.value)} className="highlighted-box" /></div>
+      <div className="field"><label>Lng</label><input value={lng} onChange={(e) => setLng(e.target.value)} className="highlighted-box" /></div>
+      <button type="submit" className="btn-analyze" disabled={loading}>{loading ? "..." : "Analyze"}</button>
+    </div>
 
-        {/* Comparison Section B */}
+    {/* ROW 2: My Loc, Save, and Nearby in one compact line */}
+    <div className="geo-tools-row-triple">
+      <button type="button" onClick={handleMyLocation} className="btn-mono-tool">📍 My Loc</button>
+      <button type="button" onClick={handleSavePlace} className="btn-mono-tool">⭐ Save</button>
+      <button type="button" onClick={handleNearbyPlaces} disabled={!result || nearbyLoading} className="btn-mono-tool">🏘️ Nearby</button>
+    </div>
+  </form>
+</section>
+
+        
         <section
           className="control-group comparison-box compact"
           style={{ display: showLocationB ? "block" : "none" }}
@@ -293,7 +311,7 @@ export default function SideBar({
           </div>
 
           {/* REDESIGNED COMPACT ROW: LAT, LNG, GO, EXIT */}
-          <div className="compact-row" style={{ marginTop: "6px", gap: "3px", alignItems: "flex-end" }}>
+          {/* <div className="compact-row" style={{ marginTop: "6px", gap: "3px", alignItems: "flex-end" }}>
             <div className="field" style={{ flex: 0.8 }}>
               <label className="input-label" style={{ fontSize: "9px" }}>Lat B</label>
               <input
@@ -346,10 +364,49 @@ export default function SideBar({
                 ✕
               </button>
             )}
-          </div>
+          </div> */}
+          {/* ROW 1: Lat, Lng, Go, X */}
+<div className="geo-unified-logic-row">
+  <div className="field">
+    <label>Lat B</label>
+    <input
+      type="text"
+      value={bLatInput}
+      onChange={(e) => setBLatInput(e.target.value)}
+      className="highlighted-box"
+    />
+  </div>
+  <div className="field">
+    <label>Lng B</label>
+    <input
+      type="text"
+      value={bLngInput}
+      onChange={(e) => setBLngInput(e.target.value)}
+      className="highlighted-box"
+    />
+  </div>
+  
+  {/* Go and X are now inside the same flex row as inputs */}
+  <button
+    type="button"
+    onClick={() => bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
+    className="btn-analyze"
+  >
+    {compareLoading ? "..." : "Go"}
+  </button>
+  
+  {isCompareMode && (
+    <button 
+      onClick={() => setIsCompareMode(false)} 
+      className="btn-cross"
+    >
+      ✕
+    </button>
+  )}
+</div>
 
           <div className="compact-row" style={{ marginTop: "6px", gap: "4px" }}>
-            <button type="button" onClick={handleMyLocationB} className="btn-save" style={{ flex: 0.7, padding: '4px', fontSize: '10px' }}>📍</button>
+            {/* <button type="button" onClick={handleMyLocationB} className="btn-save" style={{ flex: 0.7, padding: '4px', fontSize: '10px' }}>📍</button>
             <button type="button" onClick={handleSavePlaceB} disabled={isBFromSavedPlace} className="btn-save" style={{ flex: 0.7, padding: '4px', fontSize: '10px', opacity: isBFromSavedPlace ? 0.5 : 1 }}>⭐</button>
             <button 
               type="button" 
@@ -358,8 +415,36 @@ export default function SideBar({
               className="btn-analyze"
               style={{ flex: 1, padding: '4px 6px', fontSize: '10px', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)' }}
             >
-              {nearbyLoadingB ? "..." : "🏘️ Nearby"}
-            </button>
+              {nearbyLoadingB ? "..." : "🏘️"}
+            </button> */}
+            <div className="geo-tools-row-triple">
+  <button 
+    type="button" 
+    onClick={handleMyLocationB} 
+    className="btn-mono-tool" 
+    title="My Location"
+  >
+    📍
+  </button>
+  <button 
+    type="button" 
+    onClick={handleSavePlaceB} 
+    disabled={isBFromSavedPlace} 
+    className="btn-mono-tool" 
+    title="Save Place"
+  >
+    ⭐
+  </button>
+  <button 
+    type="button" 
+    onClick={handleNearbyPlacesB} 
+    disabled={!analyzedCoordsB?.lat || nearbyLoadingB} 
+    className="btn-mono-tool" 
+    title="Nearby Places"
+  >
+    {nearbyLoadingB ? "..." : "🏘️"}
+  </button>
+</div>
           </div>
         </section>
 

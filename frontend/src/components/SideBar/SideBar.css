@@ -248,3 +248,1138 @@
 
 
 
+
+
+
+/* ============================================================
+   ULTRA-PROFESSIONAL MONOCHROME THEME (TEXT VISIBILITY FIX)
+   ============================================================ */
+
+:root {
+    --accent-primary: var(--accent-color, #ffffff);
+    
+    /* --- DARK THEME SETTINGS --- */
+    --sb-bg: #0a0a0a;
+    --sb-border: #262626;
+    --sb-card: #141414;
+    --sb-text: #ffffff;            /* Pure white text */
+    --sb-text-dim: #a0a0a0;        /* Lighter gray for visibility */
+    --sb-input: #000000;
+    --sb-btn: #1a1a1a;             /* Charcoal buttons */
+    --sb-btn-text: #ffffff;        /* Force white text on buttons */
+    --sb-btn-hover: #333333;
+}
+
+/* --- LIGHT THEME OVERRIDE --- */
+[data-theme="light"] {
+    --sb-bg: #ffffff;
+    --sb-border: #e5e5e5;
+    --sb-card: #f9fafb;
+    --sb-text: #000000;            /* Pure black text */
+    --sb-text-dim: #4b5563;        /* Darker gray */
+    --sb-input: #f3f4f6;
+    --sb-btn: #edebeb;             /* White buttons */
+    --sb-btn-text: #000000;        /* Force black text on buttons */
+    --sb-btn-hover: #f1f5f9;
+}
+
+/* 1. Global Sidebar Container */
+.sidebar.glass-morphic {
+    background: var(--sb-bg) !important;
+    border-right: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+    overflow-y: auto !important;
+    display: block !important;
+}
+
+/* 2. Module Cards */
+.sidebar-search-section, 
+.control-group.compact-group, 
+.saved-places-section,
+.comparison-box {
+    background: var(--sb-card) !important;
+    border: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+}
+
+/* 3. Typography Visibility */
+h3 {
+    color: var(--sb-text) !important;
+    font-size: 11px !important;
+    border-bottom: 1px solid var(--sb-border);
+}
+
+.input-label, label {
+    color: var(--sb-text-dim) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+}
+
+/* 4. BUTTON COLOR & TEXT FIXES */
+
+/* --- MONOCHROME BUTTONS (My Loc, Save, Share, Nearby, Map, Edit) --- */
+.btn-save, 
+.mini, 
+.compare-toggle-btn,
+.btn-edit,
+select.btn-save.mini {
+    background: var(--sb-btn) !important;
+    color: var(--sb-btn-text) !important; /* FIXED: White in Dark, Black in Light */
+    border: 1px solid var(--sb-border) !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-save:hover, .compare-toggle-btn:hover {
+    background: var(--sb-btn-hover) !important;
+    border-color: var(--sb-text-dim) !important;
+}
+
+/* --- GREEN: Analyze & Go (Action) --- */
+.btn-analyze {
+    background: #065f46 !important; /* Deep Emerald */
+    color: #ffffff !important;      /* ALWAYS White */
+    border: none !important;
+    font-weight: 700 !important;
+}
+
+.btn-analyze:hover {
+    background: #10b981 !important; 
+}
+
+/* --- RED: Cross / Exit / Delete (Danger) --- */
+.btn-cross, 
+.compare-toggle-btn[style*="#ef4444"] {
+    background: #7f1d1d !important; /* Deep Blood Red */
+    color: #ffffff !important;      /* ALWAYS White */
+    border: none !important;
+}
+
+.btn-cross:hover {
+    background: #ef4444 !important;
+}
+
+/* 5. Inputs & Fields */
+.sidebar-search-input, 
+.highlighted-box, 
+input {
+    background: var(--sb-input) !important;
+    border: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important; /* Input text color */
+}
+
+/* Placeholder visibility fix */
+input::placeholder {
+    color: var(--sb-text-dim) !important;
+    opacity: 0.6;
+}
+
+/* 6. Saved Places Responsive Grid */
+.places-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 8px !important;
+}
+
+.place-card-compact {
+    background: var(--sb-input) !important;
+    border: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+}
+
+.place-info-mini strong { color: var(--sb-text) !important; }
+.place-info-mini span { color: var(--sb-text-dim) !important; }
+
+/* 7. Dropdown Styling */
+.sidebar-suggestions-dropdown {
+    background: var(--sb-bg) !important;
+    border: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+}
+
+.suggestion-text .suggestion-main { color: var(--sb-text) !important; }
+.suggestion-text .suggestion-sub { color: var(--sb-text-dim) !important; }
+
+
+/* ============================================================
+   HORIZONTAL SEARCH LAYOUT FIX
+   ============================================================ */
+
+/* 1. Force the wrapper to be a flex container */
+.search-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    background: var(--sb-input) !important; /* Matches your monochrome input bg */
+    border: 1px solid var(--sb-border) !important;
+    border-radius: 50px !important; /* Professional pill shape */
+    padding: 2px 12px !important;
+    gap: 8px !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* 2. Style the Zoom Icon (Left side) */
+.search-icon {
+    font-size: 14px !important;
+    color: var(--sb-text-dim) !important;
+    flex-shrink: 0 !important; /* Prevents icon from squishing */
+    margin: 0 !important;
+}
+
+/* 3. Style the Input Box (Right side) */
+.sidebar-search-input {
+    background: transparent !important; /* Removes inner background */
+    border: none !important; /* Removes inner border */
+    color: var(--sb-text) !important;
+    flex: 1 !important; /* Takes up remaining width */
+    height: 32px !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    outline: none !important;
+}
+
+/* 4. Focus State for the entire wrapper */
+.search-wrapper:focus-within {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 8px var(--accent-glow) !important;
+}
+
+/* 5. Loader Ring adjustment */
+.search-spinner-small {
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid var(--sb-border) !important;
+    border-top: 2px solid var(--accent-primary) !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   SELECTED LOCATION TABLE STYLING
+   ============================================================ */
+.search-result-description {
+    margin-top: 8px !important;
+    padding: 8px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--sb-border) !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.desc-label {
+    color: var(--accent-primary) !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    font-size: 9px !important;
+}
+
+.clear-desc {
+    background: #ef4444 !important;
+    color: white !important;
+    border: none !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10px !important;
+}
+
+
+
+
+/* ============================================================
+   NEARBY PLACES THEMED BUTTON (Dynamic Inversion)
+   ============================================================ */
+
+/* DARK THEME (Default) - Button is Dark Gray, Text is White */
+.btn-analyze:last-child, 
+button[onClick*="Nearby"] {
+    background: #1a1a1a !important; /* Dark Gray */
+    color: #ffffff !important;      /* White text */
+    border: 1px solid var(--sb-border) !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
+}
+
+/* LIGHT THEME - Button is White, Text is Dark Charcoal */
+[data-theme="light"] .btn-analyze:last-child,
+[data-theme="light"] button[onClick*="Nearby"] {
+    background: #ffffff !important; /* White Background */
+    color: #1e293b !important;      /* Dark Text */
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+/* Hover effects for Nearby Button */
+.btn-analyze:last-child:hover {
+    background: var(--accent-primary) !important;
+    color: white !important;
+}
+
+[data-theme="light"] .btn-analyze:last-child:hover {
+    background: var(--accent-primary) !important;
+    color: white !important;
+    border-color: var(--accent-primary) !important;
+}
+
+/* ============================================================
+   SELECTED LOCATION DATA (Tabular View)
+   ============================================================ */
+.search-result-description {
+    margin-top: 10px !important;
+    padding: 10px !important;
+    background: var(--sb-card) !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--sb-border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+}
+
+.desc-label {
+    color: var(--accent-primary) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+}
+
+.clear-desc {
+    align-self: flex-end !important;
+    background: #ef4444 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 2px 8px !important;
+    font-size: 10px !important;
+    cursor: pointer !important;
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+   UNIFIED TRIPLE TOOL ROW (📍, ⭐, 🏘️)
+   ============================================================ */
+
+.geo-tools-row-triple {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important; /* 3 Equal columns */
+    gap: 4px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+}
+
+/* Base style for all three buttons to make them identical */
+.btn-mono-tool {
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+    width: 100% !important;
+    border: 1px solid var(--sb-border, rgba(255, 255, 255, 0.1)) !important;
+}
+
+/* --- DARK THEME (Monochrome Shades) --- */
+.btn-mono-tool {
+    background: #1a1a1a !important; /* Dark Gray */
+    color: #ffffff !important;
+}
+
+.btn-mono-tool:hover:not(:disabled) {
+    background: #262626 !important;
+    border-color: var(--accent-color, #ffffff) !important;
+}
+
+/* --- LIGHT THEME (Monochrome Shades) --- */
+[data-theme="light"] .btn-mono-tool {
+    background: #ffffff !important; /* White Background */
+    color: #000000 !important;      /* Black Icons */
+    border: 1px solid #e5e5e5 !important;
+}
+
+[data-theme="light"] .btn-mono-tool:hover:not(:disabled) {
+    background: #f3f4f6 !important;
+    border-color: var(--accent-color, #000000) !important;
+}
+
+/* Disabled state for "Save" or "Nearby" if logic requires */
+.btn-mono-tool:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    filter: grayscale(1) !important;
+}
+
+
+
+
+/* ============================================================
+   UNIFIED 4-ELEMENT LOGIC ROW (Lat, Lng, Go, X)
+   ============================================================ */
+
+.geo-unified-logic-row {
+    display: flex !important;
+    align-items: flex-end !important; /* Forces buttons to align with the bottom of inputs */
+    gap: 4px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+}
+
+.geo-unified-logic-row .field {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important; /* Inputs take equal shared space */
+    min-width: 0 !important; /* Prevents overflow in narrow sidebar */
+}
+
+.geo-unified-logic-row label {
+    font-size: 9px !important;
+    margin-bottom: 2px !important;
+    color: var(--sb-text-dim, #808080) !important;
+    white-space: nowrap !important;
+}
+
+/* Match heights for inputs and buttons */
+.geo-unified-logic-row input,
+.geo-unified-logic-row .btn-analyze,
+.geo-unified-logic-row .btn-cross {
+    height: 28px !important; /* Standardized compact height */
+    box-sizing: border-box !important;
+    font-size: 10px !important;
+    padding: 0 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Button Width Ratios */
+.geo-unified-logic-row .btn-analyze {
+    flex: 0.4 !important; /* "Go" is slightly wider than "X" */
+    background: #065f46 !important; /* Deep Emerald */
+    color: white !important;
+    border: none !important;
+}
+
+.geo-unified-logic-row .btn-cross {
+    flex: 0.3 !important; /* "X" is the most compact */
+    background: #7f1d1d !important; /* Deep Red */
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+}
+
+/* Hover States matching your previous palette requests */
+.geo-unified-logic-row .btn-analyze:hover { background: #10b981 !important; }
+.geo-unified-logic-row .btn-cross:hover { background: #ef4444 !important; }
+
+/* Responsive adjustments: as sidebar stretches, inputs grow but buttons stay proportional */
+
+
+
+
+
+
+/* ============================================================
+   LOCATION A - COMPACT DENSE LAYOUT
+   ============================================================ */
+
+/* Reduced heights for ultra-compact look */
+.geo-unified-logic-row input,
+.geo-unified-logic-row .btn-analyze,
+.geo-tools-row-triple .btn-mono-tool {
+    height: 26px !important; /* Shorter height than previous 30px */
+    font-size: 10px !important;
+    padding: 0 6px !important;
+}
+
+/* Ensure the Analyze button in the top row has a proportional width */
+.geo-unified-logic-row .btn-analyze {
+    flex: 0.5 !important;
+    background: #065f46 !important; /* Deep Emerald */
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.geo-unified-logic-row .btn-analyze:hover {
+    background: #10b981 !important;
+}
+
+/* Three equal columns for the bottom tools */
+.geo-tools-row-triple {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 4px !important;
+    margin-top: 6px !important;
+}
+
+.geo-tools-row-triple .btn-mono-tool {
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Label styling to keep it tight */
+.geo-unified-logic-row label {
+    font-size: 9px !important;
+    margin-bottom: 1px !important;
+}
+
+/* Ensure inputs are not too wide if stretched */
+.geo-unified-logic-row .field {
+    min-width: 60px !important;
+}
+
+
+
+/* ============================================================
+   FORCED DYNAMIC ACTION BUTTONS (Analyze & Go)
+   ============================================================ */
+
+/* 1. DARK THEME: Light Green -> Vibrant Blue Hover */
+.btn-analyze {
+    background: #10b981 !important; /* Vibrant Emerald */
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2) !important;
+}
+
+.btn-analyze:hover:not(:disabled) {
+    background: #dee1e6 !important; /* Attractive Intelligence Blue */
+    color: #141313 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* 2. LIGHT THEME: Dark Green -> Royal Blue Hover */
+[data-theme="light"] .btn-analyze {
+    background: #065f46 !important; /* Deep Forest Green for high contrast */
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(6, 95, 70, 0.2) !important;
+}
+
+[data-theme="light"] .btn-analyze:hover:not(:disabled) {
+    background: #131313 !important; /* Deep Royal Blue */
+    color: #ffffff !important;
+}
+
+
+
+
+
+
+
+/* ============================================================
+   PROFESSIONAL MONOCHROME (PALETTE ONLY FOR FOCUS & SCROLL)
+   ============================================================ */
+
+:root {
+    /* Palette color from your Navbar */
+    --accent-primary: var(--accent-color, #ffffff);
+    
+    /* Strict Dark Theme Shades */
+    --sb-bg: #0a0a0a;
+    --sb-border: #262626;  /* Subtle, stays gray */
+    --sb-card: #141414;    /* Subtle, stays gray */
+    --sb-text: #ffffff;
+    --sb-text-dim: #808080;
+    --sb-input: #000000;
+}
+
+/* --- LIGHT THEME OVERRIDE --- */
+[data-theme="light"] {
+    --sb-bg: #ffffff;
+    --sb-border: #e5e5e5;
+    --sb-card: #f9fafb;
+    --sb-text: #000000;
+    --sb-text-dim: #64748b;
+    --sb-input: #f3f4f6;
+}
+
+/* 1. Global Sidebar Scrollbar - THIS reflects the palette */
+.sidebar.glass-morphic {
+    background: var(--sb-bg) !important;
+    border-right: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent;
+}
+
+.sidebar.glass-morphic::-webkit-scrollbar-thumb {
+    background: var(--accent-primary) !important;
+    border-radius: 10px;
+}
+
+/* 2. Sections & Cards - Borders stay Neutral/Gray (Clean look) */
+.sidebar-search-section, 
+.control-group.compact-group, 
+.saved-places-section,
+.comparison-box {
+    background: var(--sb-card) !important;
+    border: 1px solid var(--sb-border) !important;
+    border-radius: 6px !important;
+    margin: 6px 8px !important;
+    padding: 8px !important;
+}
+
+/* 3. Inputs - ONLY reflect palette on FOCUS */
+.sidebar-search-input, 
+.highlighted-box, 
+input {
+    background: var(--sb-input) !important;
+    border: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+}
+
+input:focus {
+    border-color: var(--accent-primary) !important; /* Palette highlight on focus */
+    outline: none !important;
+}
+
+/* 4. Action Buttons (Always Green / Red) */
+.btn-analyze {
+    background: #065f46 !important; /* Dark Green */
+    color: white !important;
+}
+[data-theme="dark"] .btn-analyze {
+    background: #10b981 !important; /* Light Green */
+}
+
+.btn-cross {
+    background: #7f1d1d !important; /* Dark Red */
+    color: white !important;
+}
+
+/* 5. Utility Buttons (Strict Monochrome) */
+.btn-save, .mini, .btn-mono-tool {
+    background: var(--sb-bg) !important;
+    color: var(--sb-text) !important;
+    border: 1px solid var(--sb-border) !important;
+    font-weight: 700 !important;
+}
+
+.btn-save:hover {
+    background: var(--sb-border) !important; /* Subtle gray hover, not palette */
+}
+
+/* 6. Alignment & Density (Unchanged) */
+.geo-unified-logic-row {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
+}
+
+.geo-unified-logic-row input, 
+.geo-unified-logic-row .btn-analyze, 
+.geo-tools-row-triple .btn-mono-tool {
+    height: 24px !important;
+    font-size: 10px !important;
+}
+
+
+
+
+
+/* ============================================================
+   DYNAMIC PALETTE HOVER LOGIC (Report, Share, Map, etc.)
+   ============================================================ */
+
+/* 1. Base Utility Buttons (Report, Share, Map, My Loc, Save) */
+.btn-save, 
+.mini, 
+.btn-mono-tool, 
+.compare-toggle-btn:not([style*="#ef4444"]) {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. DARK THEME HOVER (Lighter/Glowing Palette Color) */
+.btn-save:hover, 
+.mini:hover, 
+.btn-mono-tool:hover {
+    background: var(--accent-primary) !important;
+    color: #000000 !important; /* Invert text to black for readability on bright accent */
+    border-color: var(--accent-primary) !important;
+    filter: brightness(1.2) !important; /* Lighter version */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 3. LIGHT THEME HOVER (Darker/Deeper Palette Color) */
+[data-theme="light"] .btn-save:hover, 
+[data-theme="light"] .mini:hover, 
+[data-theme="light"] .btn-mono-tool:hover {
+    background: var(--accent-primary) !important;
+    color: #ffffff !important; /* Invert text to white for readability on dark accent */
+    border-color: var(--accent-primary) !important;
+    filter: brightness(0.8) !important; /* Darker version */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 4. Special Case: Close Comparison Button Hover */
+.compare-toggle-btn:not([style*="#ef4444"]):hover {
+    background: var(--accent-primary) !important;
+    color: white !important;
+    filter: brightness(1.1) !important;
+}
+
+/* 5. Ensure "Analyze" and "Go" Hover logic remains Blue (as per previous request) 
+   or if you want them to match the palette too, uncomment below: */
+/*
+.btn-analyze:hover {
+    background: var(--accent-primary) !important;
+    filter: contrast(1.2) !important;
+}
+*/
+
+/* 6. Button Active State (Click effect) */
+.btn-save:active, .mini:active {
+    transform: scale(0.96) !important;
+}
+
+
+
+/* ============================================================
+   FORCE PALETTE HOVER (DARK THEME FIX)
+   ============================================================ */
+
+/* 1. Target by Class and Attribute to beat any internal logic */
+.sidebar .btn-save:hover, 
+.sidebar .mini:hover, 
+.sidebar .btn-mono-tool:hover,
+.sidebar button[type="button"]:not(.btn-analyze):not(.btn-cross):hover {
+    background-color: var(--accent-primary) !important;
+    background-image: none !important; /* Removes any default gradients */
+    color: #000000 !important;        /* Pure black text for high contrast */
+    border-color: var(--accent-primary) !important;
+    filter: brightness(1.2) !important; /* Lighter glowing version */
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+    opacity: 1 !important;
+}
+
+/* 2. Specific fix for the "Generate Report" and "Share" Row */
+.compact-row button.btn-save:hover {
+    background: var(--accent-primary) !important;
+    color: #000000 !important;
+}
+
+/* 3. Specific fix for the Map button and Tool emojis */
+button.mini:hover, .btn-mono-tool:hover {
+    background: var(--accent-primary) !important;
+    color: #000000 !important;
+}
+
+/* 4. LIGHT THEME OVERRIDE (Re-asserting Darker Palette) */
+[data-theme="light"] .sidebar .btn-save:hover,
+[data-theme="light"] .sidebar .mini:hover,
+[data-theme="light"] .sidebar .btn-mono-tool:hover {
+    background-color: var(--accent-primary) !important;
+    color: #ffffff !important; /* White text for contrast on light theme */
+    filter: brightness(0.8) !important; /* Darker version */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* ============================================================
+   RE-ESTABLISHING THE FUNCTIONAL COLORS
+   ============================================================ */
+
+/* Keep Analyze Green and Exit Red protected from the palette hover */
+.btn-analyze:hover {
+    background-color: #3b82f6 !important; /* Stays Intelligence Blue */
+    color: #ffffff !important;
+}
+
+.btn-cross:hover {
+    background-color: #ef4444 !important; /* Stays Alert Red */
+    color: #ffffff !important;
+}
+
+
+
+
+
+/* ============================================================
+   FORCED RED BUTTONS & THEME-SPECIFIC HOVER FLIP
+   ============================================================ */
+
+/* 1. BASE STATE: Always Red (Close / Exit / Delete) */
+.sidebar .btn-cross,
+.sidebar button.btn-cross,
+.sidebar .compare-toggle-btn,
+.sidebar button[style*="backgroundColor: #ef4444"],
+.sidebar button[onClick*="setShowLocationB"] {
+    background-color: #7f1d1d !important; /* Deep Red for Light Theme */
+    background-image: none !important;    /* Removes any gradients */
+    color: #ffffff !important;            /* Pure White Text */
+    border: none !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Base State override for Dark Theme */
+[data-theme="dark"] .sidebar .btn-cross,
+[data-theme="dark"] .sidebar .compare-toggle-btn {
+    background-color: #ef4444 !important; /* Vibrant Red for Dark Theme */
+}
+
+/* 2. HOVER FLIP: LIGHT THEME (Becomes Black with White Text) */
+[data-theme="light"] .sidebar .btn-cross:hover,
+[data-theme="light"] .sidebar .compare-toggle-btn:hover,
+.sidebar .btn-cross:hover, /* Fallback */
+.sidebar .compare-toggle-btn:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+    cursor: pointer !important;
+}
+
+/* 3. HOVER FLIP: DARK THEME (Becomes White with Black Text) */
+[data-theme="dark"] .sidebar .btn-cross:hover,
+[data-theme="dark"] .sidebar .compare-toggle-btn:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ============================================================
+   RE-ASSERTING THE ANALYZE BUTTON (FORCED GREEN)
+   ============================================================ */
+.sidebar .btn-analyze {
+    background-color: #065f46 !important; /* Dark Green Base */
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .sidebar .btn-analyze {
+    background-color: #10b981 !important; /* Light Green Base */
+}
+
+/* Analyze Hover follows the same Flip logic as Close button */
+.sidebar .btn-analyze:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .sidebar .btn-analyze:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+
+/* ============================================================
+   ULTIMATE FORCE: ANALYZE BUTTON GREEN FIX
+   ============================================================ */
+
+/* Targets the button by class, type, and location to ensure it turns Green */
+.sidebar section.compact-group .btn-analyze,
+.sidebar button.btn-analyze[type="submit"],
+.sidebar .geo-unified-logic-row .btn-analyze {
+    background-color: #065f46 !important; /* Deep Forest Green for Light Theme */
+    background-image: none !important;    /* Kills any white/gray gradients */
+    color: #ffffff !important;            /* Pure White Text */
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Specific Dark Theme Override */
+[data-theme="dark"] .sidebar section.compact-group .btn-analyze,
+[data-theme="dark"] .sidebar button.btn-analyze[type="submit"] {
+    background-color: #10b981 !important; /* Vibrant Emerald for Dark Theme */
+    color: #ffffff !important;
+}
+
+/* ============================================================
+   BLACK/WHITE HOVER FLIP (FORCED)
+   ============================================================ */
+
+/* LIGHT THEME: Hover becomes Black/White */
+[data-theme="light"] .sidebar .btn-analyze:hover,
+.sidebar .btn-analyze:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* DARK THEME: Hover becomes White/Black */
+[data-theme="dark"] .sidebar .btn-analyze:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    background-image: none !important;
+}
+
+/* ============================================================
+   ULTIMATE FORCE: ANALYZE BUTTON (GREEN BASE + HOVER FLIP)
+   ============================================================ */
+
+/* 1. BASE STATE: Force Forest Green for Light Theme */
+/* This specific selector is designed to win against almost any override */
+.sidebar .btn-analyze, 
+.sidebar button.btn-analyze, 
+.sidebar button[type="submit"] {
+    background-color: #065f46 !important; /* Deep Forest Green */
+    background-image: none !important;    /* Kills any white gradients or colors */
+    color: #ffffff !important;            /* Pure White Text */
+    border: none !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease-in-out !important;
+    text-transform: uppercase !important; /* Professional bold look */
+    font-weight: 800 !important;
+}
+
+/* 2. BASE STATE: Override Green for Dark Theme */
+[data-theme="dark"] .sidebar .btn-analyze,
+[data-theme="dark"] .sidebar button.btn-analyze {
+    background-color: #10b981 !important; /* Vibrant Emerald Green */
+}
+
+/* 3. HOVER FLIP: DARK THEME (White Background / Black Text) */
+/* This specifically addresses your request for the "White/Black" look on hover */
+[data-theme="dark"] .sidebar .btn-analyze:hover,
+[data-theme="dark"] .sidebar button.btn-analyze:hover {
+    background-color: #ffffff !important; /* Force Pure White BG */
+    background-image: none !important;
+    color: #000000 !important;            /* Force Pure Black Text */
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.7) !important; /* Wide glow */
+}
+
+/* 4. HOVER FLIP: LIGHT THEME (Black Background / White Text) */
+[data-theme="light"] .sidebar .btn-analyze:hover,
+.sidebar .btn-analyze:hover {
+    background-color: #000000 !important; /* Force Pure Black BG */
+    background-image: none !important;
+    color: #ffffff !important;            /* Force Pure White Text */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+
+
+
+/* ============================================================
+   ULTRA-COMPACT MONOCHROME INTELLIGENCE (COMPLETE)
+   ============================================================ */
+
+:root {
+    --accent-primary: var(--accent-color, #ffffff);
+    --sb-bg: #0a0a0a;
+    --sb-border: #262626;
+    --sb-card: #141414;
+    --sb-text: #ffffff;
+    --sb-text-dim: #808080;
+    --sb-input: #000000;
+}
+
+[data-theme="light"] {
+    --sb-bg: #ffffff;
+    --sb-border: #e2e8f0;
+    --sb-card: #f8fafc;
+    --sb-text: #0f172a;
+    --sb-text-dim: #64748b;
+    --sb-input: #f1f5f9;
+}
+
+/* 1. Global Sidebar Compression */
+.sidebar.glass-morphic {
+    background: var(--sb-bg) !important;
+    border-right: 1px solid var(--sb-border) !important;
+    color: var(--sb-text) !important;
+    padding: 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important; /* Forces all sections to sit closer */
+}
+
+/* 2. Higher Density Sections */
+.sidebar-search-section, 
+.control-group.compact-group, 
+.saved-places-section,
+.comparison-box {
+    background: var(--sb-card) !important;
+    border: 1px solid var(--sb-border) !important;
+    border-radius: 4px !important;
+    margin: 2px 4px !important; /* Reduced margins to save space */
+    padding: 6px !important;    /* Tighter internal padding */
+}
+
+/* 3. ROW LOGIC: Lat, Lng, Analyze/Go (FORCED GREEN) */
+.geo-unified-logic-row {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
+    width: 100% !important;
+}
+
+.geo-unified-logic-row .field {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.geo-unified-logic-row input, 
+.geo-unified-logic-row .btn-analyze,
+.geo-tools-row-triple .btn-mono-tool {
+    height: 24px !important; /* Ultra-compact height */
+    font-size: 10px !important;
+    padding: 0 6px !important;
+    border-radius: 3px !important;
+}
+
+/* 4. ANALYZE BUTTON: Forced Green Base */
+.sidebar .btn-analyze, 
+.sidebar button[type="submit"] {
+    background-color: #065f46 !important; /* Deep Green (Light) */
+    background-image: none !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 800 !important;
+    flex: 0.6 !important;
+}
+
+[data-theme="dark"] .sidebar .btn-analyze {
+    background-color: #10b981 !important; /* Emerald (Dark) */
+}
+
+/* 5. ANALYZE HOVER FLIP (FORCED) */
+[data-theme="dark"] .sidebar .btn-analyze:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme="light"] .sidebar .btn-analyze:hover,
+.sidebar .btn-analyze:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+/* 6. RED BUTTONS (CLOSE COMPARISON) */
+.sidebar .btn-cross, 
+.sidebar .compare-toggle-btn {
+    background-color: #7f1d1d !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+[data-theme="dark"] .sidebar .btn-cross:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+
+/* 8. Utility Hover (Palette sync) */
+.btn-mono-tool:hover, .btn-save:hover {
+    border-color: var(--accent-primary) !important;
+    background: var(--sb-input) !important;
+}
+
+/* Scrollbar synchronization */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--accent-primary); }
+
+
+
+
+
+/* 1. Remove palette color from search section borders */
+.sidebar-search-section,
+.search-wrapper {
+    background: var(--sb-card) !important;
+    /* Forces a neutral gray border regardless of palette choice */
+    border: 1px solid var(--sb-border, #262626) !important; 
+    transition: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   PERMANENT NEUTRAL SEARCH (NO CLICK/FOCUS HIGHLIGHT)
+   ============================================================ */
+
+/* 1. Remove focus border from the wrapper and input */
+.sidebar .search-wrapper,
+.sidebar .search-wrapper:focus-within,
+.sidebar .sidebar-search-input,
+.sidebar .sidebar-search-input:focus {
+    border: 1px solid var(--sb-border, #262626) !important; /* Locks to neutral gray */
+    outline: none !important;           /* Removes browser default blue glow */
+    box-shadow: none !important;         /* Removes any glow/shadow effects */
+    transition: none !important;         /* Stops any color fading effects */
+}
+
+/* 2. Ensure the background stays consistent on click */
+.sidebar .sidebar-search-input:focus {
+    background: transparent !important;
+}
+
+
+
+
+
+/* ============================================================
+   MINIMALIST SCROLLBAR FOR SAVED PLACES
+   ============================================================ */
+
+/* 1. Target the specific scrollable area in the sidebar */
+.places-grid.attractive-scroll,
+.sidebar-scrollable {
+    scrollbar-width:thin;          /* Firefox: Makes it thin */
+    scrollbar-color: var(--accent-color) transparent; /* Firefox */
+}
+
+/* 2. Chrome, Edge, and Safari (Webkit) */
+
+/* The main width of the scrollbar */
+.places-grid.attractive-scroll::-webkit-scrollbar,
+.sidebar-scrollable::-webkit-scrollbar {
+    width: 4px;               /* Thin width for vertical scroll */
+    height: 4px;              /* Thin height for horizontal scroll */
+}
+
+/* The background of the scrollbar (Track) */
+.places-grid.attractive-scroll::-webkit-scrollbar-track,
+.sidebar-scrollable::-webkit-scrollbar-track {
+    background: transparent;  /* Keeps it clean and invisible */
+}
+
+/* The draggable part (Thumb) */
+.places-grid.attractive-scroll::-webkit-scrollbar-thumb,
+.sidebar-scrollable::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color); /* Palette Color */
+    border-radius: 20px;                   /* Rounded pill shape */
+    border: 1px solid transparent;         /* Adds slight padding effect */
+}
+
+/* Hover effect on the scrollbar */
+.places-grid.attractive-scroll::-webkit-scrollbar-thumb:hover,
+.sidebar-scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-glow);  /* Subtle glow/change on hover */
+}
+
+
+
+

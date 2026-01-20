@@ -4636,7 +4636,18 @@ html, body, #root, .app-shell {
 
 
 
+.history-direct-link {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important; /* Forces the link to be clickable */
+    cursor: pointer !important;
+    display: inline-block;
+}
 
+/* Ensure the table cell doesn't block the link */
+.history-table td {
+    position: relative;
+}
 
 
 
