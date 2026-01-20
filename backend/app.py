@@ -17,7 +17,7 @@ from google import genai
 from geogpt_config import generate_system_prompt 
 from backend.reports.pdf_generator import generate_land_report
 from backend.integrations.nearby_places import get_nearby_named_places
-
+from backend.integrations.terrain_adapter import estimate_terrain_slope
 from flask import send_file
 from dotenv import load_dotenv
 load_dotenv()
@@ -381,13 +381,15 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             )
             final_score = agg.get("score")
             model_used = "Weighted Aggregator (Fallback)"
-
+        terrain_analysis = estimate_terrain_slope(latitude, longitude)
+        
 
         # 4. FINAL RESPONSE WITH METADATA (Populates Evidence Detail Section)
         return {
             "suitability_score": final_score,
             "label": "Highly Suitable" if final_score >= 70 else ("Moderate" if final_score >= 40 else "Unsuitable"),
             "model_used": model_used,
+            "terrain_analysis": terrain_analysis,
             "factors": {
                 "rainfall": rainfall_score, "flood": flood_s, "landslide": landslide_s,
                 "soil": soil_s, "proximity": prox_s, "water": w_score,

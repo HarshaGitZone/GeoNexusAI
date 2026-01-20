@@ -8,7 +8,7 @@ import "./LandSuitabilityChecker.css";
 import TopNav from "../TopNav/TopNav";
 import RadarChart from "../RadarChart/RadarChart"; 
 import HistoryView from "../HistoryView/HistoryView"; 
-
+import TerrainSlope from "../TerrainSlope/TerrainSlope";
 // Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -721,10 +721,13 @@ useEffect(() => {
                   isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
                   isCompareMode={false}
                 />
+                {/* ✅ Terrain & Slope Analysis (FINAL CHECK) */}
+                {result.terrain_analysis && (<TerrainSlope terrain={result.terrain_analysis} />)}
               </div>
               <div className="col-2">
                 <PotentialSection factors={result.factors} score={result.suitability_score} />
                 <EvidenceSection data={result} />
+                
               </div>
             </div>
           )}
@@ -740,6 +743,7 @@ useEffect(() => {
                           isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
                           isCompareMode={true}
                         />
+                        {result.terrain_analysis && (<TerrainSlope terrain={result.terrain_analysis} />)}
                         <EvidenceSection data={result} />
                       </>
                     ) : <div className="empty-results">Analyzing Site A...</div>}
@@ -753,6 +757,7 @@ useEffect(() => {
                           isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
                           isCompareMode={true}
                         />
+                        {compareResult?.terrain_analysis && (<TerrainSlope terrain={compareResult.terrain_analysis} />)}
                         <EvidenceSection data={compareResult} />
                         </>
                     ) : <div className="empty-results">Waiting for selection or Analyzing Site B...</div>}
