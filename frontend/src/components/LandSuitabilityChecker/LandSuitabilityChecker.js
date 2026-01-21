@@ -266,7 +266,8 @@ export default function LandSuitabilityChecker() {
   const [historyTargetData, setHistoryTargetData] = useState(null);
   const [historyTargetName, setHistoryTargetName] = useState("");
   const [historyTargetCoords, setHistoryTargetCoords] = useState({ lat: "", lng: "" });
-
+const [editingIndex, setEditingIndex] = useState(null);
+  const [editingName, setEditingName] = useState("");
   const [savedPlaces, setSavedPlaces] = useState(() => JSON.parse(localStorage.getItem("savedPlaces")) || []);
   const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
   const [analyzedCoordsB, setAnalyzedCoordsB] = useState({ lat: null, lng: null });
@@ -679,6 +680,10 @@ useEffect(() => {
         showNearby={showNearby}
         setShowNearby={setShowNearby}
         compareResult={compareResult}
+        editingIndex={editingIndex}
+        setEditingIndex={setEditingIndex}
+        editingName={editingName}
+        setEditingName={setEditingName}
       />
 
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
