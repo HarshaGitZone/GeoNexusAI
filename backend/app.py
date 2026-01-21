@@ -1,5 +1,6 @@
 import os
 import sys
+import requests
 import numpy as np
 import pickle
 from datetime import datetime
@@ -85,6 +86,99 @@ for name in ("model_xgboost.pkl", "model_rf.pkl"):
         except Exception as e:
             print(f"Failed {name}: {e}")
 
+# --- WEATHER HELPER ---
+# def get_live_weather(lat, lng):
+#     """Fetches high-accuracy real-time weather data for exact coordinates"""
+#     try:
+#         url = "https://api.open-meteo.com/v1/forecast"
+#         params = {
+#             "latitude": lat,
+#             "longitude": lng,
+#             "current": ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "is_day"],
+#             "timezone": "auto"
+#         }
+#         response = requests.get(url, params=params, timeout=5)
+#         data = response.json()
+#         current = data.get("current", {})
+
+#         # Interpret weather codes into user-friendly descriptions
+#         code = current.get("weather_code", 0)
+#         is_day = current.get("is_day", 1)
+        
+#         description = "Clear Sky"
+#         icon = "☀️" if is_day else "🌙"
+        
+#         if code in [1, 2, 3]:
+#             description = "Partly Cloudy"
+#             icon = "⛅"
+#         elif code in [51, 53, 55, 61, 63, 65]:
+#             description = "Rainy Conditions"
+#             icon = "🌧️"
+#         elif code in [95, 96, 99]:
+#             description = "Thunderstorm"
+#             icon = "⛈️"
+
+#         return {
+#             "temp_c": current.get("temperature_2m"),
+#             "humidity": current.get("relative_humidity_2m"),
+#             "rain_mm": current.get("precipitation"),
+#             "description": description,
+#             "icon": icon
+#         }
+#     except Exception as e:
+#         logger.error(f"Weather Fetch Error: {e}")
+#         return None
+def get_live_weather(lat, lng):
+    try:
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": lat,
+            "longitude": lng,
+            "current": ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "is_day"],
+            "timezone": "auto" # Resolves local time for Site A
+        }
+        response = requests.get(url, params=params, timeout=5)
+        response.raise_for_status() # Check for HTTP errors
+        data = response.json()
+        
+        current = data.get("current")
+        if not current:
+            return None
+
+        code = current.get("weather_code", 0)
+        is_day = current.get("is_day") # 1 for day, 0 for night
+        
+        # Expanded WMO Code Mapping
+        description = "Clear Sky"
+        icon = "☀️" if is_day else "🌙"
+        
+        if code in [1, 2]:
+            description = "Mainly Clear"
+            icon = "🌤️" if is_day else "☁️"
+        elif code == 3:
+            description = "Overcast"
+            icon = "☁️"
+        elif code in [51, 53, 55, 61, 63, 65]:
+            description = "Rainy"
+            icon = "🌧️"
+        elif code in [95, 96, 99]:
+            description = "Thunderstorm"
+            icon = "⛈️"
+        # Extract the ISO-formatted local time from the API response
+        local_time_iso = current.get("time")
+        return {
+            "temp_c": current.get("temperature_2m"),
+            "local_time": data.get("current", {}).get("time"),
+            "timezone": data.get("timezone"),
+            "humidity": current.get("relative_humidity_2m"),
+            "rain_mm": current.get("precipitation"),
+            "description": description,
+            "icon": icon,
+            "is_day": is_day # Pass this to React for conditional styling
+        }
+    except Exception as e:
+        logger.error(f"Weather Fetch Error: {e}")
+        return None
 # --- 1. Health Check Route (Fixes Render 404/Timeout) ---
 @app.route('/health', methods=['GET'])
 def health():
@@ -199,6 +293,8 @@ def suitability():
 
         # PROCEED WITH ANALYSIS AND CACHE THE RESULT
         result = _perform_suitability_analysis(latitude, longitude)
+        # ADD REAL-TIME WEATHER DATA
+        result['weather'] = get_live_weather(latitude, longitude)
         ANALYSIS_CACHE[cache_key] = result
         return jsonify(result)
 

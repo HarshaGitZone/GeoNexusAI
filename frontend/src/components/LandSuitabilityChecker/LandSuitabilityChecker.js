@@ -9,6 +9,7 @@ import TopNav from "../TopNav/TopNav";
 import RadarChart from "../RadarChart/RadarChart"; 
 import HistoryView from "../HistoryView/HistoryView"; 
 import TerrainSlope from "../TerrainSlope/TerrainSlope";
+import WeatherCard from "../Weather/WeatherCard";
 // Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -726,8 +727,11 @@ useEffect(() => {
                   isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
                   isCompareMode={false}
                 />
+                 {/* In your FactorsSection return logic */}
+                  <WeatherCard weather={result?.weather} />
                 {/* ✅ Terrain & Slope Analysis (FINAL CHECK) */}
                 {result.terrain_analysis && (<TerrainSlope terrain={result.terrain_analysis} />)}
+               
               </div>
               <div className="col-2">
                 <PotentialSection factors={result.factors} score={result.suitability_score} />
@@ -748,6 +752,8 @@ useEffect(() => {
                           isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
                           isCompareMode={true}
                         />
+                        {/* FIXED: Correct result object for Side A */}
+                      <WeatherCard weather={result?.weather} />
                         {result.terrain_analysis && (<TerrainSlope terrain={result.terrain_analysis} />)}
                         <EvidenceSection data={result} />
                       </>
@@ -762,6 +768,8 @@ useEffect(() => {
                           isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
                           isCompareMode={true}
                         />
+                        {/* In your FactorsSection return logic */}
+                          <WeatherCard weather={compareResult?.weather} />
                         {compareResult?.terrain_analysis && (<TerrainSlope terrain={compareResult.terrain_analysis} />)}
                         <EvidenceSection data={compareResult} />
                         </>
