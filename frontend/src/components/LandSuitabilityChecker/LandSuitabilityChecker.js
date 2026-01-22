@@ -227,6 +227,7 @@ const FactorsSection = memo(({ data, latVal, lngVal, locationName, isDarkMode, v
 });
 
 export default function LandSuitabilityChecker() {
+  const [mobileCompareSite, setMobileCompareSite] = useState("A");
   const [deviceLocation, setDeviceLocation] = useState({ lat: null, lng: null });
   const [analysisHistory, setAnalysisHistory] = useState(() => 
       JSON.parse(localStorage.getItem("analysis_history")) || []
@@ -784,7 +785,8 @@ const renderTabContent = (data, coords, name, isFullWidth) => {
             <section className="results-container" style={{ height: `${bottomHeight}px`, flex: `0 0 ${bottomHeight}px`, overflowY: 'auto' }}>
             
             {/* The result check wraps everything below */}
-            {result ? (
+            {/* {result ? ( */}
+            {result || loading || compareLoading ? (
               <>
                 {/* 1. Tab Bar Navigation (Visible only when result exists) */}
                 <div className="results-tab-bar glass-morphic">
@@ -793,13 +795,17 @@ const renderTabContent = (data, coords, name, isFullWidth) => {
                   <button className={activeTab === "infrastructure" ? "active" : ""} onClick={() => setActiveTab("infrastructure")}>📋 Site Insights</button>
                 </div>
 
-                {/* 2. Loading State */}
-                {(loading || compareLoading) && <div className="loading-overlay">Analyzing Terrain Data...</div>}
-
+               {/* 2. Loading Overlay: This will now appear OVER the placeholder space immediately */}
+                {(loading || compareLoading) && (
+                  <div className="loading-overlay">
+                    <div className="spinner"></div>
+                    <p>Analyzing Terrain Data...</p>
+                  </div>
+                )}
                 {/* 3. Data Viewport */}
                 <div className="tab-viewport">
                   {/* SINGLE ANALYSIS VIEW */}
-                  {!isCompareMode && (
+                  {!isCompareMode && result &&(
                     <div className="single-analysis-view">
                       <h4 className="pane-header">{locationAName.toUpperCase()} - FULL TERRAIN REPORT</h4>
                       {renderTabContent(result, analyzedCoords, locationAName, true)}
@@ -807,7 +813,7 @@ const renderTabContent = (data, coords, name, isFullWidth) => {
                   )}
 
                   {/* COMPARE MODE */}
-                  {isCompareMode && (
+                  {/* {isCompareMode && (
                     <div className="compare-layout-ditto" style={{ display: 'flex', height: '100%', width: '100%' }}>
                       <div className="compare-pane-ditto">
                         <h4 className="pane-header">{locationAName.toUpperCase()}</h4>
@@ -820,6 +826,39 @@ const renderTabContent = (data, coords, name, isFullWidth) => {
                         ) : (
                           <div className="empty-results">Waiting for Site B selection...</div>
                         )}
+                      </div>
+                    </div>
+                  )} */}
+                  {/* Sub-Tabs for Mobile Comparison: Placed below the 3-tab bar */}
+                  {/* This UI element only appears during Comparison Mode on Mobile */}
+                  {isCompareMode && (
+                    <div className="mobile-location-tabs glass-morphic only-mobile">
+                      <button 
+                        className={mobileCompareSite === "A" ? "active" : ""} 
+                        onClick={() => setMobileCompareSite("A")}
+                      >
+                        📍 {locationAName}
+                      </button>
+                      <button 
+                        className={mobileCompareSite === "B" ? "active" : ""} 
+                        onClick={() => setMobileCompareSite("B")}
+                      >
+                        📍 {locationBName || "Site B"}
+                      </button>
+                    </div>
+                  )}
+                  {isCompareMode && (
+                    <div className="compare-layout-ditto">
+                      {/* Site A Pane */}
+                      <div className={`compare-pane-ditto ${mobileCompareSite === "A" ? "show-mobile" : "hide-mobile"}`}>
+                        <h4 className="pane-header only-desktop">{locationAName.toUpperCase()}</h4>
+                        {result ? renderTabContent(result, analyzedCoords, locationAName, false) : <div className="empty-results">Analyzing Site A...</div>}
+                      </div>
+
+                      {/* Site B Pane */}
+                      <div className={`compare-pane-ditto ${mobileCompareSite === "B" ? "show-mobile" : "hide-mobile"}`}>
+                        <h4 className="pane-header only-desktop">{locationBName.toUpperCase() || "SITE B"}</h4>
+                        {compareResult ? renderTabContent(compareResult, analyzedCoordsB, locationBName, false) : <div className="empty-results">Waiting for selection...</div>}
                       </div>
                     </div>
                   )}
