@@ -186,33 +186,154 @@ def health():
 
 
 # --- 2. GeoGPT Route (Logic Verified) ---
+# @app.route('/ask_geogpt', methods=['POST'])
+# def ask_geogpt():
+#     data = request.json or {}
+#     user_query = data.get('query')
+#     # This 'history' comes from the frontend chat state
+#     chat_history = data.get('history', [])
+#     current_data = data.get('currentData') 
+#     location_name = data.get('locationName')
+
+#     if not current_data:
+#         return jsonify({"answer": "Please analyze a location on the map first so I can give you specific details!"})
+
+#     if not GEMINI_KEY or not client:
+#         return jsonify({"answer": "I'm currently offline (API key missing). Please check your backend variables."})
+
+#     try:
+#         # Convert frontend history format to Gemini API format
+#         formatted_history = []
+#         for msg in chat_history:
+#             # Gemini uses 'user' and 'model' as roles
+#             role = "user" if msg['role'] == 'user' else "model"
+#             formatted_history.append({
+#                 "role": role,
+#                 "parts": [{"text": msg['content']}]
+#             })
+        
+#         system_context = generate_system_prompt(location_name, current_data)
+
+#         # Initialize the chat with System Instructions and previous history
+#         chat_session = client.chats.create(
+#             model="gemini-2.0-flash", 
+#             config={
+#                 "system_instruction": system_context,
+#                 "temperature": 0.7, # Balanced creativity and accuracy
+#             },
+#             history=formatted_history
+#         )
+
+#         # Send the message
+#         response = chat_session.send_message(user_query)
+        
+#         return jsonify({
+#             "answer": response.text,
+#             "status": "success"
+#         })
+
+#     except Exception as e:
+#         error_msg = str(e)
+#         logger.error(f"Gemini Error: {error_msg}")
+
+#         # LOGICAL FIX: Specific check for Rate Limits (Error 429)
+#         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+#             return jsonify({
+#                 "answer": "### ⚠️ System Notice\nGeoGPT is currently handling too many requests. Please **wait 60 seconds** for the engine to reset before asking your next question.",
+#                 "status": "rate_limit"
+#             })
+
+#         # Handling potential 404 fallback for model string updates
+#         if "404" in error_msg:
+#              return jsonify({"answer": "I'm having trouble finding the specific AI model version. Please contact the developer to update the model string."}), 500
+
+#         return jsonify({"answer": "I am having trouble connecting to my AI brain. Please try again later."}), 500
+# In app.py - Replace your ask_geogpt route with this
+
 @app.route('/ask_geogpt', methods=['POST'])
 def ask_geogpt():
     data = request.json or {}
     user_query = data.get('query')
-    current_data = data.get('currentData') 
+    chat_history = data.get('history', [])
+    current_data = data.get('currentData')  # Site A
+    compare_data = data.get('compareData')  # Site B (Now included!)
     location_name = data.get('locationName')
 
     if not current_data:
-        return jsonify({"answer": "Please analyze a location on the map first so I can give you specific details!"})
+        return jsonify({"answer": "### 🌍 Intelligence Awaiting\nPlease analyze a location on the map first so I can access the geospatial data stream!"})
 
     if not GEMINI_KEY or not client:
-        return jsonify({"answer": "I'm currently offline (API key missing). Please check your backend variables."})
+        return jsonify({"answer": "### ⚠️ System Offline\nI'm currently disconnected from my AI core. Please verify API configuration."})
 
     try:
-        system_context = generate_system_prompt(location_name, current_data)
-        full_prompt = f"{system_context}\n\nUser Question: {user_query}\n\nProvide a professional, concise response:"
+        # Convert history format for Gemini SDK
+        formatted_history = []
+        # for msg in chat_history:
+        #     role = "user" if msg['role'] == 'user' else "model"
+        #     formatted_history.append({"role": role, "parts": [{"text": msg['content']}]})
         
-        # LOGICAL FIX: Handling potential 404 fallback automatically
-        response = client.models.generate_content(model="models/gemini-2.5-flash", contents=full_prompt)
-        return jsonify({"answer": response.text})
+        # To this (Slicing the last 6 messages only):
+        for msg in chat_history[-6:]: 
+            role = "user" if msg['role'] == 'user' else "model"
+            formatted_history.append({"role": role, "parts": [{"text": msg['content']}]})
+        
+        # Inject context for both sites + project meta-info
+        system_context = generate_system_prompt(location_name, current_data, compare_data)
+
+        chat_session = client.chats.create(
+            model="gemini-2.0-flash", 
+            config={
+                "system_instruction": system_context,
+                "temperature": 0.7, 
+            },
+            history=formatted_history
+        )
+
+        response = chat_session.send_message(user_query)
+        
+        return jsonify({
+            "answer": response.text,
+            "status": "success"
+        })
 
     except Exception as e:
-        logger.error(f"Gemini Error: {e}")
-        # If the specific model fails, provide a clear technical fallback message
-        if "404" in str(e):
-             return jsonify({"answer": "I'm having trouble finding the specific AI model version. Please contact the developer to update the model string."}), 500
-        return jsonify({"answer": "I am having trouble connecting to my AI brain. Please try again later."}), 500
+        error_msg = str(e)
+        logger.error(f"GeoGPT API Error: {error_msg}")
+
+        # FIX: Handling Rate Limit (429 RESOURCE_EXHAUSTED)
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            return jsonify({
+                "answer": "### ⚠️ System Quota Exhausted\nGeoGPT (Free Tier) has hit its request limit. Please **wait 30-60 seconds** for the engine to cool down before your next query.",
+                "status": "rate_limit"
+            })
+
+        # General error fallback
+        return jsonify({"answer": "### ⚠️ Cognitive Lapse\nI encountered an error processing that request. Please try again in a moment."}), 500
+import math
+
+def calculate_haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculates the straight-line distance (Great Circle) between two points 
+    on Earth using the Haversine formula. Result is in Kilometers.
+    """
+    # Earth's radius in kilometers
+    R = 6371.0 
+    
+    # Convert decimal degrees to radians
+    d_lat = math.radians(lat2 - lat1)
+    d_lon = math.radians(lon2 - lon1)
+    
+    r_lat1 = math.radians(lat1)
+    r_lat2 = math.radians(lat2)
+
+    # Haversine formula calculation
+    a = math.sin(d_lat / 2)**2 + \
+        math.cos(r_lat1) * math.cos(r_lat2) * \
+        math.sin(d_lon / 2)**2
+        
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    return R * c
 
 def calculate_historical_suitability(current_lat, current_lng, range_type):
     # 1. Start with current features
