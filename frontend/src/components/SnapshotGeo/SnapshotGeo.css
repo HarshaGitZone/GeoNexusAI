@@ -1,0 +1,87 @@
+.snapshot-geo-card {
+  position: relative;
+  overflow: hidden;
+  border-left: none !important;
+  padding: 0 !important;
+}
+
+.snapshot-inner {
+  display: flex;
+  min-height: 180px;
+}
+
+.snapshot-side-strip {
+  background: var(--primary-color, #3b82f6);
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.snapshot-side-strip span {
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.snapshot-content {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.snap-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.iso-code {
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.snap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.snap-item label {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.snap-item span {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.terrain-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  margin-top: 15px;
+}
+
+.pro-summary {
+  font-size: 12px;
+  margin-top: 10px;
+  font-style: italic;
+  opacity: 0.8;
+  line-height: 1.4;
+}

@@ -85,49 +85,6 @@ for name in ("model_xgboost.pkl", "model_rf.pkl"):
             print(f"Loaded: {name}")
         except Exception as e:
             print(f"Failed {name}: {e}")
-
-# --- WEATHER HELPER ---
-# def get_live_weather(lat, lng):
-#     """Fetches high-accuracy real-time weather data for exact coordinates"""
-#     try:
-#         url = "https://api.open-meteo.com/v1/forecast"
-#         params = {
-#             "latitude": lat,
-#             "longitude": lng,
-#             "current": ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "is_day"],
-#             "timezone": "auto"
-#         }
-#         response = requests.get(url, params=params, timeout=5)
-#         data = response.json()
-#         current = data.get("current", {})
-
-#         # Interpret weather codes into user-friendly descriptions
-#         code = current.get("weather_code", 0)
-#         is_day = current.get("is_day", 1)
-        
-#         description = "Clear Sky"
-#         icon = "☀️" if is_day else "🌙"
-        
-#         if code in [1, 2, 3]:
-#             description = "Partly Cloudy"
-#             icon = "⛅"
-#         elif code in [51, 53, 55, 61, 63, 65]:
-#             description = "Rainy Conditions"
-#             icon = "🌧️"
-#         elif code in [95, 96, 99]:
-#             description = "Thunderstorm"
-#             icon = "⛈️"
-
-#         return {
-#             "temp_c": current.get("temperature_2m"),
-#             "humidity": current.get("relative_humidity_2m"),
-#             "rain_mm": current.get("precipitation"),
-#             "description": description,
-#             "icon": icon
-#         }
-#     except Exception as e:
-#         logger.error(f"Weather Fetch Error: {e}")
-#         return None
 def get_live_weather(lat, lng):
     try:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -184,71 +141,6 @@ def get_live_weather(lat, lng):
 def health():
     return jsonify({"status": "healthy"}), 200
 
-
-# --- 2. GeoGPT Route (Logic Verified) ---
-# @app.route('/ask_geogpt', methods=['POST'])
-# def ask_geogpt():
-#     data = request.json or {}
-#     user_query = data.get('query')
-#     # This 'history' comes from the frontend chat state
-#     chat_history = data.get('history', [])
-#     current_data = data.get('currentData') 
-#     location_name = data.get('locationName')
-
-#     if not current_data:
-#         return jsonify({"answer": "Please analyze a location on the map first so I can give you specific details!"})
-
-#     if not GEMINI_KEY or not client:
-#         return jsonify({"answer": "I'm currently offline (API key missing). Please check your backend variables."})
-
-#     try:
-#         # Convert frontend history format to Gemini API format
-#         formatted_history = []
-#         for msg in chat_history:
-#             # Gemini uses 'user' and 'model' as roles
-#             role = "user" if msg['role'] == 'user' else "model"
-#             formatted_history.append({
-#                 "role": role,
-#                 "parts": [{"text": msg['content']}]
-#             })
-        
-#         system_context = generate_system_prompt(location_name, current_data)
-
-#         # Initialize the chat with System Instructions and previous history
-#         chat_session = client.chats.create(
-#             model="gemini-2.0-flash", 
-#             config={
-#                 "system_instruction": system_context,
-#                 "temperature": 0.7, # Balanced creativity and accuracy
-#             },
-#             history=formatted_history
-#         )
-
-#         # Send the message
-#         response = chat_session.send_message(user_query)
-        
-#         return jsonify({
-#             "answer": response.text,
-#             "status": "success"
-#         })
-
-#     except Exception as e:
-#         error_msg = str(e)
-#         logger.error(f"Gemini Error: {error_msg}")
-
-#         # LOGICAL FIX: Specific check for Rate Limits (Error 429)
-#         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
-#             return jsonify({
-#                 "answer": "### ⚠️ System Notice\nGeoGPT is currently handling too many requests. Please **wait 60 seconds** for the engine to reset before asking your next question.",
-#                 "status": "rate_limit"
-#             })
-
-#         # Handling potential 404 fallback for model string updates
-#         if "404" in error_msg:
-#              return jsonify({"answer": "I'm having trouble finding the specific AI model version. Please contact the developer to update the model string."}), 500
-
-#         return jsonify({"answer": "I am having trouble connecting to my AI brain. Please try again later."}), 500
-# In app.py - Replace your ask_geogpt route with this
 
 @app.route('/ask_geogpt', methods=['POST'])
 def ask_geogpt():
@@ -309,8 +201,256 @@ def ask_geogpt():
 
         # General error fallback
         return jsonify({"answer": "### ⚠️ Cognitive Lapse\nI encountered an error processing that request. Please try again in a moment."}), 500
+# import math
+# NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
+# def get_snapshot_identity(lat, lon, timeout=10):
+#     # Basic Position Logic
+#     hemisphere_ns = "Northern" if lat >= 0 else "Southern"
+#     hemisphere_ew = "Eastern" if lon >= 0 else "Western"
+    
+#     # Simple Continent Mapping (Approximate bounding boxes for speed)
+#     continent = "Unknown"
+#     if -35 <= lat <= 38 and -18 <= lon <= 52: continent = "Africa"
+#     elif 36 <= lat <= 71 and -25 <= lon <= 45: continent = "Europe"
+#     elif 10 <= lat <= 80 and 45 <= lon <= 180: continent = "Asia"
+#     elif 15 <= lat <= 72 and -170 <= lon <= -50: continent = "North America"
+#     elif -56 <= lat <= 13 and -82 <= lon <= -35: continent = "South America"
+#     elif -48 <= lat <= -10 and 110 <= lon <= 155: continent = "Australia/Oceania"
+#     elif lat < -60: continent = "Antarctica"
+
+#     try:
+#         res = requests.get(NOMINATIM_URL, params={
+#             "lat": lat, "lon": lon, "format": "json", "zoom": 10, "addressdetails": 1
+#         }, headers={"User-Agent": "GeoAI-Snapshot"}, timeout=timeout)
+        
+#         data = res.json()
+#         addr = data.get("address", {})
+        
+#         return {
+#             "identity": {
+#                 "name": addr.get("city") or addr.get("town") or "Inland Territory",
+#                 "hierarchy": f"{addr.get('state', 'N/A')}, {addr.get('country', 'N/A')}",
+#                 "continent": continent
+#             },
+#             "coordinates": {
+#                 "lat": f"{abs(lat)}° {'N' if lat>=0 else 'S'}",
+#                 "lng": f"{abs(lon)}° {'E' if lon>=0 else 'W'}",
+#                 "zone": f"UTM {int((lon + 180) / 6) + 1}" # Universal Transverse Mercator Zone
+#             },
+#             "physics": {
+#                 "hemisphere": f"{hemisphere_ns} / {hemisphere_ew}",
+#                 "landform": "Coastal" if addr.get("coast") else "Inland Plateau",
+#             },
+#             "summary": f"This site is situated in the {hemisphere_ns} Hemisphere within the continent of {continent}."
+#         }
+#     except:
+#         return {"error": "Service Timed Out"}
+    
+# @app.route("/snapshot_identity", methods=["POST", "OPTIONS"])
+# def snapshot_identity_route():
+#     if request.method == "OPTIONS":
+#         return jsonify({}), 200
+
+#     try:
+#         data = request.json or {}
+#         lat = float(data.get("latitude"))
+#         lon = float(data.get("longitude"))
+
+#         # Call the utility function you already have
+#         snapshot = get_snapshot_identity(lat, lon)
+#         return jsonify(snapshot)
+
+#     except Exception as e:
+#         logger.error(f"Snapshot Route Error: {e}")
+#         return jsonify({
+#             "error": "Internal Server Error",
+#             "professional_summary": "Snapshot service unavailable"
+#         }), 500
+
+import requests
 import math
 
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
+
+# def get_snapshot_identity(lat, lon, timeout=10):
+#     # Basic Position Logic
+#     hemisphere_ns = "Northern" if lat >= 0 else "Southern"
+#     hemisphere_ew = "Eastern" if lon >= 0 else "Western"
+    
+#     # Improved Continent Mapping based on wider bounding boxes
+#     continent = "Global"
+#     if -35 <= lat <= 38 and -20 <= lon <= 55: continent = "Africa"
+#     elif 34 <= lat <= 82 and -25 <= lon <= 45: continent = "Europe"
+#     elif -10 <= lat <= 82 and 25 <= lon <= 180: continent = "Asia"
+#     elif 7 <= lat <= 85 and -170 <= lon <= -50: continent = "North America"
+#     elif -57 <= lat <= 15 and -95 <= lon <= -30: continent = "South America"
+#     elif -50 <= lat <= -10 and 100 <= lon <= 180: continent = "Australia/Oceania"
+#     elif lat < -60: continent = "Antarctica"
+
+#     try:
+#         # Request with addressdetails=1 to get the full hierarchy
+#         res = requests.get(NOMINATIM_URL, params={
+#             "lat": lat, 
+#             "lon": lon, 
+#             "format": "jsonv2", 
+#             "zoom": 10, 
+#             "addressdetails": 1
+#         }, headers={"User-Agent": "GeoAI-Snapshot-App"}, timeout=timeout)
+        
+#         if res.status_code != 200:
+#             raise Exception("Geocoding service busy")
+
+#         data = res.json()
+#         addr = data.get("address", {})
+        
+#         # --- SAFE KEY RETRIEVAL LOGIC ---
+#         # Checks multiple OSM keys to prevent "N/A"
+#         country = addr.get("country", "International Waters")
+#         state = addr.get("state") or addr.get("province") or addr.get("state_district") or "N/A"
+#         district = addr.get("district") or addr.get("county") or addr.get("city_district") or "N/A"
+#         city = addr.get("city") or addr.get("town") or addr.get("village") or addr.get("suburb") or "Inland Territory"
+        
+#         # Dynamic Terrain/Context logic
+#         context = "Urban Infrastructure" if addr.get("city") or addr.get("town") else "Remote / Rural Landscape"
+
+#         summary = (
+#             f"This site is located in {city}, {state}, {country}. "
+#             f"It sits in the {hemisphere_ns} Hemisphere and falls within the {continent} landmass."
+#         )
+        
+#         return {
+#             "identity": {
+#                 "name": city,
+#                 "hierarchy": f"{state}, {country}",
+#                 "continent": continent
+#             },
+#             "coordinates": {
+#                 "lat": f"{abs(lat):.4f}° {'N' if lat>=0 else 'S'}",
+#                 "lng": f"{abs(lon):.4f}° {'E' if lon>=0 else 'W'}",
+#                 "zone": f"UTM {int((lon + 180) / 6) + 1}"
+#             },
+#             "political_identity": {
+#                 "country": country,
+#                 "iso_code": addr.get("country_code", "XX").upper()
+#             },
+#             "administrative_nesting": {
+#                 "state": state,
+#                 "district": district
+#             },
+#             "global_position": {
+#                 "continent": continent,
+#                 "hemisphere": f"{hemisphere_ns} / {hemisphere_ew}"
+#             },
+#             "terrain_context": context,
+#             "professional_summary": summary
+#         }
+#     except Exception as e:
+#         print(f"Geospatial Error: {e}")
+#         return {
+#             "professional_summary": "Geospatial identity resolution failed. Coordinate may be in an unmapped region or service is offline.",
+#             "identity": {"name": "Unknown", "continent": "Global"},
+#             "political_identity": {"country": "Unknown"}
+#         }
+import requests
+import math
+
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
+
+def calculate_haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0 # Earth radius in km
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+def get_snapshot_identity(lat, lon, timeout=10):
+    # 1. Global Distances
+    dist_to_equator = calculate_haversine(lat, lon, 0, lon)
+    dist_to_pole = calculate_haversine(lat, lon, 90, lon)
+    
+    # 2. Continent & Hemisphere Logic
+    hem_ns = "Northern" if lat >= 0 else "Southern"
+    hem_ew = "Eastern" if lon >= 0 else "Western"
+    
+    continent = "Global"
+    if -35 <= lat <= 38 and -20 <= lon <= 55: continent = "Africa"
+    elif 34 <= lat <= 82 and -25 <= lon <= 45: continent = "Europe"
+    elif -10 <= lat <= 82 and 25 <= lon <= 180: continent = "Asia"
+    elif 7 <= lat <= 85 and -170 <= lon <= -50: continent = "North America"
+    elif -57 <= lat <= 15 and -95 <= lon <= -30: continent = "South America"
+    elif -50 <= lat <= -10 and 100 <= lon <= 180: continent = "Australia/Oceania"
+
+    try:
+        res = requests.get(NOMINATIM_URL, params={
+            "lat": lat, "lon": lon, "format": "jsonv2", "zoom": 10, "addressdetails": 1
+        }, headers={"User-Agent": "Harshavardhan-GeoAI-V1-Unique"}, timeout=timeout)
+
+        data = res.json()
+        addr = data.get("address", {})
+        
+        # 2. Log this to your terminal so you can see if OSM is actually sending new data
+        # print(f"OSM Response for {lat},{lon}: {addr.get('country')}")
+
+        # Safe Retrieval with Fallbacks
+        country = addr.get("country", "International Waters")
+        state = addr.get("state") or addr.get("province") or addr.get("state_district") or "N/A"
+        district = addr.get("district") or addr.get("county") or addr.get("city_district") or "N/A"
+        city = addr.get("city") or addr.get("town") or addr.get("village") or "Inland Territory"
+        
+        # 3. Ocean Detection
+        # If OSM doesn't return a city/state, it's often a coastal or marine area
+        is_coastal = "city" not in addr and "town" not in addr
+        terrain_type = "Coastal / Marine" if is_coastal else "Inland Plateau"
+
+        return {
+            "identity": {
+                "name": city,
+                "hierarchy": f"{state}, {country}",
+                "continent": continent
+            },
+            "coordinates": {
+                "lat": f"{abs(lat):.4f}° {'N' if lat>=0 else 'S'}",
+                "lng": f"{abs(lon):.4f}° {'E' if lon>=0 else 'W'}",
+                "zone": f"UTM {int((lon + 180) / 6) + 1}"
+            },
+            "metrics": {
+                "equator_dist_km": round(dist_to_equator, 1),
+                "pole_dist_km": round(dist_to_pole, 1),
+            },
+            "political_identity": {
+                "country": country,
+                "iso_code": addr.get("country_code", "XX").upper()
+            },
+            "administrative_nesting": {
+                "state": state,
+                "district": district
+            },
+            "global_position": {
+                "continent": continent,
+                "hemisphere": f"{hem_ns} / {hem_ew}"
+            },
+            "terrain_context": terrain_type,
+            "professional_summary": f"Site {city} is {round(dist_to_equator)}km from the Equator in the {hem_ns} hemisphere."
+        }
+    except Exception:
+        return {"error": "Resolution Failed"}
+@app.route("/snapshot_identity", methods=["POST", "OPTIONS"])
+def snapshot_identity_route():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    try:
+        data = request.json or {}
+        lat = float(data.get("latitude"))
+        lon = float(data.get("longitude"))
+
+        # Fetch enriched geospatial data
+        snapshot = get_snapshot_identity(lat, lon)
+        return jsonify(snapshot)
+
+    except Exception as e:
+        logger.error(f"Snapshot Route Error: {e}")
+        return jsonify({"error": "Failed to resolve identity"}), 500
 def calculate_haversine_distance(lat1, lon1, lat2, lon2):
     """
     Calculates the straight-line distance (Great Circle) between two points 
