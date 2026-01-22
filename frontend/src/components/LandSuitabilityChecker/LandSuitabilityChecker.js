@@ -218,15 +218,10 @@ const FactorsSection = memo(({ data, latVal, lngVal, locationName, isDarkMode, v
           </button>
         </div>
       </div>
+      {/* 2. Factor Card: Terrain Factors (Charts/Bars) */}
+      {FactorCard}
 
-      {isCompareMode ? (
-        <>
-          {FactorCard}
-          <PotentialSection factors={data.factors} score={data.suitability_score} />
-        </>
-      ) : (
-        FactorCard
-      )}
+      
     </>
   );
 });
@@ -243,9 +238,10 @@ export default function LandSuitabilityChecker() {
   const [lng, setLng] = useState(() => localStorage.getItem("geo_lng") || "78.4867");
   const [zoom, setZoom] = useState(() => Number(localStorage.getItem("geo_zoom")) || 13);
   const [mapVariety, setMapVariety] = useState(() => localStorage.getItem("geo_map_style") || "streets");
-  
+  const [activeTab, setActiveTab] = useState("suitability");
   const [isDarkMode, setIsDarkMode] = useState(() => JSON.parse(localStorage.getItem("geo_theme")) ?? true);
-  const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
+  // const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
+  const [result, setResult] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(() => Number(localStorage.getItem("sidebar_width")) || 320);
   const [bottomHeight, setBottomHeight] = useState(() => Number(localStorage.getItem("bottom_height")) || 380);
   
@@ -648,7 +644,77 @@ useEffect(() => {
       </div>
     </div>
   );
+const renderTabContent = (data, coords, name, isFullWidth) => {
+  // If isFullWidth (Single Analysis), use your 'results-grid' class
+  // If not (Compare Mode), use 'column-stack' to fit inside the narrow pane
+  const containerClass = isFullWidth ? "results-grid" : "column-stack";
 
+  if (activeTab === "suitability") {
+    return (
+      <div className={containerClass}>
+        <div className={isFullWidth ? "col-1" : ""}>
+          <FactorsSection 
+            data={data} 
+            latVal={coords.lat} 
+            lngVal={coords.lng} 
+            locationName={name}
+            isDarkMode={isDarkMode} 
+            viewMode={viewMode} 
+            setViewMode={setViewMode} 
+            onOpenHistory={handleOpenHistory} 
+            mapVariety={mapVariety}
+            isCompareMode={!isFullWidth}
+          />
+        </div>
+        <div className={isFullWidth ? "col-2" : ""}>
+          {/* <PotentialSection factors={data.factors} score={data.suitability_score} /> */}
+          <EvidenceSection data={data} />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "environmental") {
+    return (
+      <div className={containerClass}>
+        <div className={isFullWidth ? "col-1" : ""}>
+          <WeatherCard weather={data?.weather} />
+        </div>
+        <div className={isFullWidth ? "col-2" : ""}>
+          {data.terrain_analysis && <TerrainSlope terrain={data.terrain_analysis} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "infrastructure") {
+    return (
+      // <div className="infrastructure-tab-view">
+      //   <div className="card glass-morphic">
+      //     <h3>Infrastructure & Amenities</h3>
+      //     <p className="subtitle">Proximity to essential services for {name}</p>
+      //     <div className="empty-results">Infrastructure Data Visualization Coming Soon</div>
+      //   </div>
+      // </div>
+      <div className={containerClass}>
+        <div className={isFullWidth ? "col-1" : ""}>
+          {/* SITE POTENTIAL ANALYSIS MOVED HERE */}
+          <PotentialSection factors={data.factors} score={data.suitability_score} />
+        </div>
+        <div className={isFullWidth ? "col-2" : ""}>
+          <div className="card glass-morphic">
+            <h3>Infrastructure Context</h3>
+            <p className="subtitle">Proximity to essential services for {name}</p>
+            <div className="empty-results">Nearby Places Data mapping here...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback return to avoid "undefined" errors
+  return null;
+};
   return (
     <div className="app-shell">
       <TopNav isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} analysisHistory={analysisHistory} onSearchResult={handleSearchResult} />
@@ -715,69 +781,61 @@ useEffect(() => {
 
         <div className="horizontal-resizer" onMouseDown={startResizingBottom} />
 
-        <section className="results-container" style={{ height: `${bottomHeight}px`, flex: `0 0 ${bottomHeight}px`, overflowY: 'auto' }}>
-          {(loading || compareLoading) && <div className="loading-overlay">Analyzing Terrain Data...</div>}
-          
-          {result && !isCompareMode && (
-            <div className="results-grid">
-              <div className="col-1">
-                <h4 className="pane-header">{locationAName.toUpperCase()}</h4>
-                <FactorsSection 
-                  data={result} latVal={analyzedCoords.lat} lngVal={analyzedCoords.lng} locationName={locationAName}
-                  isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
-                  isCompareMode={false}
-                />
-                 {/* In your FactorsSection return logic */}
-                  <WeatherCard weather={result?.weather} />
-                {/* ✅ Terrain & Slope Analysis (FINAL CHECK) */}
-                {result.terrain_analysis && (<TerrainSlope terrain={result.terrain_analysis} />)}
-               
-              </div>
-              <div className="col-2">
-                <PotentialSection factors={result.factors} score={result.suitability_score} />
-                <EvidenceSection data={result} />
-                
-              </div>
-            </div>
-          )}
+            <section className="results-container" style={{ height: `${bottomHeight}px`, flex: `0 0 ${bottomHeight}px`, overflowY: 'auto' }}>
+            
+            {/* The result check wraps everything below */}
+            {result ? (
+              <>
+                {/* 1. Tab Bar Navigation (Visible only when result exists) */}
+                <div className="results-tab-bar glass-morphic">
+                  <button className={activeTab === "suitability" ? "active" : ""} onClick={() => setActiveTab("suitability")}>🎯 Suitability</button>
+                  <button className={activeTab === "environmental" ? "active" : ""} onClick={() => setActiveTab("environmental")}>⛰️ Environmental</button>
+                  <button className={activeTab === "infrastructure" ? "active" : ""} onClick={() => setActiveTab("infrastructure")}>📋 Site Insights</button>
+                </div>
 
-          {isCompareMode && (
-            <div className="compare-layout-ditto" style={{ display: 'flex', height: '100%', width: '100%' }}>
-                <div className="compare-pane-ditto">
-                    <h4 className="pane-header">{locationAName.toUpperCase()}</h4>
-                    {result ? (
-                      <>
-                        <FactorsSection 
-                          data={result} latVal={analyzedCoords.lat} lngVal={analyzedCoords.lng} locationName={locationAName}
-                          isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
-                          isCompareMode={true}
-                        />
-                        {/* FIXED: Correct result object for Side A */}
-                      <WeatherCard weather={result?.weather} />
-                        {result.terrain_analysis && (<TerrainSlope terrain={result.terrain_analysis} />)}
-                        <EvidenceSection data={result} />
-                      </>
-                    ) : <div className="empty-results">Analyzing Site A...</div>}
+                {/* 2. Loading State */}
+                {(loading || compareLoading) && <div className="loading-overlay">Analyzing Terrain Data...</div>}
+
+                {/* 3. Data Viewport */}
+                <div className="tab-viewport">
+                  {/* SINGLE ANALYSIS VIEW */}
+                  {!isCompareMode && (
+                    <div className="single-analysis-view">
+                      <h4 className="pane-header">{locationAName.toUpperCase()} - FULL TERRAIN REPORT</h4>
+                      {renderTabContent(result, analyzedCoords, locationAName, true)}
+                    </div>
+                  )}
+
+                  {/* COMPARE MODE */}
+                  {isCompareMode && (
+                    <div className="compare-layout-ditto" style={{ display: 'flex', height: '100%', width: '100%' }}>
+                      <div className="compare-pane-ditto">
+                        <h4 className="pane-header">{locationAName.toUpperCase()}</h4>
+                        {renderTabContent(result, analyzedCoords, locationAName, false)}
+                      </div>
+                      <div className="compare-pane-ditto">
+                        <h4 className="pane-header">{locationBName.toUpperCase() || "SITE B"}</h4>
+                        {compareResult ? (
+                          renderTabContent(compareResult, analyzedCoordsB, locationBName, false)
+                        ) : (
+                          <div className="empty-results">Waiting for Site B selection...</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="compare-pane-ditto">
-                    <h4 className="pane-header">{compareName.toUpperCase() || "SITE B"}</h4>
-                    {compareResult ? (
-                        <>
-                        <FactorsSection 
-                          data={compareResult} latVal={analyzedCoordsB.lat || bLatInput} lngVal={analyzedCoordsB.lng || bLngInput} locationName={compareName || "Site B"}
-                          isDarkMode={isDarkMode} viewMode={viewMode} setViewMode={setViewMode} onOpenHistory={handleOpenHistory} mapVariety={mapVariety}
-                          isCompareMode={true}
-                        />
-                        {/* In your FactorsSection return logic */}
-                          <WeatherCard weather={compareResult?.weather} />
-                        {compareResult?.terrain_analysis && (<TerrainSlope terrain={compareResult.terrain_analysis} />)}
-                        <EvidenceSection data={compareResult} />
-                        </>
-                    ) : <div className="empty-results">Waiting for selection or Analyzing Site B...</div>}
+              </>
+            ) : (
+              /* This displays when the page is freshly opened and no analysis has run */
+              <div className="welcome-placeholder">
+                <div className="placeholder-content">
+                    <span className="placeholder-icon">🌍</span>
+                    <h3>Ready for Analysis</h3>
+                    <p>Select a location on the map or search above to begin geospatial synthesis.</p>
                 </div>
-            </div>
-          )}
-        </section>
+              </div>
+            )}
+          </section>
 
         <div className={`geogpt-fixed-container ${isGptOpen ? 'expanded' : ''}`}>
             {isGptOpen ? (
@@ -855,3 +913,8 @@ useEffect(() => {
     </div>
   );
 }
+
+
+
+
+
