@@ -8,7 +8,10 @@ import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask import Flask, request, jsonify
+import logging
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 # --- CRITICAL: Path Injection to ensure geogpt_config is found ---
 current_dir = os.path.dirname(os.path.abspath(__file__))

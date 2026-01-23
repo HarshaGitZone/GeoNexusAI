@@ -335,24 +335,6 @@ const [snapshotLoading, setSnapshotLoading] = useState(false);
     }
   }, [debug]);
 
-  //  const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) => {
-  //   const curLat = parseFloat(targetLat).toFixed(4);
-  //   const curLng = parseFloat(targetLng).toFixed(4);
-
-  //   const matchedPlace = savedPlaces.find(p => 
-  //     p.lat.toFixed(4) === curLat && p.lng.toFixed(4) === curLng
-  //   );
-  //   if (matchedPlace) return matchedPlace.name;
-
-  //   if (isNearbyDevice(targetLat, targetLng, deviceLocation)) {
-  //     return "My Location";
-  //   }
-
-  //   const userName = prompt(`Enter a name for the site at ${curLat}, ${curLng}:`);
-  //   return userName || defaultFallback;
-  // }, [savedPlaces, deviceLocation]);
-
-  // Inside LandSuitabilityChecker.js
 const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) => {
     const curLat = parseFloat(targetLat).toFixed(4);
     const curLng = parseFloat(targetLng).toFixed(4);
@@ -372,68 +354,6 @@ const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) 
     const userName = prompt(`New location detected at ${curLat}, ${curLng}. Enter a name:`);
     return userName || defaultFallback;
 }, [savedPlaces, deviceLocation]);
-// const handleCompareSelect = useCallback(async (tLat, tLng, existingName = null) => {
-//       setIsSelectingB(false);
-//       setBLatInput(tLat.toString());
-//       setBLngInput(tLng.toString());
-      
-//       let name = existingName || resolveLocationName(tLat, tLng, "Site B");
-      
-//       setCompareName(name);
-//       setLocationBName(name);
-//       setCompareLoading(true);
-//       setIsCompareMode(true);
-//       setCompareResult(null); 
-
-//       try { 
-//         const data = await performAnalysis(tLat, tLng); 
-//         setCompareResult(data);
-//         setSnapshotDataB(snapData);
-//         setAnalyzedCoordsB({ lat: tLat.toString(), lng: tLng.toString() });
-//       } catch (err) { console.error(err); } 
-//       finally { setCompareLoading(false); }
-//   }, [resolveLocationName, performAnalysis]);
-
-//   useEffect(() => {
-//     if (navigator.geolocation) {
-//       navigator.geolocation.getCurrentPosition((pos) => {
-//         setDeviceLocation({
-//           lat: pos.coords.latitude.toFixed(4),
-//           lng: pos.coords.longitude.toFixed(4)
-//         });
-//       });
-//     }
-//   }, []);
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   const sharedLat = params.get("lat");
-//   const sharedLng = params.get("lng");
-//   const sharedNameA = params.get("nameA"); // Get name A
-//   const sharedBLat = params.get("bLat");
-//   const sharedBLng = params.get("bLng");
-//   const sharedNameB = params.get("nameB"); // Get name B
-//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
-  
-//   if (sharedLat && sharedLng) {
-//     setLat(sharedLat);
-//     setLng(sharedLng);
-//     if (sharedNameA) setLocationAName(sharedNameA); // Set name A
-//   }
-
-//   if (isSharedCompare && sharedBLat && sharedBLng) {
-//     setBLatInput(sharedBLat);
-//     setBLngInput(sharedBLng);
-//     if (sharedNameB) {
-//         setLocationBName(sharedNameB); // Set name B
-//         setCompareName(sharedNameB);
-//     }
-//     setShowLocationB(true);
-//     setIsCompareMode(true);
-    
-//     // Pass the name directly to handleCompareSelect to prevent logic triggering prompt
-//     handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
-//   }
-// }, [handleCompareSelect]); 
 
 
 const handleCompareSelect = useCallback(async (tLat, tLng, existingName = null) => {
@@ -477,307 +397,7 @@ useEffect(() => {
   }
 }, []);
 
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   const sharedLat = params.get("lat");
-//   const sharedLng = params.get("lng");
-//   const sharedNameA = params.get("nameA"); // Get name A
-//   const sharedBLat = params.get("bLat");
-//   const sharedBLng = params.get("bLng");
-//   const sharedNameB = params.get("nameB"); // Get name B
-//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
-  
-//   if (sharedLat && sharedLng) {
-//     setLat(sharedLat);
-//     setLng(sharedLng);
-//     if (sharedNameA) setLocationAName(sharedNameA); // Set name A
-//   }
 
-//   if (isSharedCompare && sharedBLat && sharedBLng) {
-//     setBLatInput(sharedBLat);
-//     setBLngInput(sharedBLng);
-//     if (sharedNameB) {
-//         setLocationBName(sharedNameB); // Set name B
-//         setCompareName(sharedNameB);
-//     }
-    
-//     setShowLocationB(true);
-//     setIsCompareMode(true);
-    
-//     // Pass the name directly to handleCompareSelect to prevent logic triggering prompt
-//     handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
-//   }
-// }, [handleCompareSelect]);
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   const sharedLat = params.get("lat");
-//   const sharedLng = params.get("lng");
-//   const sharedNameA = params.get("nameA");
-//   const sharedBLat = params.get("bLat");
-//   const sharedBLng = params.get("bLng");
-//   const sharedNameB = params.get("nameB");
-//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
-  
-//   // Flag to check if we should trigger the main analysis
-//   let shouldAnalyze = false;
-
-//   if (sharedLat && sharedLng) {
-//     setLat(sharedLat);
-//     setLng(sharedLng);
-//     if (sharedNameA) setLocationAName(decodeURIComponent(sharedNameA));
-//     shouldAnalyze = true; 
-//   }
-
-//   if (isSharedCompare && sharedBLat && sharedBLng) {
-//     setBLatInput(sharedBLat);
-//     setBLngInput(sharedBLng);
-//     if (sharedNameB) {
-//         const decodedB = decodeURIComponent(sharedNameB);
-//         setLocationBName(decodedB);
-//         setCompareName(decodedB);
-//     }
-//     setShowLocationB(true);
-//     setIsCompareMode(true);
-    
-//     // This handles Site B analysis
-//     handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
-//   }
-
-//   // NEW: Trigger the main handleSubmit automatically if we have Site A params
-//   if (shouldAnalyze) {
-//     // We use a tiny timeout to ensure the state updates for lat/lng are processed
-//     const timer = setTimeout(() => {
-//       handleSubmit(); 
-//     }, 500);
-//     return () => clearTimeout(timer);
-//   }
-// }, [handleCompareSelect]); // Keep handleCompareSelect in deps if it's memoized
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   const sharedLat = params.get("lat");
-//   const sharedLng = params.get("lng");
-//   const sharedNameA = params.get("nameA");
-//   const sharedBLat = params.get("bLat");
-//   const sharedBLng = params.get("bLng");
-//   const sharedNameB = params.get("nameB");
-//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
-  
-//   let shouldAnalyze = false;
-
-//   if (sharedLat && sharedLng) {
-//     setLat(sharedLat);
-//     setLng(sharedLng);
-//     if (sharedNameA) {
-//       // Decode name to prevent prompt logic from triggering later
-//       setLocationAName(decodeURIComponent(sharedNameA));
-//     }
-//     shouldAnalyze = true; 
-//   }
-
-//   if (isSharedCompare && sharedBLat && sharedBLng) {
-//     setBLatInput(sharedBLat);
-//     setBLngInput(sharedBLng);
-    
-//     const decodedB = sharedNameB ? decodeURIComponent(sharedNameB) : "Site B";
-//     setLocationBName(decodedB);
-//     setCompareName(decodedB);
-    
-//     // Explicitly set UI modes for side-by-side view
-//     setShowLocationB(true);
-//     setIsCompareMode(true);
-    
-//     // Pass the decoded name directly to avoid the prompt popup
-//     handleCompareSelect(sharedBLat, sharedBLng, decodedB);
-//   }
-
-//   if (shouldAnalyze) {
-//     const timer = setTimeout(() => {
-//       handleSubmit(); 
-//     }, 500);
-//     return () => clearTimeout(timer);
-//   }
-// }, [handleCompareSelect]);
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   const sharedLat = params.get("lat");
-//   const sharedLng = params.get("lng");
-//   const sharedNameA = params.get("nameA");
-//   const sharedBLat = params.get("bLat");
-//   const sharedBLng = params.get("bLng");
-//   const sharedNameB = params.get("nameB");
-//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
-  
-//   let shouldAnalyze = false;
-
-//   if (sharedLat && sharedLng) {
-//     // 1. Set main location state
-//     setLat(sharedLat);
-//     setLng(sharedLng);
-    
-//     if (sharedNameA) {
-//       // Decode name here so handleSubmit sees a set name and skips the prompt
-//       setLocationAName(decodeURIComponent(sharedNameA));
-//     }
-//     shouldAnalyze = true; 
-//   }
-
-//   if (isSharedCompare && sharedBLat && sharedBLng) {
-//     // 2. Set comparison inputs
-//     setBLatInput(sharedBLat);
-//     setBLngInput(sharedBLng);
-    
-//     // Decode Site B name
-//     const decodedB = sharedNameB ? decodeURIComponent(sharedNameB) : "Site B";
-//     setLocationBName(decodedB);
-//     setCompareName(decodedB);
-    
-//     // 3. Enable comparison UI modes
-//     setShowLocationB(true);
-//     setIsCompareMode(true);
-    
-//     // 4. Trigger Site B analysis immediately using the decoded name to bypass prompts
-//     handleCompareSelect(sharedBLat, sharedBLng, decodedB);
-//   }
-
-//   // 5. Auto-trigger the main analysis for Site A
-//   if (shouldAnalyze) {
-//     const timer = setTimeout(() => {
-//       handleSubmit(); 
-//     }, 500);
-//     return () => clearTimeout(timer);
-//   }
-// }, [handleCompareSelect]);
-// const handleSubmit = useCallback(async (e) => {
-//   // Safe check for automatic calls from useEffect (where 'e' might be undefined)
-//   if (e && e.preventDefault) e.preventDefault();
-//   // Check if coordinates have changed since last analysis
-//   const hasAChanged = analyzedCoords.lat !== lat || analyzedCoords.lng !== lng;
-//   // 1. Determine Name A: Use existing state if set (prevents prompt on shared links), 
-//   // otherwise use the resolver (which checks Saved Places, then My Loc, then Prompts).
-//   // const nameA = (locationAName && locationAName !== "Site A") 
-//   //   ? locationAName 
-//   //   : resolveLocationName(lat, lng, "Site A");
-//   let nameA = locationAName;
-//   if (locationAName === "Site A" || hasAChanged) {
-//     nameA = resolveLocationName(lat, lng, "Site A");
-//     setLocationAName(nameA);
-//   }
-  
-//   setLocationAName(nameA);
-
-
-//   // Reset results and start loading states
-//   setResult(null);
-//   setCompareResult(null);
-//   setSnapshotData(null);
-  
-//   // Ensure snapshotDataB state is cleared correctly
-//   if (setSnapshotDataB) setSnapshotDataB(null);
-  
-//   setLoading(true);
-//   setSnapshotLoading(true);
-
-//   // Capture current state of comparison for this specific submission
-//   const activeCompareMode = showLocationB && bLatInput && bLngInput;
-
-//   if (activeCompareMode) {
-//     setIsCompareMode(true);
-//     setCompareLoading(true);
-    
-//     // Determine Name B for UI consistency
-//     const nameB = (locationBName && locationBName !== "Site B") 
-//       ? locationBName 
-//       : resolveLocationName(bLatInput, bLngInput, "Site B");
-      
-//     setLocationBName(nameB);
-//     setCompareName(nameB);
-//   } else {
-//     setIsCompareMode(false);
-//   }
-
-//   // Build the list of parallel tasks
-//   const tasks = [
-//     performAnalysis(lat, lng),
-//     fetchSnapshot(lat, lng)
-//   ];
-
-//   if (activeCompareMode) {
-//     tasks.push(performAnalysis(bLatInput, bLngInput));
-//     tasks.push(fetchSnapshot(bLatInput, bLngInput));
-//   }
-
-//   try {
-//     const results = await Promise.allSettled(tasks);
-
-//     // --- SITE A RESULTS & UNIFIED HISTORY ---
-//     if (results[0].status === 'fulfilled') {
-//       const analysisData = results[0].value;
-//       setResult(analysisData);
-//       setAnalyzedCoords({ lat, lng });
-
-//       // Identify Score B from the task results (index 2) rather than state
-//       // const scoreBVal = (activeCompareMode && results[2] && results[2].status === 'fulfilled') 
-//       //   ? results[2].value.suitability_score 
-//       //   : undefined;
-//       const scoreBVal = (activeCompareMode && results[2]?.status === 'fulfilled') 
-//     ? results[2].value.suitability_score 
-//     : undefined;
-
-//       // Final check for nameB to ensure the history entry isn't saved as "Site B"
-//       const finalNameB = activeCompareMode ? (locationBName !== "Site B" ? locationBName : resolveLocationName(bLatInput, bLngInput, "Site B")) : null;
-
-//       // UNIFIED HISTORY ENTRY: Stores both sites in one row if comparing.
-//       const newHistoryEntry = {
-//         name: nameA,
-//         lat,
-//         lng,
-//         score: analysisData.suitability_score,
-//         timestamp: new Date().getTime(),
-//         // Comparison Data:
-//         isCompareMode: activeCompareMode,
-//         nameB: finalNameB,
-//         bLat: activeCompareMode ? bLatInput : null,
-//         bLng: activeCompareMode ? bLngInput : null,
-//         scoreB: scoreBVal 
-//       };
-
-//       setAnalysisHistory(prev => {
-//         const updated = [newHistoryEntry, ...prev].slice(0, 20);
-//         localStorage.setItem("analysis_history", JSON.stringify(updated));
-//         return updated;
-//       });
-//     }
-
-//     if (results[1].status === 'fulfilled') {
-//       setSnapshotData(results[1].value);
-//     }
-
-//     // --- SITE B DATA PROCESSING (UI states only) ---
-//     if (activeCompareMode) {
-//       if (results[2] && results[2].status === 'fulfilled') {
-//         const compareData = results[2].value;
-//         setCompareResult(compareData);
-//         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
-//       }
-
-//       if (results[3] && results[3].status === 'fulfilled') {
-//         if (setSnapshotDataB) setSnapshotDataB(results[3].value);
-//       }
-//     }
-
-//   } catch (err) {
-//     console.error("Critical Analysis Error:", err);
-//   } finally {
-//     setLoading(false);
-//     setCompareLoading(false);
-//     setSnapshotLoading(false);
-//   }
-// }, [
-//   lat, lng, locationAName, locationBName, bLatInput, bLngInput, showLocationB, 
-//   resolveLocationName, performAnalysis, fetchSnapshot, setSnapshotDataB, 
-//   setAnalysisHistory,analyzedCoords.lat,   // <--- Add this
-//   analyzedCoords.lng,
-// ]);
 const handleSubmit = useCallback(async (e) => {
   // Safe check for automatic calls from useEffect (where 'e' might be undefined)
   if (e && e.preventDefault) e.preventDefault();
@@ -917,47 +537,8 @@ const handleSubmit = useCallback(async (e) => {
   analyzedCoords.lat, 
   analyzedCoords.lng,
 ]);
-// Automatically reset names to defaults when coordinates are manually changed
-// This ensures resolveLocationName triggers a prompt on the next submission
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   // Only reset if NOT currently loading a shared link
-//   if (!params.get("lat")) {
-//     setLocationAName("Site A");
-//   }
-// }, [lat, lng]);
 
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   if (!params.get("bLat")) {
-//     setLocationBName("Site B");
-//   }
-// }, [bLatInput, bLngInput]);
-// Monitor Coordinate Changes to Reset Names/Analysis for Site A
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  // 1. Skip logic if currently loading a shared link
-  if (params.get("lat")) return; 
 
-  const currentLat = parseFloat(lat).toFixed(4);
-  const currentLng = parseFloat(lng).toFixed(4);
-
-  // 2. Check if the new coordinates match a Saved Place
-  const matched = savedPlaces.find(p => 
-    parseFloat(p.lat).toFixed(4) === currentLat && 
-    parseFloat(p.lng).toFixed(4) === currentLng
-  );
-
-  if (matched) {
-    // 3. If it matches a saved place, adopt the saved name immediately
-    setLocationAName(matched.name);
-  } else if (analyzedCoords.lat && lat !== analyzedCoords.lat.toString()) {
-    // 4. Reset to "Site A" only if it's a new unknown location 
-    // AND the coordinates have actually moved from the last analysis
-    setLocationAName("Site A");
-    setResult(null); 
-  }
-}, [lat, lng, analyzedCoords.lat, savedPlaces]); 
 
 // Monitor Coordinate Changes to Reset Names/Analysis for Site B
 useEffect(() => {
@@ -983,30 +564,7 @@ useEffect(() => {
     setCompareResult(null);
   }
 }, [bLatInput, bLngInput, analyzedCoordsB.lat, savedPlaces]);
-// Monitor Coordinate Changes to Reset Names/Analysis
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//     if (params.get("lat")) return; // Don't interfere with share linkss
-//   // Only reset if we aren't currently loading from a link
-//   if (!params.get("lat")) {
-//      // If coordinates moved away from the analyzed ones, reset the name to trigger prompt
-//      if (analyzedCoords.lat && lat !== analyzedCoords.lat.toString()) {
-//         setLocationAName("Site A");
-//         setResult(null); // Clear old results as they are no longer valid for new coords
-//      }
-//   }
-// }, [lat, lng, analyzedCoords]);
 
-// useEffect(() => {
-//   const params = new URLSearchParams(window.location.search);
-//   if (!params.get("bLat") && analyzedCoordsB.lat) {
-//      if (bLatInput !== analyzedCoordsB.lat.toString()) {
-//         setLocationBName("Site B");
-//         setCompareResult(null);
-//      }
-//   }
-// }, [bLatInput, bLngInput, analyzedCoordsB]);
-// Monitor Coordinate Changes to Reset Names/Analysis for Site A
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
   if (params.get("lat")) return; // Don't interfere with share links
@@ -1030,29 +588,6 @@ useEffect(() => {
   }
 }, [lat, lng, analyzedCoords, savedPlaces]); // Added savedPlaces to dependencies
 
-// Monitor Coordinate Changes to Reset Names/Analysis for Site B
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("bLat")) return; // Don't interfere with share links
-
-  const currentLatB = parseFloat(bLatInput).toFixed(4);
-  const currentLngB = parseFloat(bLngInput).toFixed(4);
-
-  // 1. Check if the new coordinates match a Saved Place
-  const matchedB = savedPlaces.find(p => 
-    p.lat.toFixed(4) === currentLatB && p.lng.toFixed(4) === currentLngB
-  );
-
-  if (matchedB) {
-    // Automatically adopt the saved name
-    setLocationBName(matchedB.name);
-  } else if (analyzedCoordsB.lat && bLatInput !== analyzedCoordsB.lat.toString()) {
-    // 2. Only reset to "Site B" if coordinates moved away from last analysis 
-    // AND it's not a saved place
-    setLocationBName("Site B");
-    setCompareResult(null);
-  }
-}, [bLatInput, bLngInput, analyzedCoordsB, savedPlaces]); // Added savedPlaces to dependencies
 useEffect(() => {
   // Check if we already handled the URL analysis to prevent loops
   if (initialAnalysisRef.current) return;
@@ -1100,9 +635,7 @@ useEffect(() => {
 
   // 5. Auto-trigger the main analysis for Site A
   if (shouldAnalyze) {
-    // A small timeout ensures that the state updates for lat/lng are 
-    // fully processed before the API call begins
-    // Mark as run IMMEDIATELY before starting the async call
+
     initialAnalysisRef.current = true;
     const timer = setTimeout(() => {
       handleSubmit(); 
@@ -1113,9 +646,49 @@ useEffect(() => {
   // handleSubmit is now included to satisfy the ESLint warning
 }, [handleCompareSelect, handleSubmit]);
 
-/**
-   * Resolve site name based on: Saved Places > My Location > Prompt
-   */
+// ✅ FIX: Ensure comparison history is saved after URL-based analysis (DEPLOYED FIX)
+useEffect(() => {
+  if (!result || !compareResult || !isCompareMode) return;
+
+  setAnalysisHistory(prev => {
+    const exists = prev.some(
+      h =>
+        h.lat === lat &&
+        h.lng === lng &&
+        h.bLat === bLatInput &&
+        h.bLng === bLngInput
+    );
+    if (exists) return prev;
+
+    const entry = {
+      name: locationAName,
+      lat,
+      lng,
+      score: result.suitability_score,
+      isCompareMode: true,
+      nameB: locationBName,
+      bLat: bLatInput,
+      bLng: bLngInput,
+      scoreB: compareResult.suitability_score,
+      timestamp: Date.now()
+    };
+
+    const updated = [entry, ...prev].slice(0, 20);
+    localStorage.setItem("analysis_history", JSON.stringify(updated));
+    return updated;
+  });
+}, [
+  result,
+  compareResult,
+  isCompareMode,
+  lat,
+  lng,
+  bLatInput,
+  bLngInput,
+  locationAName,
+  locationBName
+]);
+
  
 
 
@@ -1149,18 +722,6 @@ useEffect(() => {
     } finally { setGptLoading(false); }
   };
 
-  // useEffect(() => {
-  //   localStorage.setItem("geo_lat", lat);
-  //   localStorage.setItem("geo_lng", lng);
-  //   localStorage.setItem("geo_zoom", zoom);
-  //   localStorage.setItem("geo_theme", JSON.stringify(isDarkMode));
-  //   localStorage.setItem("geo_map_style", mapVariety);
-  //   localStorage.setItem("sidebar_width", sidebarWidth);
-  //   localStorage.setItem("bottom_height", bottomHeight);
-  //   localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
-  //   if (result) localStorage.setItem("geo_last_result", JSON.stringify(result));
-  //   document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
-  // }, [lat, lng, zoom, isDarkMode, sidebarWidth, bottomHeight, result, savedPlaces, mapVariety]);
   useEffect(() => {
   // --- Standard UI State ---
   localStorage.setItem("geo_lat", lat);
@@ -1207,28 +768,7 @@ useEffect(() => {
   bLatInput, bLngInput, locationBName, compareResult
 ]);
 
-  // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const sharedLat = params.get("lat");
-  //   const sharedLng = params.get("lng");
-  //   const sharedBLat = params.get("bLat");
-  //   const sharedBLng = params.get("bLng");
-  //   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
-
-  //   if (sharedLat && sharedLng) {
-  //       setLat(sharedLat);
-  //       setLng(sharedLng);
-  //   }
-
-  //   if (isSharedCompare && sharedBLat && sharedBLng) {
-  //       setBLatInput(sharedBLat);
-  //       setBLngInput(sharedBLng);
-  //       setShowLocationB(true);
-  //       setIsCompareMode(true);
-  //       handleCompareSelect(sharedBLat, sharedBLng);
-  //   }
-  // }, [handleCompareSelect]);
-  // LandSuitabilityChecker.js - inside the useEffect for URL params
+ 
 
 
   const handleMouseMove = useCallback((e) => {

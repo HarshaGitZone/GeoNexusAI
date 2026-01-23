@@ -252,7 +252,12 @@ const handleNavMouseLeave = () => {
   {analysisHistory.length > 0 ? (
     analysisHistory.map((item, index) => {
       // 1. Logic remains unchanged: Identify if this was a comparison
-      const isComparison = item.isCompareMode || (item.bLat && item.bLng);
+      // const isComparison = item.isCompareMode || (item.bLat && item.bLng);
+      const isComparison =
+        item.isCompareMode ||
+        (item.bLat && item.bLng) ||
+        (item.nameB && item.nameB !== "Site B");
+
 
       // 2. Logic remains unchanged: Construct the dynamic share link
       const baseUrl = `${window.location.origin}${window.location.pathname}`;
