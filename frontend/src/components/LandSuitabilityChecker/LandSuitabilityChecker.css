@@ -5184,3 +5184,64 @@ html, body, #root, .app-shell {
 
 
 
+/* Result Tab Bar Container */
+.results-tab-bar.glass-morphic {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+/* Base Tab Button Style */
+.results-tab-bar button {
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: #64748b; /* Subtle grey for inactive */
+}
+
+/* --- LIGHT THEME SPECIFIC UPDATES --- */
+[data-theme='light'] .results-tab-bar button {
+  color: #475569;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='light'] .results-tab-bar button:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1e293b;
+}
+
+/* Active State for Light Theme */
+[data-theme='light'] .results-tab-bar button.active {
+  background: #ffffff;
+  color: #2563eb; /* Professional Blue */
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Color Accents for specific tabs in Light Mode */
+[data-theme='light'] .results-tab-bar button.active:nth-child(1) {
+  border-bottom: 3px solid #2563eb; /* Suitability - Blue */
+}
+
+[data-theme='light'] .results-tab-bar button.active:nth-child(2) {
+  border-bottom: 3px solid #059669; /* Locational Intelligence - Green */
+}
+
+[data-theme='light'] .results-tab-bar button.active:nth-child(3) {
+  border-bottom: 3px solid #7c3aed; /* Strategic Utility - Purple */
+}
+
+/* --- DARK THEME PRESERVATION --- */
+[data-theme='dark'] .results-tab-bar button.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.2);
+}

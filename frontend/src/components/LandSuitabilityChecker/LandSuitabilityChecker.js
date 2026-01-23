@@ -228,6 +228,7 @@ const FactorsSection = memo(({ data, latVal, lngVal, locationName, isDarkMode, v
 });
 
 export default function LandSuitabilityChecker() {
+  const initialAnalysisRef = useRef(false); // Flag to prevent double execution on mount
   const [mobileCompareSite, setMobileCompareSite] = useState("A");
   const [deviceLocation, setDeviceLocation] = useState({ lat: null, lng: null });
   const [analysisHistory, setAnalysisHistory] = useState(() => 
@@ -243,15 +244,22 @@ export default function LandSuitabilityChecker() {
   const [activeTab, setActiveTab] = useState("suitability");
   const [isDarkMode, setIsDarkMode] = useState(() => JSON.parse(localStorage.getItem("geo_theme")) ?? true);
   // const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
-  const [result, setResult] = useState(null);
+  // const [result, setResult] = useState(null);
+  const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
+  const [compareResult, setCompareResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_compare_result")) || null);
+const [isCompareMode, setIsCompareMode] = useState(() => JSON.parse(localStorage.getItem("geo_is_compare")) || false);
+const [showLocationB, setShowLocationB] = useState(() => JSON.parse(localStorage.getItem("geo_show_b")) || false);
+const [locationAName, setLocationAName] = useState(() => localStorage.getItem("geo_name_a") || "Site A");
+const [locationBName, setLocationBName] = useState(() => localStorage.getItem("geo_name_b") || "Site B");
   const [sidebarWidth, setSidebarWidth] = useState(() => Number(localStorage.getItem("sidebar_width")) || 320);
   const [bottomHeight, setBottomHeight] = useState(() => Number(localStorage.getItem("bottom_height")) || 380);
-  
+  // LandSuitabilityChecker.js - At the top of the component
+
   const isResizingSide = useRef(false);
   const isResizingBottom = useRef(false);
 
-  const [isCompareMode, setIsCompareMode] = useState(false);
-  const [compareResult, setCompareResult] = useState(null);
+  // const [isCompareMode, setIsCompareMode] = useState(false);
+  // const [compareResult, setCompareResult] = useState(null);
   const [compareName, setCompareName] = useState("");
   const [isSelectingB, setIsSelectingB] = useState(false);
   const [compareLoading, setCompareLoading] = useState(false);
@@ -270,9 +278,9 @@ const [editingIndex, setEditingIndex] = useState(null);
   const [savedPlaces, setSavedPlaces] = useState(() => JSON.parse(localStorage.getItem("savedPlaces")) || []);
   const [analyzedCoords, setAnalyzedCoords] = useState({ lat: null, lng: null });
   const [analyzedCoordsB, setAnalyzedCoordsB] = useState({ lat: null, lng: null });
-  const [locationAName, setLocationAName] = useState("Site A");
-  const [locationBName, setLocationBName] = useState("Site B");
-  const [showLocationB, setShowLocationB] = useState(false);
+  // const [locationAName, setLocationAName] = useState("Site A");
+  // const [locationBName, setLocationBName] = useState("Site B");
+  // const [showLocationB, setShowLocationB] = useState(false);
   const [isBFromSavedPlace] = useState(false);
   
   const [showNearby, setShowNearby] = useState(false);
@@ -327,23 +335,43 @@ const [snapshotLoading, setSnapshotLoading] = useState(false);
     }
   }, [debug]);
 
-   const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) => {
+  //  const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) => {
+  //   const curLat = parseFloat(targetLat).toFixed(4);
+  //   const curLng = parseFloat(targetLng).toFixed(4);
+
+  //   const matchedPlace = savedPlaces.find(p => 
+  //     p.lat.toFixed(4) === curLat && p.lng.toFixed(4) === curLng
+  //   );
+  //   if (matchedPlace) return matchedPlace.name;
+
+  //   if (isNearbyDevice(targetLat, targetLng, deviceLocation)) {
+  //     return "My Location";
+  //   }
+
+  //   const userName = prompt(`Enter a name for the site at ${curLat}, ${curLng}:`);
+  //   return userName || defaultFallback;
+  // }, [savedPlaces, deviceLocation]);
+
+  // Inside LandSuitabilityChecker.js
+const resolveLocationName = useCallback((targetLat, targetLng, defaultFallback) => {
     const curLat = parseFloat(targetLat).toFixed(4);
     const curLng = parseFloat(targetLng).toFixed(4);
 
+    // Condition 1: Check Saved Places
     const matchedPlace = savedPlaces.find(p => 
       p.lat.toFixed(4) === curLat && p.lng.toFixed(4) === curLng
     );
     if (matchedPlace) return matchedPlace.name;
 
+    // Condition 2: Check if it's the User's current physical device location
     if (isNearbyDevice(targetLat, targetLng, deviceLocation)) {
       return "My Location";
     }
 
-    const userName = prompt(`Enter a name for the site at ${curLat}, ${curLng}:`);
+    // Condition 3: Prompt for new name because coordinates changed
+    const userName = prompt(`New location detected at ${curLat}, ${curLng}. Enter a name:`);
     return userName || defaultFallback;
-  }, [savedPlaces, deviceLocation]);
-
+}, [savedPlaces, deviceLocation]);
 // const handleCompareSelect = useCallback(async (tLat, tLng, existingName = null) => {
 //       setIsSelectingB(false);
 //       setBLatInput(tLat.toString());
@@ -449,36 +477,641 @@ useEffect(() => {
   }
 }, []);
 
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   const sharedLat = params.get("lat");
+//   const sharedLng = params.get("lng");
+//   const sharedNameA = params.get("nameA"); // Get name A
+//   const sharedBLat = params.get("bLat");
+//   const sharedBLng = params.get("bLng");
+//   const sharedNameB = params.get("nameB"); // Get name B
+//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
+  
+//   if (sharedLat && sharedLng) {
+//     setLat(sharedLat);
+//     setLng(sharedLng);
+//     if (sharedNameA) setLocationAName(sharedNameA); // Set name A
+//   }
+
+//   if (isSharedCompare && sharedBLat && sharedBLng) {
+//     setBLatInput(sharedBLat);
+//     setBLngInput(sharedBLng);
+//     if (sharedNameB) {
+//         setLocationBName(sharedNameB); // Set name B
+//         setCompareName(sharedNameB);
+//     }
+    
+//     setShowLocationB(true);
+//     setIsCompareMode(true);
+    
+//     // Pass the name directly to handleCompareSelect to prevent logic triggering prompt
+//     handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
+//   }
+// }, [handleCompareSelect]);
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   const sharedLat = params.get("lat");
+//   const sharedLng = params.get("lng");
+//   const sharedNameA = params.get("nameA");
+//   const sharedBLat = params.get("bLat");
+//   const sharedBLng = params.get("bLng");
+//   const sharedNameB = params.get("nameB");
+//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
+  
+//   // Flag to check if we should trigger the main analysis
+//   let shouldAnalyze = false;
+
+//   if (sharedLat && sharedLng) {
+//     setLat(sharedLat);
+//     setLng(sharedLng);
+//     if (sharedNameA) setLocationAName(decodeURIComponent(sharedNameA));
+//     shouldAnalyze = true; 
+//   }
+
+//   if (isSharedCompare && sharedBLat && sharedBLng) {
+//     setBLatInput(sharedBLat);
+//     setBLngInput(sharedBLng);
+//     if (sharedNameB) {
+//         const decodedB = decodeURIComponent(sharedNameB);
+//         setLocationBName(decodedB);
+//         setCompareName(decodedB);
+//     }
+//     setShowLocationB(true);
+//     setIsCompareMode(true);
+    
+//     // This handles Site B analysis
+//     handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
+//   }
+
+//   // NEW: Trigger the main handleSubmit automatically if we have Site A params
+//   if (shouldAnalyze) {
+//     // We use a tiny timeout to ensure the state updates for lat/lng are processed
+//     const timer = setTimeout(() => {
+//       handleSubmit(); 
+//     }, 500);
+//     return () => clearTimeout(timer);
+//   }
+// }, [handleCompareSelect]); // Keep handleCompareSelect in deps if it's memoized
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   const sharedLat = params.get("lat");
+//   const sharedLng = params.get("lng");
+//   const sharedNameA = params.get("nameA");
+//   const sharedBLat = params.get("bLat");
+//   const sharedBLng = params.get("bLng");
+//   const sharedNameB = params.get("nameB");
+//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
+  
+//   let shouldAnalyze = false;
+
+//   if (sharedLat && sharedLng) {
+//     setLat(sharedLat);
+//     setLng(sharedLng);
+//     if (sharedNameA) {
+//       // Decode name to prevent prompt logic from triggering later
+//       setLocationAName(decodeURIComponent(sharedNameA));
+//     }
+//     shouldAnalyze = true; 
+//   }
+
+//   if (isSharedCompare && sharedBLat && sharedBLng) {
+//     setBLatInput(sharedBLat);
+//     setBLngInput(sharedBLng);
+    
+//     const decodedB = sharedNameB ? decodeURIComponent(sharedNameB) : "Site B";
+//     setLocationBName(decodedB);
+//     setCompareName(decodedB);
+    
+//     // Explicitly set UI modes for side-by-side view
+//     setShowLocationB(true);
+//     setIsCompareMode(true);
+    
+//     // Pass the decoded name directly to avoid the prompt popup
+//     handleCompareSelect(sharedBLat, sharedBLng, decodedB);
+//   }
+
+//   if (shouldAnalyze) {
+//     const timer = setTimeout(() => {
+//       handleSubmit(); 
+//     }, 500);
+//     return () => clearTimeout(timer);
+//   }
+// }, [handleCompareSelect]);
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   const sharedLat = params.get("lat");
+//   const sharedLng = params.get("lng");
+//   const sharedNameA = params.get("nameA");
+//   const sharedBLat = params.get("bLat");
+//   const sharedBLng = params.get("bLng");
+//   const sharedNameB = params.get("nameB");
+//   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
+  
+//   let shouldAnalyze = false;
+
+//   if (sharedLat && sharedLng) {
+//     // 1. Set main location state
+//     setLat(sharedLat);
+//     setLng(sharedLng);
+    
+//     if (sharedNameA) {
+//       // Decode name here so handleSubmit sees a set name and skips the prompt
+//       setLocationAName(decodeURIComponent(sharedNameA));
+//     }
+//     shouldAnalyze = true; 
+//   }
+
+//   if (isSharedCompare && sharedBLat && sharedBLng) {
+//     // 2. Set comparison inputs
+//     setBLatInput(sharedBLat);
+//     setBLngInput(sharedBLng);
+    
+//     // Decode Site B name
+//     const decodedB = sharedNameB ? decodeURIComponent(sharedNameB) : "Site B";
+//     setLocationBName(decodedB);
+//     setCompareName(decodedB);
+    
+//     // 3. Enable comparison UI modes
+//     setShowLocationB(true);
+//     setIsCompareMode(true);
+    
+//     // 4. Trigger Site B analysis immediately using the decoded name to bypass prompts
+//     handleCompareSelect(sharedBLat, sharedBLng, decodedB);
+//   }
+
+//   // 5. Auto-trigger the main analysis for Site A
+//   if (shouldAnalyze) {
+//     const timer = setTimeout(() => {
+//       handleSubmit(); 
+//     }, 500);
+//     return () => clearTimeout(timer);
+//   }
+// }, [handleCompareSelect]);
+// const handleSubmit = useCallback(async (e) => {
+//   // Safe check for automatic calls from useEffect (where 'e' might be undefined)
+//   if (e && e.preventDefault) e.preventDefault();
+//   // Check if coordinates have changed since last analysis
+//   const hasAChanged = analyzedCoords.lat !== lat || analyzedCoords.lng !== lng;
+//   // 1. Determine Name A: Use existing state if set (prevents prompt on shared links), 
+//   // otherwise use the resolver (which checks Saved Places, then My Loc, then Prompts).
+//   // const nameA = (locationAName && locationAName !== "Site A") 
+//   //   ? locationAName 
+//   //   : resolveLocationName(lat, lng, "Site A");
+//   let nameA = locationAName;
+//   if (locationAName === "Site A" || hasAChanged) {
+//     nameA = resolveLocationName(lat, lng, "Site A");
+//     setLocationAName(nameA);
+//   }
+  
+//   setLocationAName(nameA);
+
+
+//   // Reset results and start loading states
+//   setResult(null);
+//   setCompareResult(null);
+//   setSnapshotData(null);
+  
+//   // Ensure snapshotDataB state is cleared correctly
+//   if (setSnapshotDataB) setSnapshotDataB(null);
+  
+//   setLoading(true);
+//   setSnapshotLoading(true);
+
+//   // Capture current state of comparison for this specific submission
+//   const activeCompareMode = showLocationB && bLatInput && bLngInput;
+
+//   if (activeCompareMode) {
+//     setIsCompareMode(true);
+//     setCompareLoading(true);
+    
+//     // Determine Name B for UI consistency
+//     const nameB = (locationBName && locationBName !== "Site B") 
+//       ? locationBName 
+//       : resolveLocationName(bLatInput, bLngInput, "Site B");
+      
+//     setLocationBName(nameB);
+//     setCompareName(nameB);
+//   } else {
+//     setIsCompareMode(false);
+//   }
+
+//   // Build the list of parallel tasks
+//   const tasks = [
+//     performAnalysis(lat, lng),
+//     fetchSnapshot(lat, lng)
+//   ];
+
+//   if (activeCompareMode) {
+//     tasks.push(performAnalysis(bLatInput, bLngInput));
+//     tasks.push(fetchSnapshot(bLatInput, bLngInput));
+//   }
+
+//   try {
+//     const results = await Promise.allSettled(tasks);
+
+//     // --- SITE A RESULTS & UNIFIED HISTORY ---
+//     if (results[0].status === 'fulfilled') {
+//       const analysisData = results[0].value;
+//       setResult(analysisData);
+//       setAnalyzedCoords({ lat, lng });
+
+//       // Identify Score B from the task results (index 2) rather than state
+//       // const scoreBVal = (activeCompareMode && results[2] && results[2].status === 'fulfilled') 
+//       //   ? results[2].value.suitability_score 
+//       //   : undefined;
+//       const scoreBVal = (activeCompareMode && results[2]?.status === 'fulfilled') 
+//     ? results[2].value.suitability_score 
+//     : undefined;
+
+//       // Final check for nameB to ensure the history entry isn't saved as "Site B"
+//       const finalNameB = activeCompareMode ? (locationBName !== "Site B" ? locationBName : resolveLocationName(bLatInput, bLngInput, "Site B")) : null;
+
+//       // UNIFIED HISTORY ENTRY: Stores both sites in one row if comparing.
+//       const newHistoryEntry = {
+//         name: nameA,
+//         lat,
+//         lng,
+//         score: analysisData.suitability_score,
+//         timestamp: new Date().getTime(),
+//         // Comparison Data:
+//         isCompareMode: activeCompareMode,
+//         nameB: finalNameB,
+//         bLat: activeCompareMode ? bLatInput : null,
+//         bLng: activeCompareMode ? bLngInput : null,
+//         scoreB: scoreBVal 
+//       };
+
+//       setAnalysisHistory(prev => {
+//         const updated = [newHistoryEntry, ...prev].slice(0, 20);
+//         localStorage.setItem("analysis_history", JSON.stringify(updated));
+//         return updated;
+//       });
+//     }
+
+//     if (results[1].status === 'fulfilled') {
+//       setSnapshotData(results[1].value);
+//     }
+
+//     // --- SITE B DATA PROCESSING (UI states only) ---
+//     if (activeCompareMode) {
+//       if (results[2] && results[2].status === 'fulfilled') {
+//         const compareData = results[2].value;
+//         setCompareResult(compareData);
+//         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+//       }
+
+//       if (results[3] && results[3].status === 'fulfilled') {
+//         if (setSnapshotDataB) setSnapshotDataB(results[3].value);
+//       }
+//     }
+
+//   } catch (err) {
+//     console.error("Critical Analysis Error:", err);
+//   } finally {
+//     setLoading(false);
+//     setCompareLoading(false);
+//     setSnapshotLoading(false);
+//   }
+// }, [
+//   lat, lng, locationAName, locationBName, bLatInput, bLngInput, showLocationB, 
+//   resolveLocationName, performAnalysis, fetchSnapshot, setSnapshotDataB, 
+//   setAnalysisHistory,analyzedCoords.lat,   // <--- Add this
+//   analyzedCoords.lng,
+// ]);
+const handleSubmit = useCallback(async (e) => {
+  // Safe check for automatic calls from useEffect (where 'e' might be undefined)
+  if (e && e.preventDefault) e.preventDefault();
+
+  // Check if coordinates have changed since last analysis
+  const hasAChanged = analyzedCoords.lat !== lat || analyzedCoords.lng !== lng;
+
+  // 1. Determine Name A: 
+  // Use existing state if set, otherwise use resolver (Saved Places > My Loc > Prompt)
+  // Logic preserves your requirement to re-prompt if coordinates moved
+  let nameA = locationAName;
+  if (locationAName === "Site A" || hasAChanged) {
+    nameA = resolveLocationName(lat, lng, "Site A");
+    setLocationAName(nameA);
+  } else {
+    setLocationAName(nameA);
+  }
+
+  // Reset results and start loading states
+  setResult(null);
+  setCompareResult(null);
+  setSnapshotData(null);
+  
+  // Ensure snapshotDataB state is cleared correctly
+  if (setSnapshotDataB) setSnapshotDataB(null);
+  
+  setLoading(true);
+  setSnapshotLoading(true);
+
+  // Capture current state of comparison for this specific submission
+  const activeCompareMode = showLocationB && bLatInput && bLngInput;
+
+  if (activeCompareMode) {
+    setIsCompareMode(true);
+    setCompareLoading(true);
+    
+    // Determine Name B for UI consistency
+    const nameB = (locationBName && locationBName !== "Site B") 
+      ? locationBName 
+      : resolveLocationName(bLatInput, bLngInput, "Site B");
+      
+    setLocationBName(nameB);
+    setCompareName(nameB);
+  } else {
+    setIsCompareMode(false);
+  }
+
+  // Build the list of parallel tasks
+  const tasks = [
+    performAnalysis(lat, lng),
+    fetchSnapshot(lat, lng)
+  ];
+
+  if (activeCompareMode) {
+    tasks.push(performAnalysis(bLatInput, bLngInput));
+    tasks.push(fetchSnapshot(bLatInput, bLngInput));
+  }
+
+  try {
+    const results = await Promise.allSettled(tasks);
+
+    // --- SITE A RESULTS & UNIFIED HISTORY ---
+    if (results[0].status === 'fulfilled') {
+      const analysisData = results[0].value;
+      setResult(analysisData);
+      setAnalyzedCoords({ lat, lng });
+
+      // Identify Score B from the task results (index 2) directly to ensure history accuracy
+      const scoreBVal = (activeCompareMode && results[2]?.status === 'fulfilled') 
+        ? results[2].value.suitability_score 
+        : undefined;
+
+      // Final check for nameB to ensure the history entry isn't saved as default "Site B" if a name exists
+      const finalNameB = activeCompareMode 
+        ? (locationBName !== "Site B" ? locationBName : resolveLocationName(bLatInput, bLngInput, "Site B")) 
+        : null;
+
+      // UNIFIED HISTORY ENTRY: Stores both sites in one row if comparing.
+      const newHistoryEntry = {
+        name: nameA,
+        lat,
+        lng,
+        score: analysisData.suitability_score,
+        timestamp: new Date().getTime(),
+        // Comparison Data:
+        isCompareMode: activeCompareMode,
+        nameB: finalNameB,
+        bLat: activeCompareMode ? bLatInput : null,
+        bLng: activeCompareMode ? bLngInput : null,
+        scoreB: scoreBVal 
+      };
+
+      setAnalysisHistory(prev => {
+        const updated = [newHistoryEntry, ...prev].slice(0, 20);
+        localStorage.setItem("analysis_history", JSON.stringify(updated));
+        return updated;
+      });
+    }
+
+    if (results[1].status === 'fulfilled') {
+      setSnapshotData(results[1].value);
+    }
+
+    // --- SITE B DATA PROCESSING (UI states only) ---
+    if (activeCompareMode) {
+      if (results[2] && results[2].status === 'fulfilled') {
+        const compareData = results[2].value;
+        setCompareResult(compareData);
+        setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+      }
+
+      if (results[3] && results[3].status === 'fulfilled') {
+        if (setSnapshotDataB) setSnapshotDataB(results[3].value);
+      }
+    }
+
+  } catch (err) {
+    console.error("Critical Analysis Error:", err);
+  } finally {
+    setLoading(false);
+    setCompareLoading(false);
+    setSnapshotLoading(false);
+  }
+}, [
+  lat, 
+  lng, 
+  locationAName, 
+  locationBName, 
+  bLatInput, 
+  bLngInput, 
+  showLocationB, 
+  resolveLocationName, 
+  performAnalysis, 
+  fetchSnapshot, 
+  setSnapshotDataB, 
+  setAnalysisHistory,
+  analyzedCoords.lat, 
+  analyzedCoords.lng,
+]);
+// Automatically reset names to defaults when coordinates are manually changed
+// This ensures resolveLocationName triggers a prompt on the next submission
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   // Only reset if NOT currently loading a shared link
+//   if (!params.get("lat")) {
+//     setLocationAName("Site A");
+//   }
+// }, [lat, lng]);
+
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   if (!params.get("bLat")) {
+//     setLocationBName("Site B");
+//   }
+// }, [bLatInput, bLngInput]);
+// Monitor Coordinate Changes to Reset Names/Analysis for Site A
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
+  // 1. Skip logic if currently loading a shared link
+  if (params.get("lat")) return; 
+
+  const currentLat = parseFloat(lat).toFixed(4);
+  const currentLng = parseFloat(lng).toFixed(4);
+
+  // 2. Check if the new coordinates match a Saved Place
+  const matched = savedPlaces.find(p => 
+    parseFloat(p.lat).toFixed(4) === currentLat && 
+    parseFloat(p.lng).toFixed(4) === currentLng
+  );
+
+  if (matched) {
+    // 3. If it matches a saved place, adopt the saved name immediately
+    setLocationAName(matched.name);
+  } else if (analyzedCoords.lat && lat !== analyzedCoords.lat.toString()) {
+    // 4. Reset to "Site A" only if it's a new unknown location 
+    // AND the coordinates have actually moved from the last analysis
+    setLocationAName("Site A");
+    setResult(null); 
+  }
+}, [lat, lng, analyzedCoords.lat, savedPlaces]); 
+
+// Monitor Coordinate Changes to Reset Names/Analysis for Site B
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  // 1. Skip logic if currently loading a shared link
+  if (params.get("bLat")) return;
+
+  const currentLatB = parseFloat(bLatInput).toFixed(4);
+  const currentLngB = parseFloat(bLngInput).toFixed(4);
+
+  // 2. Check if the new coordinates match a Saved Place
+  const matchedB = savedPlaces.find(p => 
+    parseFloat(p.lat).toFixed(4) === currentLatB && 
+    parseFloat(p.lng).toFixed(4) === currentLngB
+  );
+
+  if (matchedB) {
+    // 3. Adopt saved name
+    setLocationBName(matchedB.name);
+  } else if (analyzedCoordsB.lat && bLatInput !== analyzedCoordsB.lat.toString()) {
+    // 4. Reset to "Site B" and clear old comparison data
+    setLocationBName("Site B");
+    setCompareResult(null);
+  }
+}, [bLatInput, bLngInput, analyzedCoordsB.lat, savedPlaces]);
+// Monitor Coordinate Changes to Reset Names/Analysis
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//     if (params.get("lat")) return; // Don't interfere with share linkss
+//   // Only reset if we aren't currently loading from a link
+//   if (!params.get("lat")) {
+//      // If coordinates moved away from the analyzed ones, reset the name to trigger prompt
+//      if (analyzedCoords.lat && lat !== analyzedCoords.lat.toString()) {
+//         setLocationAName("Site A");
+//         setResult(null); // Clear old results as they are no longer valid for new coords
+//      }
+//   }
+// }, [lat, lng, analyzedCoords]);
+
+// useEffect(() => {
+//   const params = new URLSearchParams(window.location.search);
+//   if (!params.get("bLat") && analyzedCoordsB.lat) {
+//      if (bLatInput !== analyzedCoordsB.lat.toString()) {
+//         setLocationBName("Site B");
+//         setCompareResult(null);
+//      }
+//   }
+// }, [bLatInput, bLngInput, analyzedCoordsB]);
+// Monitor Coordinate Changes to Reset Names/Analysis for Site A
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("lat")) return; // Don't interfere with share links
+
+  const currentLat = parseFloat(lat).toFixed(4);
+  const currentLng = parseFloat(lng).toFixed(4);
+
+  // 1. Check if the new coordinates match a Saved Place
+  const matched = savedPlaces.find(p => 
+    p.lat.toFixed(4) === currentLat && p.lng.toFixed(4) === currentLng
+  );
+
+  if (matched) {
+    // Automatically adopt the saved name
+    setLocationAName(matched.name);
+  } else if (analyzedCoords.lat && lat !== analyzedCoords.lat.toString()) {
+    // 2. Only reset to "Site A" if coordinates moved away from last analysis 
+    // AND it's not a saved place
+    setLocationAName("Site A");
+    setResult(null); 
+  }
+}, [lat, lng, analyzedCoords, savedPlaces]); // Added savedPlaces to dependencies
+
+// Monitor Coordinate Changes to Reset Names/Analysis for Site B
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("bLat")) return; // Don't interfere with share links
+
+  const currentLatB = parseFloat(bLatInput).toFixed(4);
+  const currentLngB = parseFloat(bLngInput).toFixed(4);
+
+  // 1. Check if the new coordinates match a Saved Place
+  const matchedB = savedPlaces.find(p => 
+    p.lat.toFixed(4) === currentLatB && p.lng.toFixed(4) === currentLngB
+  );
+
+  if (matchedB) {
+    // Automatically adopt the saved name
+    setLocationBName(matchedB.name);
+  } else if (analyzedCoordsB.lat && bLatInput !== analyzedCoordsB.lat.toString()) {
+    // 2. Only reset to "Site B" if coordinates moved away from last analysis 
+    // AND it's not a saved place
+    setLocationBName("Site B");
+    setCompareResult(null);
+  }
+}, [bLatInput, bLngInput, analyzedCoordsB, savedPlaces]); // Added savedPlaces to dependencies
+useEffect(() => {
+  // Check if we already handled the URL analysis to prevent loops
+  if (initialAnalysisRef.current) return;
+  const params = new URLSearchParams(window.location.search);
+
   const sharedLat = params.get("lat");
   const sharedLng = params.get("lng");
-  const sharedNameA = params.get("nameA"); // Get name A
+  const sharedNameA = params.get("nameA");
   const sharedBLat = params.get("bLat");
   const sharedBLng = params.get("bLng");
-  const sharedNameB = params.get("nameB"); // Get name B
+  const sharedNameB = params.get("nameB");
   const isSharedCompare = params.get("compare") === "1" || params.get("compare") === "true";
   
+  let shouldAnalyze = false;
+
   if (sharedLat && sharedLng) {
+    // 1. Set main location state
     setLat(sharedLat);
     setLng(sharedLng);
-    if (sharedNameA) setLocationAName(sharedNameA); // Set name A
+    
+    if (sharedNameA) {
+      // Decode name here so handleSubmit sees a set name and skips the prompt
+      setLocationAName(decodeURIComponent(sharedNameA));
+    }
+    shouldAnalyze = true; 
   }
 
   if (isSharedCompare && sharedBLat && sharedBLng) {
+    // 2. Set comparison inputs
     setBLatInput(sharedBLat);
     setBLngInput(sharedBLng);
-    if (sharedNameB) {
-        setLocationBName(sharedNameB); // Set name B
-        setCompareName(sharedNameB);
-    }
+    
+    // Decode Site B name
+    const decodedB = sharedNameB ? decodeURIComponent(sharedNameB) : "Site B";
+    setLocationBName(decodedB);
+    setCompareName(decodedB);
+    
+    // 3. Enable comparison UI modes
     setShowLocationB(true);
     setIsCompareMode(true);
     
-    // Pass the name directly to handleCompareSelect to prevent logic triggering prompt
-    handleCompareSelect(sharedBLat, sharedBLng, sharedNameB || "Site B");
+    // 4. Trigger Site B analysis immediately using the decoded name to bypass prompts
+    handleCompareSelect(sharedBLat, sharedBLng, decodedB);
   }
-}, [handleCompareSelect]);
+
+  // 5. Auto-trigger the main analysis for Site A
+  if (shouldAnalyze) {
+    // A small timeout ensures that the state updates for lat/lng are 
+    // fully processed before the API call begins
+    // Mark as run IMMEDIATELY before starting the async call
+    initialAnalysisRef.current = true;
+    const timer = setTimeout(() => {
+      handleSubmit(); 
+    }, 500);
+    return () => clearTimeout(timer);
+  }
+  
+  // handleSubmit is now included to satisfy the ESLint warning
+}, [handleCompareSelect, handleSubmit]);
 
 /**
    * Resolve site name based on: Saved Places > My Location > Prompt
@@ -516,18 +1149,63 @@ useEffect(() => {
     } finally { setGptLoading(false); }
   };
 
+  // useEffect(() => {
+  //   localStorage.setItem("geo_lat", lat);
+  //   localStorage.setItem("geo_lng", lng);
+  //   localStorage.setItem("geo_zoom", zoom);
+  //   localStorage.setItem("geo_theme", JSON.stringify(isDarkMode));
+  //   localStorage.setItem("geo_map_style", mapVariety);
+  //   localStorage.setItem("sidebar_width", sidebarWidth);
+  //   localStorage.setItem("bottom_height", bottomHeight);
+  //   localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
+  //   if (result) localStorage.setItem("geo_last_result", JSON.stringify(result));
+  //   document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
+  // }, [lat, lng, zoom, isDarkMode, sidebarWidth, bottomHeight, result, savedPlaces, mapVariety]);
   useEffect(() => {
-    localStorage.setItem("geo_lat", lat);
-    localStorage.setItem("geo_lng", lng);
-    localStorage.setItem("geo_zoom", zoom);
-    localStorage.setItem("geo_theme", JSON.stringify(isDarkMode));
-    localStorage.setItem("geo_map_style", mapVariety);
-    localStorage.setItem("sidebar_width", sidebarWidth);
-    localStorage.setItem("bottom_height", bottomHeight);
-    localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
-    if (result) localStorage.setItem("geo_last_result", JSON.stringify(result));
-    document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
-  }, [lat, lng, zoom, isDarkMode, sidebarWidth, bottomHeight, result, savedPlaces, mapVariety]);
+  // --- Standard UI State ---
+  localStorage.setItem("geo_lat", lat);
+  localStorage.setItem("geo_lng", lng);
+  localStorage.setItem("geo_name_a", locationAName); // Persist Name A
+  localStorage.setItem("geo_name_b", locationBName); // Persistence
+  localStorage.setItem("geo_is_compare", JSON.stringify(isCompareMode));
+  localStorage.setItem("geo_show_b", JSON.stringify(showLocationB));
+  localStorage.setItem("geo_zoom", zoom);
+  localStorage.setItem("geo_theme", JSON.stringify(isDarkMode));
+  localStorage.setItem("geo_map_style", mapVariety);
+  localStorage.setItem("sidebar_width", sidebarWidth);
+  localStorage.setItem("bottom_height", bottomHeight);
+  localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
+  
+  // --- Analysis Results Persistence ---
+  if (compareResult) localStorage.setItem("geo_last_compare_result", JSON.stringify(compareResult));
+  if (result) {
+    localStorage.setItem("geo_last_result", JSON.stringify(result));
+  } else {
+    localStorage.removeItem("geo_last_result");
+  }
+
+  // --- Comparison State Persistence ---
+  localStorage.setItem("geo_is_compare", JSON.stringify(isCompareMode));
+  localStorage.setItem("geo_show_b", JSON.stringify(showLocationB));
+  
+  if (showLocationB) {
+    localStorage.setItem("geo_lat_b", bLatInput);
+    localStorage.setItem("geo_lng_b", bLngInput);
+    localStorage.setItem("geo_name_b", locationBName); // Persist Name B
+    
+    if (compareResult) {
+      localStorage.setItem("geo_last_compare_result", JSON.stringify(compareResult));
+    }
+  }
+
+  // --- Theme Application ---
+  document.body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
+
+}, [
+  lat, lng, locationAName, zoom, isDarkMode, sidebarWidth, bottomHeight, 
+  result, savedPlaces, mapVariety, isCompareMode, showLocationB, 
+  bLatInput, bLngInput, locationBName, compareResult
+]);
 
   // useEffect(() => {
   //   const params = new URLSearchParams(window.location.search);
@@ -764,97 +1442,431 @@ useEffect(() => {
 //   }
 // };
 
-const handleSubmit = async (e) => {
-  if (e) e.preventDefault();
+// const handleSubmit = async (e) => {
+//   if (e) e.preventDefault();
 
-  const nameA = resolveLocationName(lat, lng, "Site A");
-  setLocationAName(nameA);
+//   const nameA = resolveLocationName(lat, lng, "Site A");
+//   setLocationAName(nameA);
 
-  // Reset results and start loading states
-  setResult(null);
-  setCompareResult(null);
-  setSnapshotData(null); // Reset Snapshot A
-  setSnapshotDataB?.(null); // Reset Snapshot B if you have a separate state for it
-  setLoading(true);
-  setSnapshotLoading(true);
+//   // Reset results and start loading states
+//   setResult(null);
+//   setCompareResult(null);
+//   setSnapshotData(null); // Reset Snapshot A
+//   setSnapshotDataB?.(null); // Reset Snapshot B if you have a separate state for it
+//   setLoading(true);
+//   setSnapshotLoading(true);
 
-  if (showLocationB) {
-    setIsCompareMode(true);
-    setCompareLoading(true);
-    const nameB = resolveLocationName(bLatInput, bLngInput, "Site B");
-    setLocationBName(nameB);
-    setCompareName(nameB);
-  } else {
-    setIsCompareMode(false);
-  }
+//   if (showLocationB) {
+//     setIsCompareMode(true);
+//     setCompareLoading(true);
+//     const nameB = resolveLocationName(bLatInput, bLngInput, "Site B");
+//     setLocationBName(nameB);
+//     setCompareName(nameB);
+//   } else {
+//     setIsCompareMode(false);
+//   }
 
-  // Build the list of parallel tasks
-  const tasks = [
-    performAnalysis(lat, lng),
-    fetchSnapshot(lat, lng)
-  ];
+//   // Build the list of parallel tasks
+//   const tasks = [
+//     performAnalysis(lat, lng),
+//     fetchSnapshot(lat, lng)
+//   ];
 
-  if (showLocationB && bLatInput && bLngInput) {
-    tasks.push(performAnalysis(bLatInput, bLngInput));
-    tasks.push(fetchSnapshot(bLatInput, bLngInput));
-  }
+//   if (showLocationB && bLatInput && bLngInput) {
+//     tasks.push(performAnalysis(bLatInput, bLngInput));
+//     tasks.push(fetchSnapshot(bLatInput, bLngInput));
+//   }
 
-  try {
-    const results = await Promise.allSettled(tasks);
+//   try {
+//     const results = await Promise.allSettled(tasks);
 
-    // --- SITE A RESULTS ---
-    if (results[0].status === 'fulfilled') {
-      const analysisData = results[0].value;
-      setResult(analysisData);
-      setAnalyzedCoords({ lat, lng });
+//     // --- SITE A RESULTS ---
+//     if (results[0].status === 'fulfilled') {
+//       const analysisData = results[0].value;
+//       setResult(analysisData);
+//       setAnalyzedCoords({ lat, lng });
 
-      const newHistoryEntry = {
-        name: nameA,
-        lat, lng,
-        score: analysisData.suitability_score,
-        timestamp: new Date().getTime()
-      };
+//       const newHistoryEntry = {
+//         name: nameA,
+//         lat, lng,
+//         score: analysisData.suitability_score,
+//         timestamp: new Date().getTime(),
+//               // ADD THESE:
+//         isCompareMode: isCompareMode,
+//         nameB: locationBName,
+//         bLat: bLatInput,
+//         bLng: bLngInput
+//       };
 
-      setAnalysisHistory(prev => {
-        const updated = [newHistoryEntry, ...prev].slice(0, 20);
-        localStorage.setItem("analysis_history", JSON.stringify(updated));
-        return updated;
-      });
-    }
+//       setAnalysisHistory(prev => {
+//         const updated = [newHistoryEntry, ...prev].slice(0, 20);
+//         localStorage.setItem("analysis_history", JSON.stringify(updated));
+//         return updated;
+//       });
+//     }
 
-    if (results[1].status === 'fulfilled') {
-      setSnapshotData(results[1].value);
-    }
+//     if (results[1].status === 'fulfilled') {
+//       setSnapshotData(results[1].value);
+//     }
 
-    // --- SITE B RESULTS (If Compare Mode was active) ---
-    if (showLocationB) {
-      if (results[2] && results[2].status === 'fulfilled') {
-        const compareData = results[2].value;
-        setCompareResult(compareData);
-        setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+//     // --- SITE B RESULTS (If Compare Mode was active) ---
+//     if (showLocationB) {
+//       if (results[2] && results[2].status === 'fulfilled') {
+//         const compareData = results[2].value;
+//         setCompareResult(compareData);
+//         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
 
-        const historyEntryB = {
-          name: locationBName,
-          lat: bLatInput, lng: bLngInput,
-          score: compareData.suitability_score,
-          timestamp: new Date().getTime()
-        };
-        setAnalysisHistory(prev => [historyEntryB, ...prev].slice(0, 20));
-      }
+//         const historyEntryB = {
+//           name: locationBName,
+//           lat: bLatInput, lng: bLngInput,
+//           score: compareData.suitability_score,
+//           timestamp: new Date().getTime()
+//         };
+//         setAnalysisHistory(prev => [historyEntryB, ...prev].slice(0, 20));
+//       }
 
-      if (results[3] && results[3].status === 'fulfilled') {
-        setSnapshotDataB?.(results[3].value); 
-      }
-    }
+//       if (results[3] && results[3].status === 'fulfilled') {
+//         setSnapshotDataB?.(results[3].value); 
+//       }
+//     }
 
-  } catch (err) {
-    console.error("Critical Analysis Error:", err);
-  } finally {
-    setLoading(false);
-    setCompareLoading(false);
-    setSnapshotLoading(false);
-  }
-};
+//   } catch (err) {
+//     console.error("Critical Analysis Error:", err);
+//   } finally {
+//     setLoading(false);
+//     setCompareLoading(false);
+//     setSnapshotLoading(false);
+//   }
+// };
+// const handleSubmit = async (e) => {
+//   // Safe check for automatic calls from useEffect (where 'e' might be undefined)
+//   if (e && e.preventDefault) e.preventDefault();
+
+//   const nameA = resolveLocationName(lat, lng, "Site A");
+//   setLocationAName(nameA);
+
+//   // Reset results and start loading states
+//   setResult(null);
+//   setCompareResult(null);
+//   setSnapshotData(null);
+  
+//   // Ensure snapshotDataB state is cleared correctly
+//   if (setSnapshotDataB) setSnapshotDataB(null);
+  
+//   setLoading(true);
+//   setSnapshotLoading(true);
+
+//   // Capture current state of comparison for this specific submission
+//   const activeCompareMode = showLocationB && bLatInput && bLngInput;
+
+//   if (activeCompareMode) {
+//     setIsCompareMode(true);
+//     setCompareLoading(true);
+//     const nameB = resolveLocationName(bLatInput, bLngInput, "Site B");
+//     setLocationBName(nameB);
+//     setCompareName(nameB);
+//   } else {
+//     setIsCompareMode(false);
+//   }
+
+//   // Build the list of parallel tasks
+//   const tasks = [
+//     performAnalysis(lat, lng),
+//     fetchSnapshot(lat, lng)
+//   ];
+
+//   if (activeCompareMode) {
+//     tasks.push(performAnalysis(bLatInput, bLngInput));
+//     tasks.push(fetchSnapshot(bLatInput, bLngInput));
+//   }
+
+//   try {
+//     const results = await Promise.allSettled(tasks);
+
+//     // --- PROCESS RESULTS AND UPDATE HISTORY ---
+//     if (results[0].status === 'fulfilled') {
+//       const analysisData = results[0].value;
+//       setResult(analysisData);
+//       setAnalyzedCoords({ lat, lng });
+
+//       // Determine Site B details for the history entry if comparing
+//       const currentNameB = activeCompareMode ? resolveLocationName(bLatInput, bLngInput, "Site B") : null;
+
+//       // UNIFIED HISTORY ENTRY: Stores both sites in one row if comparing
+//       const newHistoryEntry = {
+//         name: nameA,
+//         lat,
+//         lng,
+//         score: analysisData.suitability_score,
+//         timestamp: new Date().getTime(),
+//         // Comparison Data:
+//         isCompareMode: activeCompareMode,
+//         nameB: currentNameB,
+//         bLat: activeCompareMode ? bLatInput : null,
+//         bLng: activeCompareMode ? bLngInput : null
+//       };
+
+//       setAnalysisHistory(prev => {
+//         const updated = [newHistoryEntry, ...prev].slice(0, 20);
+//         localStorage.setItem("analysis_history", JSON.stringify(updated));
+//         return updated;
+//       });
+//     }
+
+//     if (results[1].status === 'fulfilled') {
+//       setSnapshotData(results[1].value);
+//     }
+
+//     // --- SITE B DATA PROCESSING (Stored in separate states for the UI) ---
+//     if (activeCompareMode) {
+//       if (results[2] && results[2].status === 'fulfilled') {
+//         const compareData = results[2].value;
+//         setCompareResult(compareData);
+//         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+//         // NOTE: We no longer push a separate 'historyEntryB' here to avoid duplicates
+//       }
+
+//       if (results[3] && results[3].status === 'fulfilled') {
+//         if (setSnapshotDataB) setSnapshotDataB(results[3].value);
+//       }
+//     }
+
+//   } catch (err) {
+//     console.error("Critical Analysis Error:", err);
+//   } finally {
+//     setLoading(false);
+//     setCompareLoading(false);
+//     setSnapshotLoading(false);
+//   }
+// };
+// const handleSubmit = async (e) => {
+//   // Safe check for automatic calls from useEffect (where 'e' might be undefined)
+//   if (e && e.preventDefault) e.preventDefault();
+
+//   // Logic Change: Use existing locationAName if it's already been set (e.g., from URL) 
+//   // to prevent the prompt popup from appearing when opening a shared link.
+//   const nameA = (locationAName && locationAName !== "Site A") 
+//     ? locationAName 
+//     : resolveLocationName(lat, lng, "Site A");
+  
+//   setLocationAName(nameA);
+
+//   // Reset results and start loading states
+//   setResult(null);
+//   setCompareResult(null);
+//   setSnapshotData(null);
+  
+//   // Ensure snapshotDataB state is cleared correctly
+//   if (setSnapshotDataB) setSnapshotDataB(null);
+  
+//   setLoading(true);
+//   setSnapshotLoading(true);
+
+//   // Capture current state of comparison for this specific submission
+//   const activeCompareMode = showLocationB && bLatInput && bLngInput;
+
+//   if (activeCompareMode) {
+//     setIsCompareMode(true);
+//     setCompareLoading(true);
+    
+//     // Logic Change: Use existing locationBName if it's already been set
+//     const nameB = (locationBName && locationBName !== "Site B") 
+//       ? locationBName 
+//       : resolveLocationName(bLatInput, bLngInput, "Site B");
+      
+//     setLocationBName(nameB);
+//     setCompareName(nameB);
+//   } else {
+//     setIsCompareMode(false);
+//   }
+
+//   // Build the list of parallel tasks
+//   const tasks = [
+//     performAnalysis(lat, lng),
+//     fetchSnapshot(lat, lng)
+//   ];
+
+//   if (activeCompareMode) {
+//     tasks.push(performAnalysis(bLatInput, bLngInput));
+//     tasks.push(fetchSnapshot(bLatInput, bLngInput));
+//   }
+
+//   try {
+//     const results = await Promise.allSettled(tasks);
+
+//     // --- PROCESS RESULTS AND UPDATE HISTORY ---
+//     if (results[0].status === 'fulfilled') {
+//       const analysisData = results[0].value;
+//       setResult(analysisData);
+//       setAnalyzedCoords({ lat, lng });
+
+//       // UNIFIED HISTORY ENTRY: Stores both sites in one row if comparing.
+//       // This ensures that the dynamicLink generated in TopNav.js will include 
+//       // both coordinates and the compare=true flag.
+//       const newHistoryEntry = {
+//         name: nameA,
+//         lat,
+//         lng,
+//         score: analysisData.suitability_score,
+//         timestamp: new Date().getTime(),
+//         // Comparison Data:
+//         isCompareMode: activeCompareMode,
+//         nameB: activeCompareMode ? locationBName : null,
+//         bLat: activeCompareMode ? bLatInput : null,
+//         bLng: activeCompareMode ? bLngInput : null,
+//         // ADD THIS LINE:
+//   scoreB: activeCompareMode && compareResult ? compareResult.suitability_score : undefined
+//       };
+
+//       setAnalysisHistory(prev => {
+//         const updated = [newHistoryEntry, ...prev].slice(0, 20);
+//         localStorage.setItem("analysis_history", JSON.stringify(updated));
+//         return updated;
+//       });
+//     }
+
+//     if (results[1].status === 'fulfilled') {
+//       setSnapshotData(results[1].value);
+//     }
+
+//     // --- SITE B DATA PROCESSING (Stored in separate states for the UI) ---
+//     if (activeCompareMode) {
+//       if (results[2] && results[2].status === 'fulfilled') {
+//         const compareData = results[2].value;
+//         setCompareResult(compareData);
+//         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+//         // NOTE: We no longer push a separate 'historyEntryB' here to avoid duplicate rows
+//       }
+
+//       if (results[3] && results[3].status === 'fulfilled') {
+//         if (setSnapshotDataB) setSnapshotDataB(results[3].value);
+//       }
+//     }
+
+//   } catch (err) {
+//     console.error("Critical Analysis Error:", err);
+//   } finally {
+//     setLoading(false);
+//     setCompareLoading(false);
+//     setSnapshotLoading(false);
+//   }
+// };
+// const handleSubmit = async (e) => {
+//   // Safe check for automatic calls from useEffect (where 'e' might be undefined)
+//   if (e && e.preventDefault) e.preventDefault();
+
+//   // 1. Determine Name A: Use existing state if set (prevents prompt on shared links), 
+//   // otherwise use the resolver (which checks Saved Places, then My Loc, then Prompts).
+//   const nameA = (locationAName && locationAName !== "Site A") 
+//     ? locationAName 
+//     : resolveLocationName(lat, lng, "Site A");
+  
+//   setLocationAName(nameA);
+
+//   // Reset results and start loading states
+//   setResult(null);
+//   setCompareResult(null);
+//   setSnapshotData(null);
+//   setSnapshotDataB(null);
+  
+//   // Ensure snapshotDataB state is cleared correctly
+//   if (setSnapshotDataB) setSnapshotDataB(null);
+  
+//   setLoading(true);
+//   setSnapshotLoading(true);
+
+//   // Capture current state of comparison for this specific submission
+//   const activeCompareMode = showLocationB && bLatInput && bLngInput;
+
+//   if (activeCompareMode) {
+//     setIsCompareMode(true);
+//     setCompareLoading(true);
+    
+//     // Determine Name B: Same logic as Name A to prevent prompt on shared links
+//     const nameB = (locationBName && locationBName !== "Site B") 
+//       ? locationBName 
+//       : resolveLocationName(bLatInput, bLngInput, "Site B");
+      
+//     setLocationBName(nameB);
+//     setCompareName(nameB);
+//   } else {
+//     setIsCompareMode(false);
+//   }
+
+//   // Build the list of parallel tasks
+//   const tasks = [
+//     performAnalysis(lat, lng),
+//     fetchSnapshot(lat, lng)
+//   ];
+
+//   if (activeCompareMode) {
+//     tasks.push(performAnalysis(bLatInput, bLngInput));
+//     tasks.push(fetchSnapshot(bLatInput, bLngInput));
+//   }
+
+//   try {
+//     const results = await Promise.allSettled(tasks);
+
+//     // --- SITE A RESULTS & UNIFIED HISTORY ---
+//     if (results[0].status === 'fulfilled') {
+//       const analysisData = results[0].value;
+//       setResult(analysisData);
+//       setAnalyzedCoords({ lat, lng });
+
+//       // Identify Score B from the task results (index 2) rather than state
+//       // to ensure history is updated immediately with both values.
+//       const scoreBVal = (activeCompareMode && results[2] && results[2].status === 'fulfilled') 
+//         ? results[2].value.suitability_score 
+//         : undefined;
+
+//       // UNIFIED HISTORY ENTRY: Stores both sites in one row if comparing.
+//       const newHistoryEntry = {
+//         name: nameA,
+//         lat,
+//         lng,
+//         score: analysisData.suitability_score,
+//         timestamp: new Date().getTime(),
+//         // Comparison Data:
+//         isCompareMode: activeCompareMode,
+//         nameB: activeCompareMode ? locationBName : null,
+//         bLat: activeCompareMode ? bLatInput : null,
+//         bLng: activeCompareMode ? bLngInput : null,
+//         scoreB: scoreBVal 
+//       };
+
+//       setAnalysisHistory(prev => {
+//         const updated = [newHistoryEntry, ...prev].slice(0, 20);
+//         localStorage.setItem("analysis_history", JSON.stringify(updated));
+//         return updated;
+//       });
+//     }
+
+//     if (results[1].status === 'fulfilled') {
+//       setSnapshotData(results[1].value);
+//     }
+
+//     // --- SITE B DATA PROCESSING (UI states only) ---
+//     if (activeCompareMode) {
+//       if (results[2] && results[2].status === 'fulfilled') {
+//         const compareData = results[2].value;
+//         setCompareResult(compareData);
+//         setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
+//       }
+
+//       if (results[3] && results[3].status === 'fulfilled') {
+//         if (setSnapshotDataB) setSnapshotDataB(results[3].value);
+//       }
+//     }
+
+//   } catch (err) {
+//     console.error("Critical Analysis Error:", err);
+//   } finally {
+//     setLoading(false);
+//     setCompareLoading(false);
+//     setSnapshotLoading(false);
+//   }
+// };
+
   const handleNearbyPlaces = async () => {
     if (!lat || !lng) return;
     setNearbyLoading(true);
@@ -1042,6 +2054,9 @@ const renderTabContent = (data, coords, name, isFullWidth) => {
         bLngInput={bLngInput} setBLngInput={setBLngInput}
         savedPlaces={savedPlaces} handleCompareSelect={handleCompareSelect}
         compareLoading={compareLoading} isCompareMode={isCompareMode}
+        setCompareResult={setCompareResult}       // <--- Add this
+        setSnapshotDataB={setSnapshotDataB}       // <--- Add this
+        setLocationBName={setLocationBName}
         setIsCompareMode={setIsCompareMode}
         handleMyLocationB={handleMyLocationB}
         handleSavePlaceB={handleSavePlaceB}

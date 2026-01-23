@@ -250,32 +250,89 @@ const handleNavMouseLeave = () => {
           {/* Inside TopNav.js Analysis History Table */}
 <tbody>
   {analysisHistory.length > 0 ? (
-    analysisHistory.map((item, index) => (
-      <tr key={index}>
-        <td className="site-name">{item.name}</td>
-        <td>{parseFloat(item.lat).toFixed(4)}, {parseFloat(item.lng).toFixed(4)}</td>
-        <td>
-          <span className="score-badge" style={{ 
-              backgroundColor: item.score < 40 ? '#ef4444' : item.score < 70 ? '#f59e0b' : '#10b981' 
-          }}>
-            {item.score.toFixed(1)}%
-          </span>
-        </td>
-        <td>
-          <a 
-            href={item.shareLink} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="history-direct-link"
-            onClick={(e) => e.stopPropagation()}
-          >
-            View Link 🔗
-          </a>
-        </td>
-      </tr>
-    ))
+    analysisHistory.map((item, index) => {
+      // 1. Logic remains unchanged: Identify if this was a comparison
+      const isComparison = item.isCompareMode || (item.bLat && item.bLng);
+
+      // 2. Logic remains unchanged: Construct the dynamic share link
+      const baseUrl = `${window.location.origin}${window.location.pathname}`;
+      let dynamicLink = `${baseUrl}?lat=${item.lat}&lng=${item.lng}&nameA=${encodeURIComponent(item.name || "Location A")}`;
+      
+      if (isComparison) {
+        dynamicLink += `&bLat=${encodeURIComponent(item.bLat)}&bLng=${encodeURIComponent(item.bLng)}&nameB=${encodeURIComponent(item.nameB || "Location B")}&compare=true`;
+      }
+
+      // Helper for grading colors
+      const getScoreColor = (s) => (s < 40 ? '#ef4444' : s < 70 ? '#f59e0b' : '#10b981');
+
+      return (
+        <tr key={index} className={isComparison ? "history-row-comp" : ""}>
+          {/* SITE NAME: Stacked for Comparison */}
+          <td className="site-name">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>{item.name}</span>
+              {isComparison && (
+                <span style={{ fontSize: '10px', color: 'var(--accent-color)', opacity: 0.8 }}>
+                  vs {item.nameB}
+                </span>
+              )}
+            </div>
+          </td>
+
+          {/* LAT/LNG: Improved labeling */}
+          <td>
+            <div style={{ fontSize: '11px', fontFamily: 'monospace' }}>
+              <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>A:</span> {parseFloat(item.lat).toFixed(4)}, {parseFloat(item.lng).toFixed(4)}
+              {isComparison && (
+                <div style={{ marginTop: '4px', opacity: 0.7 }}>
+                  <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>B:</span> {parseFloat(item.bLat).toFixed(4)}, {parseFloat(item.bLng).toFixed(4)}
+                </div>
+              )}
+            </div>
+          </td>
+
+          {/* SCORE: Dual scores for Comparison */}
+          <td>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+              <span className="score-badge" style={{ backgroundColor: getScoreColor(item.score), minWidth: '60px' }}>
+                {isComparison && <small style={{ fontSize: '9px', marginRight: '4px', opacity: 0.8 }}>A:</small>}
+                {item.score.toFixed(1)}%
+              </span>
+              
+              {isComparison && item.scoreB !== undefined && (
+                <span className="score-badge" style={{ backgroundColor: getScoreColor(item.scoreB), minWidth: '60px' }}>
+                  <small style={{ fontSize: '9px', marginRight: '4px', opacity: 0.8 }}>B:</small>
+                  {item.scoreB.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          </td>
+
+          {/* ACTION: Styled as a Pro Button */}
+          <td>
+            <a 
+              href={dynamicLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="history-direct-link"
+              style={{ 
+                fontSize: '11px', 
+                textDecoration: 'none', 
+                padding: '6px 10px', 
+                borderRadius: '6px', 
+                border: '1px solid var(--accent-color)',
+                display: 'inline-block'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {isComparison ? "View Compare 🔗" : "View 🔗"}
+            </a>
+          </td>
+        </tr>
+      );
+    })
   ) : (
-    <tr><td colSpan="4" className="empty-row">No history found.</td></tr>
+    <tr><td colSpan="4" className="empty-row" style={{ padding: '20px', textAlign: 'center', opacity: 0.5 }}>No history found.</td></tr>
   )}
 </tbody>
         </table>

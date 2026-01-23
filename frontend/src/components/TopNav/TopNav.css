@@ -1960,3 +1960,77 @@
 
 
 
+/* Table Cell Alignment */
+.history-table td {
+  padding: 12px 8px;
+  vertical-align: middle;
+}
+
+/* Score Badge Stacking */
+.score-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.score-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 11px;
+  min-width: 65px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.score-badge small {
+  opacity: 0.8;
+  margin-right: 2px;
+}
+
+/* Site Name Styling */
+.name-primary {
+  font-weight: bold;
+  color: #fff;
+  font-size: 13px;
+}
+
+.name-vs {
+  font-size: 10px;
+  color: var(--accent-color);
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* Coords Styling */
+.coord-line {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.coord-line span {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.sub-coord {
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* Modern Button */
+.view-btn-pro {
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--accent-color);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  transition: 0.3s;
+}
+
+.view-btn-pro:hover {
+  background: var(--accent-color);
+}

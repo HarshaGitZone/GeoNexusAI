@@ -22,7 +22,10 @@ export default function SideBar({
   editingName, setEditingName,
   setSavedPlaces,
   sidebarWidth, startResizingSide,
-  onSearchResult
+  onSearchResult,
+  setCompareResult,    // <--- Add this
+  setSnapshotDataB,    // <--- Add this
+  setLocationBName,
 }) {
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -414,14 +417,30 @@ const generateShareLink = async () => {
     {compareLoading ? "..." : "Go"}
   </button>
   
-  {isCompareMode && (
+  {/* {isCompareMode && (
     <button 
       onClick={() => setIsCompareMode(false)} 
       className="btn-cross"
     >
       ✕
     </button>
-  )}
+  )} */}
+  {isCompareMode && (
+  <button 
+    onClick={() => {
+      setIsCompareMode(false);      // Exit compare mode
+      setBLatInput("");             // Clear Lat B input
+      setBLngInput("");             // Clear Lng B input
+      setCompareResult(null);       // Remove analysis data for B
+      setSnapshotDataB(null);       // Clear Site B snapshot
+      setLocationBName("Site B");   // Reset name fallback
+    }} 
+    className="btn-cross" 
+    title="Exit Compare"
+  >
+    ✕
+  </button>
+)}
 </div>
 
           <div className="compact-row" style={{ marginTop: "6px", gap: "4px" }}>
@@ -498,6 +517,8 @@ const generateShareLink = async () => {
                 key={i}
                 className="place-card-compact"
                 onClick={() => {
+                  // We set the name first so the coord-watcher doesn't overwrite it
+    setLocationAName(p.name);
                   setLat(p.lat.toString());
                   setLng(p.lng.toString());
                 }}
