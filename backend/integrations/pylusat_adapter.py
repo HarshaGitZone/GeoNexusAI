@@ -100,6 +100,7 @@ import requests
 from typing import Optional, Tuple, Dict
 # Import the water detection logic for global synchronization
 from backend.integrations.water_adapter import estimate_water_proximity_score
+import math
 
 _MIRRORS = [
     "https://overpass-api.de/api/interpreter",
@@ -161,6 +162,24 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
+def _proximity_benefit(distance_km, optimal_km=0.8):
+    """
+    Accessibility benefit peaks near optimal distance.
+    Uses a Gaussian-like curve.
+    """
+    if distance_km is None:
+        return 0.3
+    return math.exp(-((distance_km - optimal_km) ** 2) / (2 * 0.8 ** 2))
+
+
+def _noise_penalty(distance_km, buffer_km):
+    """
+    Noise & pollution penalty when too close to roads.
+    """
+    if distance_km < buffer_km:
+        return 1.0 - (distance_km / buffer_km)
+    return 0.0
+
 def compute_proximity_score(latitude: float, longitude: float) -> Tuple[float, Optional[float], Optional[Dict]]:
     """
     Calculates proximity to major roads and returns score, distance, and details.
@@ -170,7 +189,12 @@ def compute_proximity_score(latitude: float, longitude: float) -> Tuple[float, O
     # Proximity to roads is irrelevant if the site is in the Atlantic Ocean or a lake.
     w_score, w_dist, _ = estimate_water_proximity_score(latitude, longitude)
     if w_score == 0.0 or (w_dist is not None and w_dist < 0.02):
-        return 0.0, 0.0, {"name": "N/A (Water Body)", "type": "water_override"}
+        return 0.0, 0.0, {
+            "name": "N/A (Water Body)",
+            "type": "water_override",
+            "explanation": "Location lies on a water body. Road proximity is irrelevant."
+        }
+
 
     # 2. PROXIMITY SEARCH: Locate nearest major infrastructure
     elements = None
@@ -191,104 +215,174 @@ def compute_proximity_score(latitude: float, longitude: float) -> Tuple[float, O
     closest_feature = {}
 
     for el in elements:
-        # Get coordinates from node or way center
-        e_lat = el.get("lat") or el.get("center", {}).get("lat")
-        e_lon = el.get("lon") or el.get("center", {}).get("lon")
-        
-        if e_lat and e_lon:
-            d = _haversine_km(latitude, longitude, e_lat, e_lon)
-            if d < min_km:
-                min_km = d
-                closest_feature = el.get("tags", {})
+        # Node case (very accurate)
+        if "lat" in el and "lon" in el:
+            d = _haversine_km(latitude, longitude, el["lat"], el["lon"])
+        # Way case → use center but treat small distances carefully
+        elif "center" in el:
+            d = _haversine_km(
+                latitude, longitude,
+                el["center"]["lat"], el["center"]["lon"]
+            )
+        else:
+            continue
+
+        # 🚨 HARD OVERRIDE: ON ROAD DETECTION
+        if d < 0.04:  # < 40 meters
+            return 25.0, round(d, 3), {
+                "nearest_road_name": el.get("tags", {}).get("name", "Unnamed Road"),
+                "road_type": el.get("tags", {}).get("highway", "unknown"),
+                "distance_km": round(d, 3),
+                "in_buffer_zone": True,
+                "explanation": (
+                    "Location lies directly on a road corridor. "
+                    "High noise, air pollution, and safety risk. "
+                    "Poor suitability for residential development."
+                )
+            }
+
+        if d < min_km:
+            min_km = d
+            closest_feature = el.get("tags", {})
+
 
     # 4. DETERMINE ROAD TYPE AND BUFFER
     road_type = closest_feature.get("highway", "unknown")
     road_buffer_km = ROAD_CLASS_BUFFER_M.get(road_type, DEFAULT_ROAD_BUFFER_M) / 1000.0  # Convert to km
+    # 🚨 HARD CONSTRAINT: LOCATION DIRECTLY ON ROAD
+    if min_km < 0.03:  # < 30 meters
+        return 25.0, round(min_km, 3), {
+            "nearest_road_name": closest_feature.get("name", "Unnamed Road"),
+            "road_type": road_type,
+            "distance_km": round(min_km, 3),
+            "buffer_m": ROAD_CLASS_BUFFER_M.get(road_type, DEFAULT_ROAD_BUFFER_M),
+            "in_buffer_zone": True,
+            "search_radius_m": search_radius,
+            "explanation": (
+                f"Location lies directly on a {road_type} road. "
+                f"High safety risk, noise, and air pollution. "
+                f"Unsuitable for residential or sensitive development."
+            )
+        }
 
-    # 5. OPTIMAL ZONE SCORING LOGIC
-    # Bell curve approach: Sweet spot at 0.3-1.5km gives highest scores
-    # Too close (on road/in buffer): Lower score due to noise
-    # Farther away: Still good initially, then declines as accessibility drops
+    # # 5. OPTIMAL ZONE SCORING LOGIC
+    # # Bell curve approach: Sweet spot at 0.3-1.5km gives highest scores
+    # # Too close (on road/in buffer): Lower score due to noise
+    # # Farther away: Still good initially, then declines as accessibility drops
     
-    if min_km < road_buffer_km:
-        # ZONE 1: TOO CLOSE (within noise buffer)
-        # Score improves as you move away from the road
-        penalty_ratio = min_km / road_buffer_km  # 0 to 1
+    # if min_km < road_buffer_km:
+    #     # ZONE 1: TOO CLOSE (within noise buffer)
+    #     # Score improves as you move away from the road
+    #     penalty_ratio = min_km / road_buffer_km  # 0 to 1
         
-        if road_type in ("motorway", "trunk"):
-            score = 25.0 + (penalty_ratio * 20.0)  # 25-45 range (poor to acceptable)
-            explanation = (
-                f"Location is {round(min_km*1000, 0)}m from a {road_type} road (directly on/near road). "
-                f"High noise and pollution impact. Severe environmental constraints requiring extensive mitigation."
-            )
-        elif road_type in ("primary", "secondary"):
-            score = 35.0 + (penalty_ratio * 20.0)  # 35-55 range
-            explanation = (
-                f"Location is {round(min_km*1000, 0)}m from a {road_type} road (in noise buffer zone). "
-                f"Moderate to high noise/pollution. Mitigation measures essential for habitability."
-            )
-        else:
-            # Minor roads have less impact
-            score = 45.0 + (penalty_ratio * 20.0)  # 45-65 range
-            explanation = (
-                f"Location is {round(min_km*1000, 0)}m from a {road_type} road (light traffic exposure). "
-                f"Minimal noise impact. Land value moderate with good proximity advantage."
-            )
+    #     if road_type in ("motorway", "trunk"):
+    #         score = 25.0 + (penalty_ratio * 20.0)  # 25-45 range (poor to acceptable)
+    #         explanation = (
+    #             f"Location is {round(min_km*1000, 0)}m from a {road_type} road (directly on/near road). "
+    #             f"High noise and pollution impact. Severe environmental constraints requiring extensive mitigation."
+    #         )
+    #     elif road_type in ("primary", "secondary"):
+    #         score = 35.0 + (penalty_ratio * 20.0)  # 35-55 range
+    #         explanation = (
+    #             f"Location is {round(min_km*1000, 0)}m from a {road_type} road (in noise buffer zone). "
+    #             f"Moderate to high noise/pollution. Mitigation measures essential for habitability."
+    #         )
+    #     else:
+    #         # Minor roads have less impact
+    #         score = 45.0 + (penalty_ratio * 20.0)  # 45-65 range
+    #         explanation = (
+    #             f"Location is {round(min_km*1000, 0)}m from a {road_type} road (light traffic exposure). "
+    #             f"Minimal noise impact. Land value moderate with good proximity advantage."
+    #         )
     
-    elif min_km < 1.5:
-        # ZONE 2: OPTIMAL (Sweet spot for land value + low noise)
-        # Best balance: accessible but not too noisy
-        if road_type in ("motorway", "trunk"):
-            score = 85.0
-            explanation = (
-                f"Location is {round(min_km, 2)}km from a major {road_type} road. "
-                f"EXCELLENT for land value: Strong connectivity with negligible noise pollution. "
-                f"Optimal distance for commercial/industrial development."
-            )
-        elif road_type in ("primary", "secondary"):
-            score = 88.0
-            explanation = (
-                f"Location is {round(min_km, 2)}km from a {road_type} road. "
-                f"PRIME LOCATION: Ideal balance of accessibility and environmental quality. "
-                f"High land value with excellent road connectivity."
-            )
-        else:
-            score = 82.0
-            explanation = (
-                f"Location is {round(min_km, 2)}km from nearby {road_type} road. "
-                f"Good accessibility with strong land value potential and low noise impact."
-            )
+    # elif min_km < 1.5:
+    #     # ZONE 2: OPTIMAL (Sweet spot for land value + low noise)
+    #     # Best balance: accessible but not too noisy
+    #     if road_type in ("motorway", "trunk"):
+    #         score = 85.0
+    #         explanation = (
+    #             f"Location is {round(min_km, 2)}km from a major {road_type} road. "
+    #             f"EXCELLENT for land value: Strong connectivity with negligible noise pollution. "
+    #             f"Optimal distance for commercial/industrial development."
+    #         )
+    #     elif road_type in ("primary", "secondary"):
+    #         score = 88.0
+    #         explanation = (
+    #             f"Location is {round(min_km, 2)}km from a {road_type} road. "
+    #             f"PRIME LOCATION: Ideal balance of accessibility and environmental quality. "
+    #             f"High land value with excellent road connectivity."
+    #         )
+    #     else:
+    #         score = 82.0
+    #         explanation = (
+    #             f"Location is {round(min_km, 2)}km from nearby {road_type} road. "
+    #             f"Good accessibility with strong land value potential and low noise impact."
+    #         )
     
-    elif min_km < 3.0:
-        # ZONE 3: GOOD (Accessible but farther)
-        # Accessibility decreases, value decreases
-        score = 72.0
-        explanation = (
-            f"Location is {round(min_km, 2)}km from nearest road. "
-            f"Good road connectivity with strong environmental quality. "
-            f"Moderate land development potential with excellent living conditions."
-        )
+    # elif min_km < 3.0:
+    #     # ZONE 3: GOOD (Accessible but farther)
+    #     # Accessibility decreases, value decreases
+    #     score = 72.0
+    #     explanation = (
+    #         f"Location is {round(min_km, 2)}km from nearest road. "
+    #         f"Good road connectivity with strong environmental quality. "
+    #         f"Moderate land development potential with excellent living conditions."
+    #     )
     
-    elif min_km < 5.0:
-        # ZONE 4: MODERATE (Limited access)
-        # Accessibility significantly impacted
-        score = 55.0
-        explanation = (
-            f"Location is {round(min_km, 2)}km from nearest road. "
-            f"Limited road access reduces land value and development potential. "
-            f"Excellent environmental quality but requires planned infrastructure."
-        )
+    # elif min_km < 5.0:
+    #     # ZONE 4: MODERATE (Limited access)
+    #     # Accessibility significantly impacted
+    #     score = 55.0
+    #     explanation = (
+    #         f"Location is {round(min_km, 2)}km from nearest road. "
+    #         f"Limited road access reduces land value and development potential. "
+    #         f"Excellent environmental quality but requires planned infrastructure."
+    #     )
     
-    else:
-        # ZONE 5: REMOTE (Poor accessibility)
-        # Very limited accessibility, poor land value
-        score = 35.0
-        explanation = (
-            f"Location is {round(min_km, 2)}km from nearest road (remote area). "
-            f"Severely limited accessibility impacts land development potential. "
-            f"Poor infrastructure connectivity significantly reduces suitability."
-        )
+    # else:
+    #     # ZONE 5: REMOTE (Poor accessibility)
+    #     # Very limited accessibility, poor land value
+    #     score = 35.0
+    #     explanation = (
+    #         f"Location is {round(min_km, 2)}km from nearest road (remote area). "
+    #         f"Severely limited accessibility impacts land development potential. "
+    #         f"Poor infrastructure connectivity significantly reduces suitability."
+    #     )
 
+    # # 6. DETAILED EVIDENCE RETURN
+    # details = {
+    #     "nearest_road_name": closest_feature.get("name", "Unnamed Road"),
+    #     "road_type": road_type,
+    #     "distance_km": round(min_km, 3),
+    #     "buffer_m": ROAD_CLASS_BUFFER_M.get(road_type, DEFAULT_ROAD_BUFFER_M),
+    #     "in_buffer_zone": min_km < road_buffer_km,
+    #     "search_radius_m": search_radius,
+    #     "explanation": explanation
+    # }
+
+    # return float(round(score, 2)), float(round(min_km, 3)), details
+    # 5. CONTINUOUS PROXIMITY SCORING (ACCURACY IMPROVED)
+
+    benefit = _proximity_benefit(min_km)
+    penalty = _noise_penalty(min_km, road_buffer_km)
+
+    # Accessibility dominates, penalty subtracts locally
+    proximity_signal = (benefit * 0.85) - (penalty * 0.4)
+
+    # Normalize to 0–100
+    score = 20.0 + (proximity_signal * 80.0)
+
+    score = min(score, 80.0)
+
+    # ⚠️ PENALTY: Road access near water bodies
+    if w_dist is not None and w_dist < 0.5:
+        score *= 0.8
+
+    explanation = (
+        f"Nearest road ({road_type}) at {round(min_km, 2)}km. "
+        f"Accessibility benefit={round(benefit,2)}, noise penalty={round(penalty,2)}. "
+        f"Optimal access achieved without excessive environmental impact."
+    )
     # 6. DETAILED EVIDENCE RETURN
     details = {
         "nearest_road_name": closest_feature.get("name", "Unnamed Road"),

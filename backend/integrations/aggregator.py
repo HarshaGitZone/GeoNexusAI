@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+from backend.ml.predict import predict_suitability_ml
 
 def _normalize_optional(value: Optional[float], default: float) -> float:
     """Safely convert and clamp values between 0 and 100."""
@@ -37,7 +38,15 @@ def compute_suitability_score(
         "landuse": _normalize_optional(landuse_score, 50.0),
     }
 
-    
+    # Add ML-friendly raw risk signals
+    # Convert back to flood RISK for penalties
+    # flood_risk = 100.0 - factors["flood"]
+    raw_risks = {
+        "flood_x_water": (100 - factors["flood"]) * (100 - factors["water"]) / 100.0,
+        "rain_x_slope": factors["rainfall"] * (100 - factors["landslide"]) / 100.0,
+    }
+
+
     is_hard_unsuitable = factors["water"] == 0
     
 
@@ -47,20 +56,76 @@ def compute_suitability_score(
             factors[key] = 0.0
         score = 0.0
     else:
-        weights = {
-            "rainfall": 0.10, "flood": 0.16, "landslide": 0.10, "soil": 0.16,
-            "proximity": 0.10, "water": 0.18, "pollution": 0.10, "landuse": 0.10,
-        }
-        score = round(sum(factors[k] * weights[k] for k in weights), 2)
+        features = [
+            factors["rainfall"],
+            factors["flood"],
+            factors["landslide"],
+            factors["soil"],
+            factors["proximity"],
+            factors["water"],
+            factors["pollution"],
+            factors["landuse"],
+            raw_risks["flood_x_water"],
+            raw_risks["rain_x_slope"],
+        ]
+        # Domain-driven base score (weights reflect real importance)
+        # DOMAIN-WEIGHTED BASE SCORE (deterministic & monotonic)
+        base_score = (
+            0.22 * factors["landslide"] +
+            0.20 * factors["flood"] +
+            0.18 * factors["water"] +
+            0.15 * factors["soil"] +
+            0.10 * factors["landuse"] +
+            0.08 * factors["proximity"] +
+            0.04 * factors["rainfall"] +
+            0.03 * factors["pollution"]
+        )
+
+
+
+        # ML prediction
+        ml_score = predict_suitability_ml(features)
+
+        # ML can only adjust ±15%
+        score = 0.85 * base_score + 0.15 * ml_score
+
+
         
         # 🚨 SAFETY CLAMP: Forest / Protected land is NON-BUILDABLE
-        # If landuse_score indicates forest/protected (<=20), clamp total score
+        # 🚨 LEGAL FEASIBILITY GATE (LANDUSE)
         if landuse_score is not None:
             try:
-                lu_raw = float(landuse_score)
-            except (ValueError, TypeError):
-                lu_raw = None
+                lu = float(landuse_score)
+            except:
+                lu = 50.0
 
-            if lu_raw is not None and lu_raw <= 20:
-                score = min(score, 20.0)
-    return {"score": score, "factors": factors, "is_hard_unsuitable": is_hard_unsuitable}
+            if lu <= 20:          # Forest / Wetland / Protected
+                score *= 0.2
+            elif lu <= 40:        # Agricultural / semi-restricted
+                score *= 0.7
+            # else: buildable land → no change
+
+    # Soft interaction penalties
+    if raw_risks["flood_x_water"] > 50:
+        score *= 0.85  # flood amplification near water
+
+    if raw_risks["rain_x_slope"] > 60:
+        score *= 0.90  # rain-induced landslide risk
+    # 🔴 Dominant safety constraints
+    # HARD SAFETY CAPS
+    if factors["water"] < 50:
+        score = min(score, 60)
+
+    if factors["flood"] < 50:
+        score = min(score, 65)
+
+    if factors["landslide"] < 50:
+        score = min(score, 65)
+
+
+    return {
+        "score": round(score, 2),
+        "factors": factors,
+        "raw_risks": raw_risks,
+        "is_hard_unsuitable": is_hard_unsuitable
+    }

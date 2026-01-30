@@ -202,70 +202,87 @@
 
 
 
-import sys, os
-import random
-import pickle
+import os, pickle, random
 import numpy as np
 import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 from backend.integrations import compute_suitability_score
 
-# Geographic Bounding Box for India
-LAT_RANGE, LON_RANGE = (8.4, 37.6), (68.1, 97.4)
-
-print("Training Ensemble (XGBoost + RF) on Indian terrain samples...")
+print("Training ML models (FAST MODE)...")
 
 X, y = [], []
-for i in range(10000):
-    # Simulate a mix of 15% water and 85% land samples
-    on_water = random.random() < 0.15 
-    
+
+SAMPLES = 2500   # ⬅ finishes in ~2 minutes
+
+for _ in range(SAMPLES):
+    on_water = random.random() < 0.15
+
+    rainfall = random.uniform(30, 95)
+    flood = random.uniform(20, 100)
+    landslide = random.uniform(30, 90)
+    soil = 0.0 if on_water else random.uniform(30, 100)
+    proximity = random.uniform(40, 95)
+    water = 0.0 if on_water else random.uniform(40, 100)
+    pollution = random.uniform(30, 90)
+    landuse = 0.0 if on_water else random.uniform(20, 100)
+
+    flood_x_water = flood * (100 - water) / 100
+    rain_x_slope = rainfall * (100 - landslide) / 100
+    flood_safety = 100.0 - flood
     features = [
-        random.uniform(30, 95), # rainfall
-        random.uniform(20, 100), # flood
-        random.uniform(50, 90), # landslide
-        0.0 if on_water else random.uniform(30, 100), # soil
-        random.uniform(40, 95), # proximity
-        0.0 if on_water else random.uniform(40, 100), # water
-        random.uniform(30, 90), # pollution
-        0.0 if on_water else random.uniform(20, 100)  # landuse
+        rainfall,
+        flood_safety,
+        landslide,
+        soil,
+        proximity,
+        water,
+        pollution,
+        landuse,
+        flood_x_water,
+        rain_x_slope
     ]
-    
-    # Label using the Hard-Coded Logic
+
     agg = compute_suitability_score(
-        rainfall_score=features[0], flood_risk_score=features[1],
-        landslide_risk_score=features[2], soil_quality_score=features[3],
-        proximity_score=features[4], water_proximity_score=features[5],
-        pollution_score=features[6], landuse_score=features[7]
+        rainfall_score=rainfall,
+        flood_risk_score=flood_safety,
+        landslide_risk_score=landslide,
+        soil_quality_score=soil,
+        proximity_score=proximity,
+        water_proximity_score=water,
+        pollution_score=pollution,
+        landuse_score=landuse
     )
+
     X.append(features)
     y.append(agg["score"])
 
-X, y = np.array(X), np.array(y)
+X = np.array(X)
+y = np.array(y)
 
-# Train Ensemble
-model_xgb = xgb.XGBRegressor(n_estimators=300, max_depth=6, learning_rate=0.1)
-model_rf = RandomForestRegressor(n_estimators=200, max_depth=12, n_jobs=-1)
+# ⚡ FAST + STRONG MODELS
+rf = RandomForestRegressor(
+    n_estimators=120,
+    max_depth=14,
+    n_jobs=-1,
+    random_state=42
+)
 
-model_xgb.fit(X, y)
-model_rf.fit(X, y)
+xgb_model = xgb.XGBRegressor(
+    n_estimators=200,
+    max_depth=5,
+    learning_rate=0.1,
+    n_jobs=-1,
+    random_state=42
+)
 
-# # Save both models
-# os.makedirs("backend/ml", exist_ok=True)
-# pickle.dump(model_xgb, open("backend/ml/model_xgboost.pkl", "wb"))
-# pickle.dump(model_rf, open("backend/ml/model_rf.pkl", "wb"))
+rf.fit(X, y)
+xgb_model.fit(X, y)
 
-# print(f"Models saved successfully. XGB R2: {model_xgb.score(X, y):.4f}")
-# Create the specific models path
-# This goes from GeoAI/backend/ml/ -> GeoAI/backend/ml/models/
-target_dir = os.path.join(os.path.dirname(__file__), "models")
-os.makedirs(target_dir, exist_ok=True) 
+# Save models
+model_dir = os.path.join(os.path.dirname(__file__), "models")
+os.makedirs(model_dir, exist_ok=True)
 
-model_path = os.path.join(target_dir, "model_xgboost.pkl")
-rf_path = os.path.join(target_dir, "model_rf.pkl")
+pickle.dump(rf, open(os.path.join(model_dir, "model_rf.pkl"), "wb"))
+pickle.dump(xgb_model, open(os.path.join(model_dir, "model_xgboost.pkl"), "wb"))
 
-# Save the files directly into the models folder
-pickle.dump(model_xgb, open(model_path, "wb"))
-pickle.dump(model_rf, open(rf_path, "wb"))
-
-print(f"✅ Models saved automatically to: {target_dir}")
+print("✅ TRAINING COMPLETE")

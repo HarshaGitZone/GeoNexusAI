@@ -196,6 +196,22 @@ from typing import Optional
 from backend.integrations.water_adapter import estimate_water_proximity_score
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+def _buildable_probability(classification):
+    """
+    Probability that land is legally buildable.
+    This is NOT suitability, only permissibility.
+    """
+    mapping = {
+        "Dense Forest": 0.05,
+        "Wetland/Conservation Area": 0.1,
+        "Water Body": 0.0,
+        "Urban/Developed Area": 0.95,
+        "Agricultural Land": 0.7,
+        "Grassland/Meadow": 0.6,
+        "Generic Buildable Land": 0.65,
+        "Unknown (API Error)": 0.5,
+    }
+    return mapping.get(classification, 0.6)
 
 def infer_landuse_score(latitude: float, longitude: float) -> Optional[float]:
     """
@@ -214,9 +230,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
     # 1. WATER FILTER
     w_score, w_dist, _ = estimate_water_proximity_score(latitude, longitude)
     if w_score == 0.0 or (w_dist is not None and w_dist < 0.02):
+        classification="Water Body"
         return {
             "score": 0.0,
-            "classification": "Water Body",
+            "classification": classification,
+            "buildable_probability": _buildable_probability(classification),
             "ndvi_index": -0.5,  # Water has negative NDVI
             "confidence": 98.0,
             "dataset_source": "Sentinel-2 Multispectral Imagery (ESA 2025) + OpenStreetMap",
@@ -251,9 +269,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                 natural = tags.get("natural", "").lower()
 
                 if landuse == "forest" or natural in ("wood", "forest"):
+                    classification="Dense Forest"
                     return {
                         "score": 10.0,
-                        "classification": "Dense Forest",
+                        "classification": classification,
+                        "buildable_probability": _buildable_probability(classification),    
                         "ndvi_index": 0.75,  # Forest NDVI range: 0.6-0.9
                         "confidence": 96.0,
                         "dataset_source": "Sentinel-2 Multispectral Imagery (ESA 2025) + OpenStreetMap Vector Data",
@@ -262,9 +282,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "reason": "NDVI Index: 0.75 (Dense vegetation > 0.6 = Forest per USGS classification). OpenStreetMap confirmed forest coverage (100m radius). Non-buildable protected land."
                     }
                 elif landuse in ("wetland", "conservation"):
+                    classification="Wetland/Conservation Area"
                     return {
                         "score": 15.0,
-                        "classification": "Wetland/Conservation Area",
+                        "classification": classification,
+                        "buildable_probability": _buildable_probability(classification), 
                         "ndvi_index": 0.55,  # Wetland vegetation NDVI
                         "confidence": 94.0,
                         "dataset_source": "Sentinel-2 Imagery (ESA 2025) + UNESCO Protected Areas Database",
@@ -297,9 +319,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                 landuse = tags.get("landuse", "").lower()
                 
                 if landuse in ("residential", "commercial", "industrial", "retail"):
+                    classification="Urban/Developed Area"
                     return {
                         "score": 85.0,
-                        "classification": "Urban/Developed Area",
+                        "classification": classification,
+                        "buildable_probability": _buildable_probability(classification), 
                         "ndvi_index": 0.25,  # Low NDVI in urban areas (0.2-0.35)
                         "confidence": 94.0,
                         "dataset_source": "Sentinel-2 NDVI Analysis (ESA 2025) + OpenStreetMap (Jan 2026)",
@@ -308,9 +332,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "reason": f"NDVI Index: 0.25 (Low vegetation, built-up area). OpenStreetMap classified as {landuse.title()} within 500m. High suitability for urban/commercial development."
                     }
                 elif landuse in ("farmland", "farmyard", "orchard"):
+                    classification="Agricultural Land"
                     return {
                         "score": 75.0,
-                        "classification": "Agricultural Land",
+                        "classification": classification,
+                        "buildable_probability": _buildable_probability(classification), 
                         "ndvi_index": 0.52,  # Crop NDVI range: 0.4-0.6
                         "confidence": 92.0,
                         "dataset_source": "Sentinel-2 NDVI Analysis (ESA 2025) + OpenStreetMap (Jan 2026)",
@@ -319,9 +345,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "reason": f"NDVI Index: 0.52 (Moderate vegetation in 0.4-0.6 range = Agricultural crops). OpenStreetMap confirmed {landuse.title()}. Suitable for farming/agribusiness development."
                     }
                 elif landuse == "meadow":
+                    classification="Grassland/Meadow"
                     return {
                         "score": 65.0,
-                        "classification": "Grassland/Meadow",
+                        "classification": classification,
+                        "buildable_probability": _buildable_probability(classification), 
                         "ndvi_index": 0.45,  # Grassland NDVI
                         "confidence": 90.0,
                         "dataset_source": "Sentinel-2 NDVI Analysis (ESA 2025) + OpenStreetMap (Jan 2026)",
@@ -331,9 +359,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                     }
 
         # No specific landuse found - default buildable generic land
+        classification="Generic Buildable Land"
         return {
             "score": 70.0,
-            "classification": "Generic Buildable Land",
+            "classification": classification,
+            "buildable_probability": _buildable_probability(classification), 
             "ndvi_index": 0.40,  # Mixed vegetation/urban
             "confidence": 78.0,
             "dataset_source": "Sentinel-2 NDVI Index (ESA 2025) + Regional Baselines",
@@ -343,9 +373,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
         }
 
     except Exception:
+        classification="Unknown (API Error)"
         return {
             "score": 70.0,
-            "classification": "Unknown (API Error)",
+            "classification": classification,
+            "buildable_probability": _buildable_probability(classification), 
             "ndvi_index": None,
             "confidence": 0.0,
             "dataset_source": "Fallback - OpenAQ API Error",

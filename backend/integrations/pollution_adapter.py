@@ -46,7 +46,7 @@ import requests
 from typing import Optional, Tuple
 # Import the water detection logic for global synchronization
 from backend.integrations.water_adapter import estimate_water_proximity_score
-
+import math
 OPENAQ_URL = "https://api.openaq.org/v2/latest"
 
 def estimate_pollution_score(latitude: float, longitude: float) -> Tuple[float, Optional[float], Optional[dict]]:
@@ -89,16 +89,20 @@ def estimate_pollution_score(latitude: float, longitude: float) -> Tuple[float, 
 
         v = float(pm25)
         # 3. SCORING LOGIC (Higher = Cleaner/Safer)
-        if v < 10:
-            score = 95.0
-        elif v < 25:
-            score = 80.0
-        elif v < 50:
-            score = 60.0
-        elif v < 100:
-            score = 40.0
-        else:
-            score = 20.0
+        # if v < 10:
+        #     score = 95.0
+        # elif v < 25:
+        #     score = 80.0
+        # elif v < 50:
+        #     score = 60.0
+        # elif v < 100:
+        #     score = 40.0
+        # else:
+        #     score = 20.0
+        health_factor = min(1.0, pm25 / 75.0)
+        score = 100 * (1 - health_factor)
+        score = max(30, min(85, score))
+
             
         # Get measurement timestamp for data freshness proof
         last_updated = results.get("lastUpdated", "")

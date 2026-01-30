@@ -114,6 +114,11 @@ def _fetch_open_meteo_sum(lat: float, lon: float, days: int = 60) -> Optional[fl
     except Exception as e:
         # Log the error if necessary and return None for fallback handling
         return None
+    
+def rainfall_suitability(mm):
+    # Bell curve centered at ~120mm
+    import math
+    return 100 * math.exp(-((mm - 120) ** 2) / (2 * 120 ** 2))
 
 def estimate_rainfall_score(latitude: float, longitude: float) -> Tuple[float, Optional[float]]:
     """
@@ -130,16 +135,26 @@ def estimate_rainfall_score(latitude: float, longitude: float) -> Tuple[float, O
     if total_mm is None:
         return 50.0, None
         
-    if total_mm > 800:
-        score = 20.0
-    elif total_mm > 400:
-        score = 40.0
-    elif total_mm > 100:
-        score = 70.0
-    else:
-        score = 85.0
-        
-    return score, round(total_mm, 1)
+    score = max(30, min(90, rainfall_suitability(total_mm)))
+
+    # r = total_mm
+
+    # if r < 20:
+    #     score = 70.0   # drought
+    # elif r < 60:
+    #     score = 80.0   # low but usable
+    # elif r < 150:
+    #     score = 90.0   # IDEAL range
+    # elif r < 300:
+    #     score = 65.0   # safe but wet
+    # elif r < 500:
+    #     score = 55.0   # risky
+    # elif r < 700:
+    #     score = 35.0   # very risky
+    # else:
+    #     score = 20.0   # extreme rainfall
+
+    return round(score, 2), round(total_mm, 1)
 
 def get_rainfall_totals(latitude: float, longitude: float, days_list=(7, 30, 60)) -> dict:
     """

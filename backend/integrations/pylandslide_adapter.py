@@ -215,6 +215,24 @@ def estimate_slope(lat: float, lon: float, google_key: Optional[str] = None) -> 
     # Return as percentage (e.g., 0.15 gradient = 15%)
     return round(avg_gradient * 100, 2)
 
+def _slope_factor(slope_pct):
+    """
+    Converts slope (%) into 0–1 risk.
+    30%+ slope is extremely dangerous.
+    """
+    if slope_pct is None:
+        return 0.3
+    return min(1.0, slope_pct / 30.0)
+
+
+def _event_factor(num_events, recent_events):
+    """
+    Historical memory of landslides.
+    """
+    if num_events == 0:
+        return 0.0
+    return min(1.0, (num_events * 0.1) + (recent_events * 0.15))
+
 def estimate_landslide_risk_score(latitude: float, longitude: float, google_key: Optional[str] = None) -> Optional[float]:
     """
     Returns a landslide safety score (0-100). Higher = Safer/Less Risk.
@@ -230,30 +248,55 @@ def estimate_landslide_risk_score(latitude: float, longitude: float, google_key:
     if w_score == 0.0 or (w_dist is not None and w_dist < 0.02):
         return 0.0
 
-    # 2. Historical Event Penalty (NASA EONET API)
-    # Checks for reported landslide events within a 0.2-degree bounding box over 10 years.
+    # # 2. Historical Event Penalty (NASA EONET API)
+    # # Checks for reported landslide events within a 0.2-degree bounding box over 10 years.
     delta_bbox = 0.2
     bbox = f"{longitude - delta_bbox},{latitude - delta_bbox},{longitude + delta_bbox},{latitude + delta_bbox}"
     url = "https://eonet.gsfc.nasa.gov/api/v3/events"
     params = {'category': 'landslides', 'bbox': bbox, 'days': 3650, 'limit': 20}
     
-    event_penalty = 0
+    # event_penalty = 0
+    # try:
+    #     resp = requests.get(url, params=params, timeout=8)
+    #     if resp.status_code == 200:
+    #         events = resp.json().get('events', [])
+    #         num_events = len(events)
+    #         # Higher penalty for recent events (recorded since 2023)
+    #         recent = sum(1 for e in events if "2023" in str(e.get('geometry', [{}])[0].get('date', '')))
+    #         event_penalty = min((num_events * 8) + (recent * 5), 45)
+    # except: pass
+
+    # # 3. Slope-based Penalty (Calculated if location is confirmed land)
+    # slope = estimate_slope(latitude, longitude, google_key)
+    # # Heuristic: 0% slope = 0 penalty; 30%+ slope = 60 penalty (max)
+    # slope_penalty = min(slope * 2.0, 60)
+    
+    # # Base Safety starts at 90 (High Safety)
+    # final_score = max(0, 90 - event_penalty - slope_penalty)
+    
+    # return float(round(final_score, 2))
+    # 2. Historical Event Signal
+    num_events = 0
+    recent = 0
     try:
         resp = requests.get(url, params=params, timeout=8)
         if resp.status_code == 200:
             events = resp.json().get('events', [])
             num_events = len(events)
-            # Higher penalty for recent events (recorded since 2023)
             recent = sum(1 for e in events if "2023" in str(e.get('geometry', [{}])[0].get('date', '')))
-            event_penalty = min((num_events * 8) + (recent * 5), 45)
-    except: pass
+    except:
+        pass
 
-    # 3. Slope-based Penalty (Calculated if location is confirmed land)
+    event_factor = _event_factor(num_events, recent)
+
+    # 3. Slope Signal
     slope = estimate_slope(latitude, longitude, google_key)
-    # Heuristic: 0% slope = 0 penalty; 30%+ slope = 60 penalty (max)
-    slope_penalty = min(slope * 2.0, 60)
-    
-    # Base Safety starts at 90 (High Safety)
-    final_score = max(0, 90 - event_penalty - slope_penalty)
-    
-    return float(round(final_score, 2))
+    slope_factor = _slope_factor(slope)
+
+    # 4. Combine landslide risk signals
+    landslide_risk = slope_factor * (0.7 + 0.3 * event_factor)
+
+    # Convert to safety score
+    final_score = 100.0 - (landslide_risk * 100.0)
+    final_score = max(10.0, min(90.0, final_score))
+    return round(final_score, 2)

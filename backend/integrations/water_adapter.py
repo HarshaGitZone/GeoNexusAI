@@ -273,7 +273,11 @@ def estimate_water_proximity_score(latitude: float, longitude: float) -> Tuple[f
     # 1. Direct Named Water Check
     found, details = _multi_scale_search(latitude, longitude)
     if found:
-        return 0.0, 0.0, details
+        return 0.0, 0.0,{
+            **details,
+            "normalized_water_risk": 1.0,
+            "distance_km": 0.0
+        }
 
     # 2. Hardcoded Ocean Fail-Safe
     is_ocean, ocean_name = _is_in_hardcoded_ocean(latitude, longitude)
@@ -281,7 +285,9 @@ def estimate_water_proximity_score(latitude: float, longitude: float) -> Tuple[f
         return 0.0, 0.0, {
             "source": "Geometric Fail-Safe",
             "name": ocean_name,
-            "detail": f"Located within the coordinates of the {ocean_name}"
+            "detail": f"Located within the coordinates of the {ocean_name}",
+            "normalized_water_risk": 1.0,
+            "distance_km": 0.0
         }
 
     # 3. ADVANCED PROXIMITY SCAN (The logic you confirmed works well)
@@ -308,14 +314,20 @@ def estimate_water_proximity_score(latitude: float, longitude: float) -> Tuple[f
                 
                 # Your confirmed Refined Scoring
                 if dist < 0.3: score = 15.0
-                elif dist < 0.8: score = 35.0
-                elif dist < 1.5: score = 55.0
-                elif dist < 3.0: score = 75.0
-                else: score = 90.0
+                elif dist<0.7: score=30.0
+                elif dist < 1.0: score = 45.0
+                elif dist < 2.5: score = 65.0
+                elif dist < 5.0: score = 75.0
+                elif dist<7.0: score = 90.0
+                else: score=45.0
                 
+                normalized_risk = 1.0 - (score / 100.0)
+
                 return score, round(dist, 3), {
                     "source": "Overpass Poly Engine",
                     "name": water_name,
+                    "distance_km": round(dist, 3),
+                    "normalized_water_risk": round(normalized_risk, 3),
                     "detail": f"Located approximately {round(dist, 2)} km from {water_name}"
                 }
         except: continue
@@ -323,5 +335,7 @@ def estimate_water_proximity_score(latitude: float, longitude: float) -> Tuple[f
     # 4. Fallback for unverified areas
     return 50.0, None, {
         "source": "Safety Fallback",
+        "normalized_water_risk": 0.5,
+        "confidence": 0.4,
         "detail": "No major water bodies detected within 5km. Status unverified."
     }
