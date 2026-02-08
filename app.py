@@ -6134,46 +6134,28 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     intelligence = GeoDataService.get_land_intelligence(latitude, longitude)
     
     # --- DYNAMIC POLLUTION OVERRIDE ---
-    real_pollution = fetch_realtime_pollution(latitude, longitude)
-    if real_pollution:
-        intelligence["raw_factors"]["environmental"]["pollution"] = real_pollution
-    
-    # --- DYNAMIC REAL-TIME POLLUTION OVERRIDE ---
-    # This calls the Open-Meteo Air Quality API (which handles water and land equally)
-    real_pollution_data = real_pollution
+    real_pollution_data = fetch_realtime_pollution(latitude, longitude)
     if real_pollution_data:
         # Inject real-time measurements into the raw factor pool
         intelligence["raw_factors"]["environmental"]["pollution"] = real_pollution_data
-        
-        # Log success for telemetry
-        # logger.info(f"Pollution Sync Successful: {real_pollution_data['value']} AQI Score")
+        logger.info(f"Pollution Sync Successful: {real_pollution_data['value']} score")
     else:
-        # logger.warning("Real-time pollution sync failed; using satellite baseline.")
-    # --------------------------------------------
-    # --- UNIVERSAL ACCESSIBILITY (CITY ANCHORS) OVERRIDE ---
-    # hub_intelligence = get_infrastructure_score(latitude, longitude)
+        # Fixed Indentation: added pass to prevent SyntaxError
+        pass 
     
-    # if is_tier_one:
-    #     # Force Gold-Standard score for verified world hubs
-    #     hub_intelligence["value"] = 100.0
-    #     hub_intelligence["label"] = f"Tier 1 Strategic Hub: {hub_name}"
-    #     hub_intelligence["details"]["explanation"] = f"Guaranteed 100/100: Prime location in the {hub_name} infrastructure corridor."
-
-    # intelligence["raw_factors"]["socio_econ"]["infrastructure"] = hub_intelligence
-    # # ----------------------------------
     # --- UNIVERSAL ACCESSIBILITY (VALENCIA-GRADE) OVERRIDE ---
     # This logic handles multi-modal anchors (Markets, City Hubs, Strategic Roads)
-        hub_intelligence = get_infrastructure_score(latitude, longitude)
+    hub_intelligence = get_infrastructure_score(latitude, longitude)
         
-        if is_tier_one:
-            # Force Gold-Standard score for verified world hubs (Valencia/Dubai)
-            hub_intelligence["value"] = 100.0
-            hub_intelligence["label"] = f"Tier 1 Strategic Hub: {hub_name}"
-            hub_intelligence["details"]["explanation"] = f"Guaranteed 100/100: Site is located in the {hub_name} infrastructure core."
+    if is_tier_one:
+        # Force Gold-Standard score for verified world hubs (Valencia/Dubai)
+        hub_intelligence["value"] = 100.0
+        hub_intelligence["label"] = f"Tier 1 Strategic Hub: {hub_name}"
+        hub_intelligence["details"]["explanation"] = f"Guaranteed 100/100: Site is located in the {hub_name} infrastructure core."
 
     # Store the result in the intelligence raw factor pool for the aggregator to use
     intelligence["raw_factors"]["socio_econ"]["infrastructure"] = hub_intelligence
-    # ---------------------------------------------------------
+
     # 2. 📊 COMPUTE CATEGORIZED SCORES
     agg_result = Aggregator.compute_suitability_score(intelligence)
     
@@ -6190,7 +6172,6 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             raw["physical"]["elevation"] = {**elev_raw, "scaled_score": _elevation_to_suitability(elev_raw["value"])}
         except (TypeError, KeyError):
             pass
-
     f = {
         "physical": {
             "slope": normalize_factor(raw["physical"]["slope"]),
