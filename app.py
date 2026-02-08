@@ -3,6 +3,11 @@ from torchvision import models, transforms
 from PIL import Image
 import requests
 from io import BytesIO
+import uuid
+from flask import jsonify, request
+from flask_cors import CORS
+
+from projects_db import init_db, save_project, load_project
 
 # Initialize CNN Model (MobileNetV2 is best for web backends)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -153,6 +158,8 @@ print("---------------------------")
 # --- Flask App Initialization ---
 app = Flask(__name__)
 
+
+
 # 1. Standardize Allowed Origins (Ensure NO trailing slashes)
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -167,6 +174,7 @@ CORS(app, resources={r"/*": {
     "allow_headers": ["Content-Type", "Authorization", "Accept"],
     "expose_headers": ["Content-Type", "Authorization"]
 }}, supports_credentials=True)
+init_db()
 def normalize_coords(lat, lng):
     # Clamp latitude to Web Mercator / Earth limits
     lat = max(min(lat, 85.0511), -85.0511)
@@ -3360,6 +3368,7 @@ def get_history():
             # Calculate drifts for all factors with proper temporal logic
             p_prox = max(0, min(100, f.get('proximity', 50) * rev_mult))
             p_land = max(0, min(99.9, f.get('landuse', 50) / rev_mult))
+            p_infrastructure = max(0, min(100, f.get('infrastructure', 50) * rev_mult))
             p_flood = max(0, min(100, f.get('flood', 50) * (1.0 + (decay_rate * offset * 0.5))))
             p_soil = max(0, min(100, f.get('soil', 50) * (1.0 + (decay_rate * offset))))
             drift_pollution = round(offset * 2.0, 2)
@@ -3440,7 +3449,7 @@ def get_history():
             past_hydrology = (current_water + current_drainage + 
                              max(0, min(100, current_groundwater - drift_groundwater))) / 3
             past_climatic = (p_rain_score + (current_thermal + drift_thermal) + current_intensity) / 3
-            past_socio = (p_prox + p_land + (current_population + drift_population)) / 3
+            past_socio = (p_prox + p_land + p_infrastructure + (current_population + drift_population)) / 4
             past_risk = (max(0, min(100, current_multi_hazard + drift_multi_hazard)) + 
                         max(0, min(100, current_climate_change + drift_climate_change)) +
                         max(0, min(100, current_recovery - drift_recovery)) + 
@@ -3509,7 +3518,7 @@ def get_history():
                 "thermal": drift_thermal, "intensity": round(offset * 0.8, 2),
                 # Socio-Economic (3)
                 "proximity": round(p_prox - f.get('proximity', 50), 2),
-                "infrastructure": round(p_prox - f.get('proximity', 50), 2),
+                "infrastructure": round(p_infrastructure - f.get('infrastructure', 50), 2),
                 "landuse": round(p_land - f.get('landuse', 50), 2),
                 "population": drift_population,
                 # Risk & Resilience (4)
@@ -6137,22 +6146,34 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
         intelligence["raw_factors"]["environmental"]["pollution"] = real_pollution_data
         
         # Log success for telemetry
-        logger.info(f"Pollution Sync Successful: {real_pollution_data['value']} AQI Score")
+        # logger.info(f"Pollution Sync Successful: {real_pollution_data['value']} AQI Score")
     else:
-        logger.warning("Real-time pollution sync failed; using satellite baseline.")
+        # logger.warning("Real-time pollution sync failed; using satellite baseline.")
     # --------------------------------------------
     # --- UNIVERSAL ACCESSIBILITY (CITY ANCHORS) OVERRIDE ---
-    hub_intelligence = get_infrastructure_score(latitude, longitude)
+    # hub_intelligence = get_infrastructure_score(latitude, longitude)
     
-    if is_tier_one:
-        # Force Gold-Standard score for verified world hubs
-        hub_intelligence["value"] = 100.0
-        hub_intelligence["label"] = f"Tier 1 Strategic Hub: {hub_name}"
-        hub_intelligence["details"]["explanation"] = f"Guaranteed 100/100: Prime location in the {hub_name} infrastructure corridor."
+    # if is_tier_one:
+    #     # Force Gold-Standard score for verified world hubs
+    #     hub_intelligence["value"] = 100.0
+    #     hub_intelligence["label"] = f"Tier 1 Strategic Hub: {hub_name}"
+    #     hub_intelligence["details"]["explanation"] = f"Guaranteed 100/100: Prime location in the {hub_name} infrastructure corridor."
 
+    # intelligence["raw_factors"]["socio_econ"]["infrastructure"] = hub_intelligence
+    # # ----------------------------------
+    # --- UNIVERSAL ACCESSIBILITY (VALENCIA-GRADE) OVERRIDE ---
+    # This logic handles multi-modal anchors (Markets, City Hubs, Strategic Roads)
+        hub_intelligence = get_infrastructure_score(latitude, longitude)
+        
+        if is_tier_one:
+            # Force Gold-Standard score for verified world hubs (Valencia/Dubai)
+            hub_intelligence["value"] = 100.0
+            hub_intelligence["label"] = f"Tier 1 Strategic Hub: {hub_name}"
+            hub_intelligence["details"]["explanation"] = f"Guaranteed 100/100: Site is located in the {hub_name} infrastructure core."
+
+    # Store the result in the intelligence raw factor pool for the aggregator to use
     intelligence["raw_factors"]["socio_econ"]["infrastructure"] = hub_intelligence
-    # ----------------------------------
-    
+    # ---------------------------------------------------------
     # 2. 📊 COMPUTE CATEGORIZED SCORES
     agg_result = Aggregator.compute_suitability_score(intelligence)
     
@@ -6889,6 +6910,40 @@ def nearby_places_route():
             "error": str(e)
         }), 200
 
+@app.route("/projects", methods=["POST"])
+def create_project():
+    try:
+        body = request.json
+        if not body:
+            return jsonify({"error": "No payload"}), 400
+
+        project_name = body.get("projectName", "Untitled Project")
+        payload = body.get("payload")
+
+        if not payload:
+            return jsonify({"error": "Missing payload"}), 400
+
+        project_id = uuid.uuid4().hex[:12]  # short id
+        save_project(project_id, project_name, payload)
+
+        return jsonify({
+            "id": project_id,
+            "shareUrl": f"/project/{project_id}"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/projects/<project_id>", methods=["GET"])
+def get_project(project_id):
+    try:
+        proj = load_project(project_id)
+        if not proj:
+            return jsonify({"error": "Project not found"}), 404
+        return jsonify(proj), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # def serve_react(path):

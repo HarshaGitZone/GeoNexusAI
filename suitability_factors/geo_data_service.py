@@ -101,7 +101,7 @@ from .Climatic.thermal_comfort import get_thermal_comfort_analysis
 from .Climatic.thermal_intensity import get_thermal_intensity
 
 # 📂 SOCIO-ECONOMIC
-from .socio_economic.infrastructure_proximity import get_infrastructure_score
+from .socio_economic.infrastructure_reach import get_infrastructure_score
 from .socio_economic.landuse_status import infer_landuse_score
 from .socio_economic.population_density import get_population_data
 
