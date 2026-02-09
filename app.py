@@ -6929,6 +6929,34 @@ def get_project(project_id):
 #         return send_from_directory(build_dir, path)
 #     return send_from_directory(build_dir, "index.html")
 
+# Geocoding proxy to bypass CSP issues
+@app.route('/api/geocode', methods=['GET'])
+def geocode_proxy():
+    try:
+        query = request.args.get('q', '')
+        if not query:
+            return jsonify({'error': 'Query parameter q is required'}), 400
+        
+        # Try Nominatim API from backend (no CSP restrictions)
+        import requests
+        nominatim_url = f"https://nominatim.openstreetmap.org/search?format=json&q={requests.utils.quote(query)}&limit=8"
+        
+        headers = {
+            'User-Agent': 'GeoAI-App/1.0',
+            'Accept': 'application/json'
+        }
+        
+        response = requests.get(nominatim_url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify(data)
+        else:
+            return jsonify({'error': f'Geocoding service failed: {response.status_code}'}), response.status_code
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port, threaded=True)
