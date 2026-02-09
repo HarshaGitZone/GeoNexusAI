@@ -12953,3 +12953,323 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
   border-radius: 4px;
   color: #166534;                      /* Darker green text */
 }
+
+
+
+/* ============================================================
+   TACTICAL NAVIGATION TABS: HUD GLASS SYSTEM
+   ============================================================ */
+
+/* 1. Base Tab Bar Container */
+.results-tab-bar {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(15px) saturate(150%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 0 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+}
+
+/* 2. Individual Tab Buttons */
+.tab-buttons-container button {
+    background: transparent !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    position: relative !important;
+    
+    /* Typography: Tactical Monospace */
+    font-family: 'Roboto Mono', 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.2px !important;
+    text-transform: uppercase !important;
+    color: rgba(255, 255, 255, 0.5) !important; /* Muted when inactive */
+    
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+}
+
+/* 3. Hover State: Glow and Lift */
+.tab-buttons-container button:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px var(--accent-glow) !important;
+}
+
+/* 4. Active Tab: The "Tactical Underline" */
+.tab-buttons-container button.active {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 12px var(--accent-glow) !important;
+}
+
+/* Animated Neon Underline */
+.tab-buttons-container button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--accent-color) !important;
+    box-shadow: 0 0 15px var(--accent-glow), 0 0 5px var(--accent-glow) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    transform: translateX(-50%);
+}
+
+.tab-buttons-container button.active::after {
+    width: 80% !important; /* Underline expands on active */
+}
+
+/* 5. Icon Sync */
+.tab-buttons-container button .tab-icon {
+    margin-right: 8px !important;
+    font-size: 14px !important;
+    filter: grayscale(1) opacity(0.6) !important;
+    transition: all 0.3s ease !important;
+}
+
+.tab-buttons-container button.active .tab-icon {
+    filter: grayscale(0) drop-shadow(0 0 5px var(--accent-glow)) !important;
+    transform: scale(1.1) !important;
+}
+
+/* 6. Light Theme Support */
+[data-theme="light"] .tab-buttons-container button {
+    color: #64748b !important;
+}
+
+[data-theme="light"] .tab-buttons-container button.active {
+    color: var(--accent-color) !important;
+    text-shadow: none !important;
+}
+
+
+/* ============================================================
+   TACTICAL TIMESTAMP: PALETTE-SYNCED TELEMETRY
+   ============================================================ */
+
+.analysis-timestamp-container {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    backdrop-filter: blur(10px) !important;
+    padding: 6px 14px !important;
+     /* Matches search bar style */
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 1. The "LIVE" Status Pulse */
+.timestamp-status-group .timestamp-status-icon {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    animation: live-blink 1.5s infinite alternate !important;
+}
+
+.timestamp-status-group .live-label {
+    color: var(--accent-color) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.8;
+}
+
+/* 2. Last Analyzed Text Sync */
+.timestamp-label {
+    color: rgba(255, 255, 255, 0.4) !important; /* Muted label */
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    margin-right: 8px !important;
+}
+
+/* 3. The Digital Time Value */
+.timestamp-value-group .ts-date,
+.timestamp-value-group .ts-time {
+    color: var(--accent-color) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 800 !important;
+    font-size: 11px !important;
+    text-shadow: 0 0 8px var(--accent-glow) !important;
+}
+
+.timestamp-value-group .ts-separator {
+    color: rgba(255, 255, 255, 0.2) !important;
+    margin: 0 4px !important;
+}
+
+/* --- THEME SPECIFIC OVERRIDES --- */
+
+/* DARK THEME: Enhanced Glow */
+[data-theme="dark"] .analysis-timestamp-container {
+    box-shadow: inset 0 0 10px rgba(var(--accent-color-rgb), 0.05) !important;
+}
+
+/* LIGHT THEME: Sharp Obsidian definition */
+[data-theme="light"] .analysis-timestamp-container {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .timestamp-label {
+    color: #64748b !important;
+}
+
+[data-theme="light"] .timestamp-value-group .ts-date,
+[data-theme="light"] .timestamp-value-group .ts-time {
+    filter: brightness(0.7) !important; /* Darken for readability */
+    text-shadow: none !important;
+}
+
+/* Pulse Animation for the Live Dot */
+@keyframes live-blink {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.4; transform: scale(0.9); }
+}
+
+
+
+/* ============================================================
+   MINIATURE TELEMETRY PILL (EXTREME LEFT)
+   ============================================================ */
+
+/* 1. Ensure the parent container pushes this to the start */
+.results-tab-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important; /* Forces left alignment */
+    gap: 15px !important;
+    padding: 0 12px !important;
+}
+
+/* 2. The Small & Cute Pill Container */
+.analysis-timestamp-container {
+    background: rgba(var(--accent-color, 16, 185, 129), 0.08) !important;
+    border: 1px solid rgba(var(--accent-color, 16, 185, 129), 0.2) !important;
+    border-radius: 4px !important; /* Sleek technical edges */
+    padding: 3px 8px !important;
+    height: fit-content !important;
+    backdrop-filter: blur(4px) !important;
+    transition: all 0.3s ease !important;
+}
+
+.analysis-timestamp-container:hover {
+    border-color: var(--accent-color) !important;
+    background: rgba(var(--accent-color, 16, 185, 129), 0.15) !important;
+    box-shadow: 0 0 10px rgba(var(--accent-color, 16, 185, 129), 0.2) !important;
+}
+
+/* 3. Horizontal Compact Layout */
+.timestamp-text-stack {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important; /* Tight spacing */
+}
+
+/* 4. The "Small" Text Styling */
+.timestamp-label {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 8px !important; /* Ultra-compact */
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    text-transform: uppercase !important;
+}
+
+/* 5. The Digital Values */
+.timestamp-value-group {
+    display: flex !important;
+    align-items: center !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 9px !important; /* Slightly larger than label for hierarchy */
+    font-weight: 700 !important;
+    color: var(--accent-color) !important;
+}
+
+.ts-separator {
+    margin: 0 3px !important;
+    opacity: 0.3 !important;
+}
+
+/* --- LIGHT THEME POLISH --- */
+[data-theme="light"] .analysis-timestamp-container {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .timestamp-value-group {
+    color: #1e293b !important; /* Dark slate for "cute" readability */
+}
+
+[data-theme="light"] .timestamp-label {
+    color: #64748b !important;
+}
+
+
+
+/* ============================================================
+   RESULTS BAR: CENTERED TABS & EXTREME RIGHT CONTROLS
+   ============================================================ */
+
+.results-tab-bar {
+    display: grid !important;
+    /* Column 1: Timestamp | Column 2: Nav Tabs | Column 3: Controls */
+    grid-template-columns: 1fr auto 1fr !important; 
+    align-items: center !important;
+    
+}
+
+/* 1. LEFT: Miniature Telemetry Badge */
+.analysis-timestamp-container {
+    justify-self: start !important;
+    background: rgba(var(--accent-color-rgb, 16, 185, 129), 0.1) !important;
+    border: 1px solid rgba(var(--accent-color-rgb, 16, 185, 129), 0.2) !important;
+    border-radius: 4px !important;
+    padding: 3px 8px !important;
+}
+
+/* 2. CENTER: Navigation Tabs */
+.tab-buttons-container {
+    grid-column: 2 !important; /* Forces middle column */
+    display: flex !important;
+    gap: 10px !important;
+    justify-content: center !important;
+}
+
+/* 3. RIGHT: Fullscreen/Close Button */
+.analysis-header {
+    grid-column: 3 !important; /* Forces right column */
+    justify-self: end !important; /* Pushes to extreme right */
+    display: flex !important;
+    align-items: center !important;
+}
+
+.fullscreen-tab-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--accent-color) !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+}
+
+
+
+
+/* --- RESPONSIVE FIX --- */
+@media (max-width: 900px) {
+    .results-tab-bar {
+        grid-template-columns: auto 1fr auto !important;
+    }
+    .tab-text {
+        display: none !important; /* Show icons only on smaller screens */
+    }
+}
+

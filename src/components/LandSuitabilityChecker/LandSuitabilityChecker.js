@@ -5389,9 +5389,28 @@ export default function LandSuitabilityChecker() {
 
 
               <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
-
+                {analysisTime && result && (
+                    <div className="analysis-timestamp-container">
+                      <div className="timestamp-content">
+                        {/* <div className="timestamp-status-group">
+                          <span className="timestamp-status-icon">●</span>
+                          <span className="live-label">LIVE</span>
+                        </div> */}
+                        <div className="timestamp-text-stack">
+                          <span className="timestamp-label">LAST ANALYZED AT:</span>
+                          <div className="timestamp-value-group">
+                            {/* We split the string to style Date and Time differently */}
+                            <span className="ts-date">{analysisTime.split(',')[0]}</span>
+                            <span className="ts-separator">/</span>
+                            <span className="ts-time">{analysisTime.split(',')[1]}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 {/* Center Tabs */}
                 <div className="tab-buttons-container">
+                  
                   <button className={activeTab === "suitability" ? "active" : ""} onClick={() => setActiveTab("suitability")}>
                     <span className="tab-icon">🎯</span>
                     <span className="tab-text">Suitability</span>
@@ -5427,25 +5446,7 @@ export default function LandSuitabilityChecker() {
     </div>
   </div>
 )} */}
-                  {analysisTime && result && (
-                    <div className="analysis-timestamp-container">
-                      <div className="timestamp-content">
-                        <div className="timestamp-status-group">
-                          <span className="timestamp-status-icon">●</span>
-                          <span className="live-label">LIVE</span>
-                        </div>
-                        <div className="timestamp-text-stack">
-                          <span className="timestamp-label">LAST ANALYZED AT:</span>
-                          <div className="timestamp-value-group">
-                            {/* We split the string to style Date and Time differently */}
-                            <span className="ts-date">{analysisTime.split(',')[0]}</span>
-                            <span className="ts-separator">/</span>
-                            <span className="ts-time">{analysisTime.split(',')[1]}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  
                 </div>
               </div>
 
