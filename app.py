@@ -4712,17 +4712,13 @@ def _generate_evidence_text(factor_name: str, factor_data: dict, raw_factors: di
     #     hosp_display = f"{hospital_distance:.1f}" if hospital_distance is not None else "N/A"
     #     if infrastructure_score is not None:
     #         if val >= 80:
-    #             return f"Recovery Capacity: Infrastructure {infrastructure_score:.0f if infrastructure_score is not None else 'N/A'}/100, Hospital {hospital_distance:.1f if hospital_distance is not None else 'N/A'}km, Emergency services {emergency_services or 'N/A'}. HIGH resilience. Quick recovery expected, comprehensive support systems. Score {val}/100 reflects excellent recovery capability."
+    #             return f"Recovery Capacity: Infrastructure {infra_display}/100, Hospital {hosp_display}km, Emergency services {emergency_services or 'N/A'}. HIGH resilience. Quick recovery expected, comprehensive support systems. Score {val}/100 reflects excellent recovery capability."
     #         elif val >= 60:
-    #             return f"Recovery Capacity: Infrastructure {infrastructure_score:.0f if infrastructure_score is not None else 'N/A'}/100, Hospital {hospital_distance:.1f if hospital_distance is not None else 'N/A'}km, Emergency services {emergency_services or 'N/A'}. MODERATE resilience. Standard recovery timeline, adequate support systems. Score {val}/100 reflects good recovery capacity."
+    #             return f"Recovery Capacity: Infrastructure {infra_display}/100, Hospital {hosp_display}km, Emergency services {emergency_services or 'N/A'}. MODERATE resilience. Standard recovery timeline, adequate support systems. Score {val}/100 reflects good recovery capacity."
     #         elif val >= 40:
-    #             # return f"Recovery Capacity: Infrastructure {infrastructure_score:.0f if infrastructure_score is not None else 'N/A'}/100, Hospital {hospital_distance:.1f if hospital_distance is not None else 'N/A'}km, Emergency services {emergency_services or 'N/A'}. LOW resilience. Extended recovery time, additional support needed. Score {val}/100 reflects limited recovery capacity."
-    #             return (f"Recovery Capacity: Infrastructure {infra_display}/100, "
-    #             f"Hospital {hosp_display}km, Emergency services {emergency_services or 'N/A'}. "
-    #             f"LOW resilience. Extended recovery time, additional support needed. "
-    #             f"Score {val}/100 reflects limited recovery capacity.")
+    #             return f"Recovery Capacity: Infrastructure {infra_display}/100, Hospital {hosp_display}km, Emergency services {emergency_services or 'N/A'}. LOW resilience. Extended recovery time, additional support needed. Score {val}/100 reflects limited recovery capacity."
     #         else:
-    #             return f"Recovery Capacity: Infrastructure {infrastructure_score:.0f if infrastructure_score is not None else 'N/A'}/100, Hospital {hospital_distance:.1f if hospital_distance is not None else 'N/A'}km, Emergency services {emergency_services or 'N/A'}. VERY LOW resilience. Prolonged recovery, external assistance required. Score {val}/100 reflects poor recovery capacity."
+    #             return f"Recovery Capacity: Infrastructure {infra_display}/100, Hospital {hosp_display}km, Emergency services {emergency_services or 'N/A'}. VERY LOW resilience. Prolonged recovery, external assistance required. Score {val}/100 reflects poor recovery capacity."
     elif factor_name == "recovery":
         # 1. Get recovery capacity metrics
         infrastructure_score = 50
