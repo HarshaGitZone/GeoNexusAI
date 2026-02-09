@@ -7,6 +7,10 @@ export default function TopNav({
   setIsDarkMode,
   isAudioEnabled,
   setIsAudioEnabled,
+  adaptiveWeather,
+  setAdaptiveWeather,
+  weatherOpacity,
+  setWeatherOpacity,
   analysisHistory = [],
   compareResult,
   isCompareMode,
@@ -245,11 +249,40 @@ export default function TopNav({
                 ))}
               </div>
             </div>
+            <div className="nav-group right">
             <button className="icon-btn fs-toggle" onClick={toggleFullscreen}>⛶</button>
+            <button 
+              className={`weather-toggle ${adaptiveWeather ? 'active' : ''}`} 
+              onClick={() => setAdaptiveWeather(!adaptiveWeather)}
+              title={adaptiveWeather ? "Disable Adaptive Weather" : "Enable Adaptive Weather"}
+            >
+              {adaptiveWeather ? "🌦️" : "🌤️"}
+            </button>
+            {adaptiveWeather && (
+              <div className="weather-opacity-control">
+                <span className="opacity-label">Intensity</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={weatherOpacity}
+                  onChange={(e) => {
+                    const newOpacity = parseInt(e.target.value);
+                    setWeatherOpacity(newOpacity);
+                    // Update CSS variable immediately
+                    document.documentElement.style.setProperty('--weather-opacity', newOpacity / 100);
+                  }}
+                  className="opacity-slider"
+                  title="Adjust weather effects intensity"
+                />
+                <span className="opacity-value">{weatherOpacity}%</span>
+              </div>
+            )}
             <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
               {isDarkMode ? "☀️" : "🌙"}
             </button>
           </div>
+        </div>
         </div>
       </nav>
 

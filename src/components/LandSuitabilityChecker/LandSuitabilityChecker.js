@@ -13,6 +13,7 @@ import WeatherCard from '../Weather/WeatherCard';
 import HazardsCard from '../HazardsCard/HazardsCard';
 import SnapshotGeo from '../SnapshotGeo/SnapshotGeo';
 import DigitalTwin from '../DigitalTwin/DigitalTwin';
+import WeatherEffects from '../WeatherEffects/WeatherEffects';
 // import ReactMarkdown from 'react-markdown';
 // import remarkGfm from 'remark-gfm';
 import GeoGPT from '../GeoGPT/GeoGPT';
@@ -1627,9 +1628,9 @@ export default function LandSuitabilityChecker() {
 
   const [isDarkMode, setIsDarkMode] = useState(() => JSON.parse(localStorage.getItem("geo_theme")) ?? true);
 
-  // const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
+  const [adaptiveWeather, setAdaptiveWeather] = useState(() => JSON.parse(localStorage.getItem("geo_adaptive_weather")) || false);
 
-  // const [result, setResult] = useState(null);
+  const [weatherOpacity, setWeatherOpacity] = useState(() => JSON.parse(localStorage.getItem("geo_weather_opacity")) || 30);
 
   const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
   const [closeSiteA, setCloseSiteA] = useState(false);
@@ -2784,6 +2785,10 @@ export default function LandSuitabilityChecker() {
 
     localStorage.setItem("geo_theme", JSON.stringify(isDarkMode));
 
+    localStorage.setItem("geo_adaptive_weather", JSON.stringify(adaptiveWeather));
+    
+    localStorage.setItem("geo_weather_opacity", JSON.stringify(weatherOpacity));
+
     localStorage.setItem("geo_map_style", mapVariety);
 
     localStorage.setItem("sidebar_width", sidebarWidth);
@@ -2846,9 +2851,7 @@ export default function LandSuitabilityChecker() {
 
   }, [
 
-    lat, lng, locationAName, zoom, isDarkMode, sidebarWidth, bottomHeight,
-
-    result, savedPlaces, mapVariety, isCompareMode, showLocationB,
+    lat, lng, locationAName, zoom, isDarkMode, sidebarWidth, bottomHeight, adaptiveWeather, weatherOpacity, result, savedPlaces, mapVariety, isCompareMode, showLocationB,
 
     bLatInput, bLngInput, locationBName, compareResult
 
@@ -4925,6 +4928,10 @@ export default function LandSuitabilityChecker() {
         setIsDarkMode={setIsDarkMode}
         isAudioEnabled={isAudioEnabled}
         setIsAudioEnabled={setIsAudioEnabled}
+        adaptiveWeather={adaptiveWeather}
+        setAdaptiveWeather={setAdaptiveWeather}
+        weatherOpacity={weatherOpacity}
+        setWeatherOpacity={setWeatherOpacity}
         siteAPlaying={siteAPlaying}
         setSiteAPlaying={setSiteAPlaying}
         siteBPlaying={siteBPlaying}
@@ -5020,9 +5027,21 @@ export default function LandSuitabilityChecker() {
 
 
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-
+        <WeatherEffects 
+          weather={result?.weather} 
+          adaptiveWeather={adaptiveWeather}
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
+        />
         <section className="map-container" style={{ flex: 1, position: 'relative' }}>
-
+          {/* Add WeatherEffects for fullscreen map */}
+          <WeatherEffects 
+            weather={result?.weather} 
+            adaptiveWeather={adaptiveWeather}
+            isDarkMode={isDarkMode}
+            setIsDarkMode={setIsDarkMode}
+          />
+          
           {/* 🎯 MOVE THE REF TO WRAP EVERYTHING */}
 
           <div
@@ -5483,6 +5502,14 @@ export default function LandSuitabilityChecker() {
 
               <div className={`tab-viewport ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
 
+                {/* Add WeatherEffects for fullscreen analysis */}
+                <WeatherEffects 
+                  weather={result?.weather} 
+                  adaptiveWeather={adaptiveWeather}
+                  isDarkMode={isDarkMode}
+                  setIsDarkMode={setIsDarkMode}
+                />
+                
                 {/* Floating Close Button for Fullscreen */}
 
                 {isAnalysisFullscreen && (
