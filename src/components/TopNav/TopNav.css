@@ -3079,3 +3079,41 @@
   background: transparent !important;
   background-color: var(--accent-color) !important;
 }
+
+
+/* --- TACTICAL NAV SEPARATOR --- */
+.nav-divider {
+  width: 1px;               /* Thin, precision line */
+  height: 24px;            /* Doesn't touch the edges of the bar */
+  margin: 0 8px;           /* Horizontal breathing room */
+  display: inline-block;
+  align-self: center;      /* Keeps it perfectly centered vertically */
+  transition: all 0.3s ease;
+}
+
+/* DARK THEME: Glassy Cyan/Emerald Line */
+[data-theme="dark"] .nav-divider {
+  background: linear-gradient(
+    to bottom,
+    rgba(16, 185, 129, 0) 0%,
+    rgba(16, 185, 129, 0.4) 50%,
+    rgba(16, 185, 129, 0) 100%
+  );
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* LIGHT THEME: Soft Slate/Blue Line */
+[data-theme="light"] .nav-divider {
+  background: linear-gradient(
+    to bottom,
+    rgba(59, 130, 246, 0) 0%,
+    rgba(59, 130, 246, 0.3) 50%,
+    rgba(59, 130, 246, 0) 100%
+  );
+}
+
+/* Optional: In Fullscreen, make separators slightly taller for focus */
+.results-tab-bar.fullscreen .nav-divider {
+  height: 32px;
+  opacity: 0.8;
+}

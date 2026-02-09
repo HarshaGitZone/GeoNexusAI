@@ -47,6 +47,14 @@ export default function SideBar({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const importFileRef = useRef(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -473,7 +481,58 @@ const generateShareLink = () => {
         flexDirection: "column",
       }}
     >
-      <div style={{ height: "20px", width: "100%" }}></div>
+      {/* Date and Time Display */}
+      {/* <div className="sidebar-datetime-display">
+        <span className="datetime-date">{currentTime.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+        <span className="datetime-separator">•</span>
+        <span className="datetime-time">{currentTime.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+      </div> */}
+      {/* Date and Time Display - Updated for 24h + Year */}
+{/* <div className="sidebar-datetime-display">
+  <div className="datetime-content">
+    <span className="datetime-date">
+      {currentTime.toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric' 
+      })}
+    </span>
+    <span className="datetime-separator">|</span>
+    <span className="datetime-time">
+      {currentTime.toLocaleTimeString('en-GB', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      })}
+    </span>
+  </div>
+</div> */}
+{/* Centered Tactical Datetime Badge */}
+<div className="sidebar-datetime-wrapper">
+  <div className="sidebar-datetime-display">
+    <div className="datetime-content">
+      <span className="datetime-date">
+        {currentTime.toLocaleDateString('en-GB', { 
+          day: '2-digit', 
+          month: 'short', 
+          year: 'numeric' 
+        })}
+      </span>
+      <span className="datetime-separator">|</span>
+      <span className="datetime-time">
+        {currentTime.toLocaleTimeString('en-GB', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        })}
+      </span>
+    </div>
+  </div>
+</div>
+
+      <div style={{ height: "2px", width: "100%" }}></div>
 
       <div className="sidebar-scrollable" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         

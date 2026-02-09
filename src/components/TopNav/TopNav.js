@@ -33,7 +33,6 @@ export default function TopNav({
   const [showHistoryTable, setShowHistoryTable] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const navHideTimeoutRef = useRef(null);
   const [expandedQR, setExpandedQR] = useState(null);
 
@@ -73,7 +72,9 @@ export default function TopNav({
     document.documentElement.style.setProperty('--accent-color', color);
     document.documentElement.style.setProperty('--accent-glow', `${color}44`);
   };
-
+  const NavSeparator = () => (
+  <span className="nav-divider" aria-hidden="true" />
+);
   const handleMouseEnterPalette = () => {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
     // Remove hover behavior - only show on click
@@ -104,8 +105,6 @@ export default function TopNav({
   }, [isAudioEnabled, setSiteAPlaying, setSiteBPlaying]);
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-
     const handleResize = () => {
       const small = window.innerWidth < 768;
       setIsSmallScreen(small);
@@ -116,7 +115,6 @@ export default function TopNav({
     handleResize();
 
     return () => {
-      clearInterval(timer);
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
       if (navHideTimeoutRef.current) clearTimeout(navHideTimeoutRef.current);
       window.removeEventListener("resize", handleResize);
@@ -142,12 +140,12 @@ export default function TopNav({
           <div className="nav-group left">
 
             <div className="nav-group right">
-              {!isSmallScreen && (
-                <div className="compact-sys">
-                  <span className="date-val">{currentTime.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
-                  <span className="time-val">{currentTime.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-                </div>
-              )}
+              
+             
+              <button className={`icon-btn ${showHistoryTable ? "active" : ""}`} onClick={() => setShowHistoryTable(true)}>🕒</button>
+              <a href="/wild-facts" target="_blank" rel="noopener noreferrer" className="icon-btn" title="Wild World Facts" style={{ textDecoration: 'none', color: 'inherit' }}>🌍</a>
+               <NavSeparator />
+             
               <div className="team-trigger-wrapper">
                 <button className={`team-btn ${showTeam ? "active" : ""}`} onClick={() => setShowTeam(!showTeam)}>Team</button>
                 <div className={`compact-team-pane ${showTeam ? "show" : ""}`}>
@@ -166,19 +164,40 @@ export default function TopNav({
                   </div>
                 </div>
               </div>
+              <NavSeparator />
+                {/* 🔊 SITE A SPEAKER */}
+            {isAudioEnabled && (
+              <button
+                className={`icon-btn audio-toggle ${siteAPlaying ? "active" : "muted"}`}
+                onClick={() => setSiteAPlaying((p) => !p)}
+                title={siteAPlaying ? "Mute Site A" : "Unmute Site A"}
+              >
+                {siteAPlaying ? "🔊" : "🔇"}
+                <span className="audio-label">A</span>
+              </button>
+            )}
 
-
-              <button className={`icon-btn ${showHistoryTable ? "active" : ""}`} onClick={() => setShowHistoryTable(true)}>🕒</button>
-              <a href="/wild-facts" target="_blank" rel="noopener noreferrer" className="icon-btn" title="Wild World Facts" style={{ textDecoration: 'none', color: 'inherit' }}>🌍</a>
+            {/* 🔊 SITE B SPEAKER */}
+            {showBSpeaker && (
+              <button
+                className={`icon-btn audio-toggle-b ${siteBPlaying ? "active" : "muted"}`}
+                onClick={() => setSiteBPlaying((p) => !p)}
+                title={siteBPlaying ? "Mute Site B" : "Unmute Site B"}
+              >
+                {siteBPlaying ? "🔊" : "🔇"}
+                <span className="audio-label">B</span>
+              </button>
+            )}
+              
             </div>
-
+             <NavSeparator />
             <div className="nav-group center">
               <div className="brand-wrap">
                 <div className="status-dot" />
                 <h1 className="logo">Geo<span>AI</span></h1>
               </div>
             </div>
-
+             <NavSeparator />
 
 
   {/* {isAudioEnabled && (
@@ -204,57 +223,11 @@ export default function TopNav({
     </button>
   )} */}
   
-            {/* 🔊 SITE A SPEAKER */}
-            {isAudioEnabled && (
-              <button
-                className={`icon-btn audio-toggle ${siteAPlaying ? "active" : "muted"}`}
-                onClick={() => setSiteAPlaying((p) => !p)}
-                title={siteAPlaying ? "Mute Site A" : "Unmute Site A"}
-              >
-                {siteAPlaying ? "🔊" : "🔇"}
-                <span className="audio-label">A</span>
-              </button>
-            )}
-
-            {/* 🔊 SITE B SPEAKER */}
-            {showBSpeaker && (
-              <button
-                className={`icon-btn audio-toggle-b ${siteBPlaying ? "active" : "muted"}`}
-                onClick={() => setSiteBPlaying((p) => !p)}
-                title={siteBPlaying ? "Mute Site B" : "Unmute Site B"}
-              >
-                {siteBPlaying ? "🔊" : "🔇"}
-                <span className="audio-label">B</span>
-              </button>
-            )}
             
-            <div className="palette-wrapper"
-              onMouseEnter={handleMouseEnterPalette}
-              onMouseLeave={handleMouseLeavePalette}>
-              <button
-                className={`icon-btn palette-trigger ${showPalette ? "active" : ""}`}
-                onClick={handlePaletteIconClick}
-              >
-                🎨
-              </button>
-
-              <div className={`palette-dropdown ${showPalette ? "expanded" : ""}`}>
-                {themes.map((t) => (
-                  <div
-                    key={t.name}
-                    className="color-dot"
-                    style={{ backgroundColor: t.color }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      changeThemeColor(t.color);
-                      setShowPalette(false);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
+            
+           
             <div className="nav-group right">
-            <button className="icon-btn fs-toggle" onClick={toggleFullscreen}>⛶</button>
+            
             {/* Site A Weather Adapter - Show when Site A analysis exists */}
             {result && (
               <div className="weather-controls-group">
@@ -315,9 +288,36 @@ export default function TopNav({
                 )}
               </div>
             )}
+             <NavSeparator />
+             <div className="palette-wrapper"
+              onMouseEnter={handleMouseEnterPalette}
+              onMouseLeave={handleMouseLeavePalette}>
+              <button
+                className={`icon-btn palette-trigger ${showPalette ? "active" : ""}`}
+                onClick={handlePaletteIconClick}
+              >
+                🎨
+              </button>
+
+              <div className={`palette-dropdown ${showPalette ? "expanded" : ""}`}>
+                {themes.map((t) => (
+                  <div
+                    key={t.name}
+                    className="color-dot"
+                    style={{ backgroundColor: t.color }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      changeThemeColor(t.color);
+                      setShowPalette(false);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
             <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
               {isDarkMode ? "☀️" : "🌙"}
             </button>
+            <button className="icon-btn fs-toggle" onClick={toggleFullscreen}>⛶</button>
           </div>
         </div>
         </div>
