@@ -1632,6 +1632,12 @@ export default function LandSuitabilityChecker() {
 
   const [weatherOpacity, setWeatherOpacity] = useState(() => JSON.parse(localStorage.getItem("geo_weather_opacity")) || 30);
 
+  // Separate weather adapters for Site A and Site B
+  const [siteAWeather, setSiteAWeather] = useState(() => JSON.parse(localStorage.getItem("geo_site_a_weather")) || false);
+  const [siteBWeather, setSiteBWeather] = useState(() => JSON.parse(localStorage.getItem("geo_site_b_weather")) || false);
+  const [siteAOpacity, setSiteAOpacity] = useState(() => JSON.parse(localStorage.getItem("geo_site_a_opacity")) || 30);
+  const [siteBOpacity, setSiteBOpacity] = useState(() => JSON.parse(localStorage.getItem("geo_site_b_opacity")) || 30);
+
   const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
   const [closeSiteA, setCloseSiteA] = useState(false);
 
@@ -2789,6 +2795,14 @@ export default function LandSuitabilityChecker() {
 
     localStorage.setItem("geo_weather_opacity", JSON.stringify(weatherOpacity));
 
+    localStorage.setItem("geo_site_a_weather", JSON.stringify(siteAWeather));
+
+    localStorage.setItem("geo_site_b_weather", JSON.stringify(siteBWeather));
+
+    localStorage.setItem("geo_site_a_opacity", JSON.stringify(siteAOpacity));
+
+    localStorage.setItem("geo_site_b_opacity", JSON.stringify(siteBOpacity));
+
     localStorage.setItem("geo_map_style", mapVariety);
 
     localStorage.setItem("sidebar_width", sidebarWidth);
@@ -2850,11 +2864,8 @@ export default function LandSuitabilityChecker() {
 
 
   }, [
-
-    lat, lng, locationAName, zoom, isDarkMode, sidebarWidth, bottomHeight, adaptiveWeather, weatherOpacity, result, savedPlaces, mapVariety, isCompareMode, showLocationB,
-
+    lat, lng, locationAName, zoom, isDarkMode, sidebarWidth, bottomHeight, adaptiveWeather, weatherOpacity, siteAWeather, siteBWeather, siteAOpacity, siteBOpacity, result, savedPlaces, mapVariety, isCompareMode, showLocationB,
     bLatInput, bLngInput, locationBName, compareResult
-
   ]);
 
 
@@ -4932,14 +4943,23 @@ export default function LandSuitabilityChecker() {
         setAdaptiveWeather={setAdaptiveWeather}
         weatherOpacity={weatherOpacity}
         setWeatherOpacity={setWeatherOpacity}
+        result={result}
+        compareResult={compareResult}
+        isCompareMode={isCompareMode}
         siteAPlaying={siteAPlaying}
         setSiteAPlaying={setSiteAPlaying}
         siteBPlaying={siteBPlaying}
         setSiteBPlaying={setSiteBPlaying}
+        siteAWeather={siteAWeather}
+        setSiteAWeather={setSiteAWeather}
+        siteBWeather={siteBWeather}
+        setSiteBWeather={setSiteBWeather}
+        siteAOpacity={siteAOpacity}
+        setSiteAOpacity={setSiteAOpacity}
+        siteBOpacity={siteBOpacity}
+        setSiteBOpacity={setSiteBOpacity}
         analysisHistory={analysisHistory}
         onSearchResult={handleSearchResult}
-        compareResult={compareResult}
-        isCompareMode={isCompareMode}
       />
 
 
@@ -5029,19 +5049,25 @@ export default function LandSuitabilityChecker() {
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
         <WeatherEffects
           weather={result?.weather}
-          adaptiveWeather={adaptiveWeather}
+          adaptiveWeather={siteAWeather}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
-          weatherOpacity={weatherOpacity}
+          weatherOpacity={siteAOpacity}
+          siteId="A"
+          lat={parseFloat(lat)}
+          lng={parseFloat(lng)}
         />
         <section className="map-container" style={{ flex: 1, position: 'relative' }}>
           {/* Add WeatherEffects for fullscreen map */}
           <WeatherEffects
             weather={result?.weather}
-            adaptiveWeather={adaptiveWeather}
+            adaptiveWeather={siteAWeather}
             isDarkMode={isDarkMode}
             setIsDarkMode={setIsDarkMode}
-            weatherOpacity={weatherOpacity}
+            weatherOpacity={siteAOpacity}
+            siteId="A"
+            lat={parseFloat(lat)}
+            lng={parseFloat(lng)}
           />
 
           {/* 🎯 MOVE THE REF TO WRAP EVERYTHING */}
@@ -5506,11 +5532,14 @@ export default function LandSuitabilityChecker() {
 
                 {/* Add WeatherEffects for fullscreen analysis */}
                 <WeatherEffects
-                  weather={result?.weather}
-                  adaptiveWeather={adaptiveWeather}
+                  weather={compareResult?.weather}
+                  adaptiveWeather={siteBWeather}
                   isDarkMode={isDarkMode}
                   setIsDarkMode={setIsDarkMode}
-                  weatherOpacity={weatherOpacity}
+                  weatherOpacity={siteBOpacity}
+                  siteId="B"
+                  lat={parseFloat(bLatInput)}
+                  lng={parseFloat(bLngInput)}
                 />
 
                 {/* Floating Close Button for Fullscreen */}

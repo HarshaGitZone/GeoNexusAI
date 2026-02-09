@@ -215,6 +215,12 @@
   border-color: rgba(59, 130, 246, 0.4);
 }
 
+/* Container for weather controls group */
+.weather-controls-group {
+  position: relative;
+  display: inline-block;
+}
+
 /* Container for the slider - Absolutely positioned to remove it from flow */
 .weather-controls {
   position: absolute;

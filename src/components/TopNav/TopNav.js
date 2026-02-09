@@ -11,19 +11,22 @@ export default function TopNav({
   setAdaptiveWeather,
   weatherOpacity,
   setWeatherOpacity,
-  analysisHistory = [],
+  result,
   compareResult,
   isCompareMode,
-//   siteAPlaying,
-//   setSiteAPlaying,
-//   siteBPlaying,
-//   setSiteBPlaying
-// }) {
+  analysisHistory = [],
   siteAPlaying = false,
   setSiteAPlaying = () => {},
-
   siteBPlaying = false,
   setSiteBPlaying = () => {},
+  siteAWeather = false,
+  setSiteAWeather = () => {},
+  siteBWeather = false,
+  setSiteBWeather = () => {},
+  siteAOpacity = 30,
+  setSiteAOpacity = () => {},
+  siteBOpacity = 30,
+  setSiteBOpacity = () => {}
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
@@ -252,31 +255,64 @@ export default function TopNav({
             </div>
             <div className="nav-group right">
             <button className="icon-btn fs-toggle" onClick={toggleFullscreen}>⛶</button>
-            <button 
-              className={`weather-toggle ${adaptiveWeather ? 'active' : ''}`} 
-              onClick={() => setAdaptiveWeather(!adaptiveWeather)}
-              title={adaptiveWeather ? "Disable Adaptive Weather" : "Enable Adaptive Weather"}
-            >
-              {adaptiveWeather ? "🌦️" : "🌤️"}
-            </button>
-            {adaptiveWeather && (
-              <div className="weather-controls">
-                <span className="opacity-label">Intensity</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={weatherOpacity}
-                  onChange={(e) => {
-                    const newOpacity = parseInt(e.target.value);
-                    setWeatherOpacity(newOpacity);
-                    // Update CSS variable immediately
-                    document.documentElement.style.setProperty('--weather-opacity', newOpacity / 100);
-                  }}
-                  className="opacity-slider"
-                  title="Adjust weather effects intensity"
-                />
-                <span className="opacity-value">{weatherOpacity}%</span>
+            {/* Site A Weather Adapter - Show when Site A analysis exists */}
+            {result && (
+              <div className="weather-controls-group">
+                <button 
+                  className={`weather-toggle ${siteAWeather ? 'active' : ''}`}
+                  onClick={() => setSiteAWeather(!siteAWeather)}
+                  title={siteAWeather ? "Disable Site A Adaptive Weather" : "Enable Site A Adaptive Weather"}
+                >
+                  {siteAWeather ? "🌦️" : "🌤️"}
+                </button>
+                {siteAWeather && (
+                  <div className="weather-controls">
+                    <span className="opacity-label">A: {siteAOpacity}%</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={siteAOpacity}
+                      onChange={(e) => {
+                        const newOpacity = parseInt(e.target.value);
+                        setSiteAOpacity(newOpacity);
+                        document.documentElement.style.setProperty('--weather-opacity-a', newOpacity / 100);
+                      }}
+                      className="opacity-slider"
+                      title="Adjust Site A weather effects intensity"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {/* Site B Weather Adapter - Show when Site B analysis exists */}
+            {compareResult && (
+              <div className="weather-controls-group">
+                <button 
+                  className={`weather-toggle ${siteBWeather ? 'active' : ''}`}
+                  onClick={() => setSiteBWeather(!siteBWeather)}
+                  title={siteBWeather ? "Disable Site B Adaptive Weather" : "Enable Site B Adaptive Weather"}
+                >
+                  {siteBWeather ? "🌦️" : "🌤️"}
+                </button>
+                {siteBWeather && (
+                  <div className="weather-controls">
+                    <span className="opacity-label">B: {siteBOpacity}%</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={siteBOpacity}
+                      onChange={(e) => {
+                        const newOpacity = parseInt(e.target.value);
+                        setSiteBOpacity(newOpacity);
+                        document.documentElement.style.setProperty('--weather-opacity-b', newOpacity / 100);
+                      }}
+                      className="opacity-slider"
+                      title="Adjust Site B weather effects intensity"
+                    />
+                  </div>
+                )}
               </div>
             )}
             <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>

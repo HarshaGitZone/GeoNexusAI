@@ -1,56 +1,113 @@
 import React, { useEffect } from 'react';
 import './WeatherEffects.css';
 
-export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, setIsDarkMode, weatherOpacity }) {
+export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, setIsDarkMode, weatherOpacity, siteId = 'A', lat, lng }) {
   const getWeatherType = () => {
     if (!weather) return 'default';
     
     // Use the correct field names from the backend weather API
     const description = (weather.description || weather.conditions || '').toLowerCase();
     const main = (weather.weather_code !== undefined ? weather.weather_code.toString() : '').toLowerCase();
-    const isDay = weather.is_day;
+    let isDay = weather.is_day;
     
-    // Debug logging
-    console.log('Weather Effects Debug:', { description, main, isDay, weather });
+    // Override isDay with frontend calculation for accuracy
+    if (lat && lng) {
+      console.log(`Site ${siteId} Using Passed Coordinates:`, { lat, lng });
+      
+      // Calculate local time for this location
+      const utcNow = new Date();
+      const timezoneOffset = Math.round(lng / 15); // 15 degrees = 1 hour
+      const localHour = (utcNow.getUTCHours() + timezoneOffset + 24) % 24;
+      
+      // Simple sunrise/sunset calculation based on latitude and month
+      const currentMonth = new Date().getMonth();
+      let sunriseHour, sunsetHour;
+      
+      if (lat > 0) { // Northern Hemisphere
+        if (currentMonth >= 11 || currentMonth <= 1) { // Winter
+          sunriseHour = 7 + (Math.abs(lat) / 30);
+          sunsetHour = 17 - (Math.abs(lat) / 30);
+        } else if (currentMonth >= 5 && currentMonth <= 7) { // Summer
+          sunriseHour = 5 + (Math.abs(lat) / 60);
+          sunsetHour = 19 - (Math.abs(lat) / 60);
+        } else { // Spring/Fall
+          sunriseHour = 6 + (Math.abs(lat) / 45);
+          sunsetHour = 18 - (Math.abs(lat) / 45);
+        }
+      } else { // Southern Hemisphere (opposite seasons)
+        if (currentMonth >= 11 || currentMonth <= 1) { // Summer
+          sunriseHour = 5 + (Math.abs(lat) / 60);
+          sunsetHour = 19 - (Math.abs(lat) / 60);
+        } else if (currentMonth >= 5 && currentMonth <= 7) { // Winter
+          sunriseHour = 7 + (Math.abs(lat) / 30);
+          sunsetHour = 17 - (Math.abs(lat) / 30);
+        } else { // Spring/Fall
+          sunriseHour = 6 + (Math.abs(lat) / 45);
+          sunsetHour = 18 - (Math.abs(lat) / 45);
+        }
+      }
+      
+      sunriseHour = Math.max(4, Math.min(8, sunriseHour));
+      sunsetHour = Math.max(16, Math.min(20, sunsetHour));
+      
+      isDay = sunriseHour <= localHour && localHour < sunsetHour ? 1 : 0;
+      
+      console.log(`Site ${siteId} Time Calculation: UTC=${utcNow.getUTCHours()}, Local=${localHour}, Sunrise=${sunriseHour.toFixed(1)}, Sunset=${sunsetHour.toFixed(1)}, isDay=${isDay}`);
+    } else {
+      console.warn(`Site ${siteId}: No coordinates provided`);
+    }
     
     // Check for day/night first
+    let weatherType = 'default';
     if (!isDay) {
       // Night time effects
       if (description.includes('rain') || description.includes('shower') || main.includes('rain')) {
-        return 'night-rain';
+        weatherType = 'night-rain';
       } else if (description.includes('snow') || main.includes('snow')) {
-        return 'night-snow';
+        weatherType = 'night-snow';
       } else if (description.includes('cloud') || description.includes('overcast') || main.includes('cloud')) {
-        return 'night-cloudy';
+        weatherType = 'night-cloudy';
       } else if (description.includes('clear') || description.includes('mainly clear') || main.includes('clear')) {
-        return 'night-clear';
+        weatherType = 'night-clear';
       } else if (description.includes('storm') || description.includes('thunder')) {
-        return 'night-storm';
+        weatherType = 'night-storm';
       } else if (description.includes('fog') || description.includes('mist')) {
-        return 'night-foggy';
+        weatherType = 'night-foggy';
       } else {
-        return 'night-clear'; // Default night
+        weatherType = 'night-clear'; // Default night
       }
     } else {
       // Day time effects
       if (description.includes('rain') || description.includes('shower') || main.includes('rain')) {
-        return 'rain';
+        weatherType = 'rain';
       } else if (description.includes('snow') || main.includes('snow')) {
-        return 'snow';
+        weatherType = 'snow';
       } else if (description.includes('cloud') || description.includes('overcast') || main.includes('cloud')) {
-        return 'cloudy';
+        weatherType = 'cloudy';
       } else if (description.includes('clear') || description.includes('mainly clear') || main.includes('clear')) {
-        return 'sunny';
+        weatherType = 'sunny';
       } else if (description.includes('storm') || description.includes('thunder')) {
-        return 'storm';
+        weatherType = 'storm';
       } else if (description.includes('fog') || description.includes('mist')) {
-        return 'foggy';
+        weatherType = 'foggy';
       } else if (description.includes('wind') || description.includes('breez')) {
-        return 'windy';
+        weatherType = 'windy';
       } else {
-        return 'sunny'; // Default day
+        weatherType = 'sunny'; // Default day
       }
     }
+    
+    // Debug logging
+    console.log(`Site ${siteId} Weather Effects Debug:`, { 
+      description, 
+      main, 
+      isDay, 
+      weatherType,
+      location: weather?.location || 'Unknown',
+      hour: new Date().getHours()
+    });
+    
+    return weatherType;
   };
 
   const weatherType = getWeatherType();
@@ -58,18 +115,11 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
   // Auto-adjust theme based on weather - moved before early return
   useEffect(() => {
     if (adaptiveWeather && weather) {
-      // Force dark mode for night time or stormy/rainy/foggy weather
-      if (weatherType.includes('night') || weatherType === 'storm' || weatherType === 'rain' || weatherType === 'foggy') {
-        setIsDarkMode(true);
-        document.body.setAttribute('data-theme', 'dark');
-      } else if (weatherType === 'sunny') {
-        // Force light mode for sunny weather
-        setIsDarkMode(false);
-        document.body.setAttribute('data-theme', 'light');
-      }
-      // For cloudy/snow/windy, keep current theme
+      // Note: We no longer control global theme from weather effects
+      // Each site should have independent weather effects without affecting global theme
+      console.log(`Site ${siteId} Weather: ${weatherType} (Theme control disabled for independence)`);
     }
-  }, [weatherType, adaptiveWeather, weather, setIsDarkMode]);
+  }, [weatherType, adaptiveWeather, weather, siteId]);
 
   if (!adaptiveWeather || !weather) return null;
 
@@ -110,8 +160,8 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
 
   return (
     <div 
-      className="weather-effects-overlay"
-      style={{ '--weather-opacity': weatherOpacity / 100 }}
+      className={`weather-effects-overlay ${siteId === 'B' ? 'site-b' : ''}`}
+      style={{ [`--weather-opacity-${siteId.toLowerCase()}`]: weatherOpacity / 100 }}
     >
       {renderWeatherEffect()}
     </div>
@@ -185,19 +235,24 @@ function CloudyEffect() {
 function SunnyEffect() {
   return (
     <div className="sunny-container">
+      <div className="sun-disc" />
       <div className="sun-rays">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="sun-ray"
             style={{
-              transform: `rotate(${i * 45}deg)`,
-              animationDelay: `${i * 0.2}s`,
+              transform: `rotate(${i * 30}deg)`,
+              animationDelay: `${i * 0.1}s`,
             }}
           />
         ))}
       </div>
-      <div className="sun-glow" />
+      <div className="sunny-clouds">
+        <div className="sunny-cloud sunny-cloud-1" />
+        <div className="sunny-cloud sunny-cloud-2" />
+        <div className="sunny-cloud sunny-cloud-3" />
+      </div>
     </div>
   );
 }
