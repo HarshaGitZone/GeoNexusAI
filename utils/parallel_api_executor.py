@@ -97,8 +97,7 @@ class ParallelAPIExecutor:
                 factors[key] = result
         
         elapsed = time.time() - start_time
-        logger.info(f"Parallel API execution completed in {elapsed:.2f} seconds")
-        
+        # Removed debug logging
         return factors
     
     # Individual API methods (async versions of your existing functions)

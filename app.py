@@ -634,12 +634,62 @@ def get_air_quality_data(lat, lng):
     except Exception as e:
         logger.error(f"Air Quality Fetch Error: {e}")
     
-    # Fallback to estimated values based on location
+    # Fallback to location-based estimated values
+    # Use latitude to estimate air quality patterns
+    lat = float(lat)
+    
+    # Base AQI by latitude (general air quality patterns)
+    if abs(lat) < 23.5:  # Tropical regions - generally better air quality
+        base_aqi = 25 + (abs(lat) * 0.5)
+        base_pm25 = 15 + (abs(lat) * 0.3)
+    elif abs(lat) < 45:  # Temperate regions - moderate air quality
+        base_aqi = 45 + (abs(lat) * 0.4)
+        base_pm25 = 25 + (abs(lat) * 0.5)
+    elif abs(lat) < 66.5:  # Subarctic regions - variable air quality
+        base_aqi = 65 + (abs(lat) * 0.3)
+        base_pm25 = 35 + (abs(lat) * 0.4)
+    else:  # Arctic regions - cleaner air
+        base_aqi = 20 + (abs(lat) * 0.2)
+        base_pm25 = 10 + (abs(lat) * 0.2)
+    
+    # Add seasonal variation
+    current_month = datetime.now().month
+    if lat > 0:  # Northern Hemisphere
+        if current_month in [12, 1, 2]:  # Winter - worse air quality
+            base_aqi += 15
+            base_pm25 += 10
+        elif current_month in [6, 7, 8]:  # Summer - better air quality
+            base_aqi -= 10
+            base_pm25 -= 5
+    else:  # Southern Hemisphere (opposite seasons)
+        if current_month in [12, 1, 2]:  # Summer - better air quality
+            base_aqi -= 10
+            base_pm25 -= 5
+        elif current_month in [6, 7, 8]:  # Winter - worse air quality
+            base_aqi += 15
+            base_pm25 += 10
+    
+    # Ensure reasonable bounds
+    base_aqi = max(10, min(150, base_aqi))
+    base_pm25 = max(5, min(80, base_pm25))
+    
+    # Determine pollutant level
+    if base_aqi <= 50:
+        pollutant_level = "Good"
+    elif base_aqi <= 100:
+        pollutant_level = "Moderate"
+    elif base_aqi <= 150:
+        pollutant_level = "Unhealthy for Sensitive"
+    elif base_aqi <= 200:
+        pollutant_level = "Unhealthy"
+    else:
+        pollutant_level = "Very Unhealthy"
+    
     return {
-        "aqi": 50,  # Moderate
-        "pm25": 35,  # Estimated PM2.5
-        "dominant_pollutant": "PM2.5",  # Most common pollutant
-        "pollutant_level": "Moderate",
+        "aqi": round(base_aqi),
+        "pm25": round(base_pm25),
+        "dominant_pollutant": "PM2.5",
+        "pollutant_level": pollutant_level,
         "parameter": "estimated",
         "value": 35,
         "unit": "μg/m³",
@@ -6134,7 +6184,7 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     if real_pollution_data:
         # Inject real-time measurements into the raw factor pool
         intelligence["raw_factors"]["environmental"]["pollution"] = real_pollution_data
-        logger.info(f"Pollution Sync Successful: {real_pollution_data['value']} score")
+        # Removed debug logging
     else:
         # Fixed Indentation: added pass to prevent SyntaxError
         pass 
