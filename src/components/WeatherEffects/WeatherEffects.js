@@ -237,13 +237,24 @@ function SunnyEffect() {
     <div className="sunny-container">
       <div className="sun-disc" />
       <div className="sun-rays">
-        {[...Array(12)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
             className="sun-ray"
             style={{
-              transform: `rotate(${i * 30}deg)`,
-              animationDelay: `${i * 0.1}s`,
+              transform: `rotate(${i * 12}deg)`,
+              animationDelay: `${i * 0.04}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div className="dominant-rays">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="dominant-ray"
+            style={{
+              animationDelay: `${i * 0.18}s`,
             }}
           />
         ))}
@@ -252,6 +263,8 @@ function SunnyEffect() {
         <div className="sunny-cloud sunny-cloud-1" />
         <div className="sunny-cloud sunny-cloud-2" />
         <div className="sunny-cloud sunny-cloud-3" />
+        <div className="sunny-cloud sunny-cloud-4" />
+        <div className="sunny-cloud sunny-cloud-5" />
       </div>
     </div>
   );
