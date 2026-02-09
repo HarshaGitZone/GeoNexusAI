@@ -5510,6 +5510,7 @@ export default function LandSuitabilityChecker() {
                   adaptiveWeather={adaptiveWeather}
                   isDarkMode={isDarkMode}
                   setIsDarkMode={setIsDarkMode}
+                  weatherOpacity={weatherOpacity}
                 />
 
                 {/* Floating Close Button for Fullscreen */}
