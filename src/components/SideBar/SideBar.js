@@ -199,21 +199,52 @@ const importProjectFile = async (file) => {
 
 
   const handleSearch = async (val) => {
+    console.log('Search triggered with value:', val);
     setSearchQuery(val);
-    if (val.length > 2) {
+    // Start search after 2 characters for better UX
+    if (val.length > 1) {
       setIsSearching(true);
       try {
+        console.log('Making search request for:', val);
+        
+        // Use backend proxy to bypass CSP issues
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(val)}`
+          `${API_BASE}/api/geocode?q=${encodeURIComponent(val)}`
         );
-        const data = await res.json();
-        setSuggestions(data.slice(0, 5));
+        
+        console.log('Backend proxy response status:', res.status);
+        
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Backend proxy success - Search results:', data);
+          
+          if (Array.isArray(data) && data.length > 0) {
+            // Filter out duplicates and sort by importance
+            const uniqueResults = data.filter((item, index, arr) =>
+              index === arr.findIndex((t) => t.display_name === item.display_name)
+            );
+            console.log('Setting REAL suggestions:', uniqueResults.slice(0, 8));
+            setSuggestions(uniqueResults.slice(0, 8));
+          } else {
+            console.log('No results found for:', val);
+            setSuggestions([]);
+          }
+        } else {
+          throw new Error(`Backend proxy failed: ${res.status}`);
+        }
       } catch (err) {
-        console.error("Search failed", err);
+        console.error("Search failed:", err);
+        setSuggestions([]);
       } finally {
         setIsSearching(false);
       }
     } else {
+      // For single character, don't clear immediately to allow typing
+      if (val.length === 1 && /^[a-zA-Z]$/.test(val)) {
+        console.log('Single character, keeping suggestions');
+        return;
+      }
+      console.log('Clearing suggestions - input too short');
       setSuggestions([]);
     }
   };
