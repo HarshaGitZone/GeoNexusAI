@@ -12575,3 +12575,29 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
 [data-theme="light"] .results-tab-bar.fullscreen {
   background: #ffffff !important;
 }
+
+
+/* This targets the container that holds both halves */
+.compare-layout-ditto {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 10px; /* Space between the two halves */
+    padding-top: 5px; /* THIS GIVES YOU THE TOP SPACE */
+}
+
+/* Specific logic for when the user hits the Fullscreen button */
+.tab-viewport.fullscreen .compare-layout-ditto {
+    padding-top: 10px; /* Extra space in fullscreen to breathe below the header */
+    max-width: 1800px; /* Optional: keeps it from getting too wide on ultra-wide monitors */
+    margin: 0 auto;
+}
+
+/* Ensure each side takes exactly half */
+.compare-pane-ditto {
+    flex: 1; 
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.02); /* Optional glass effect */
+    border-radius: 12px;
+    padding: 15px;
+}
