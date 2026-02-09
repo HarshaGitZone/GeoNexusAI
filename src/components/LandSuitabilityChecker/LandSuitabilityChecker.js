@@ -5339,20 +5339,7 @@ export default function LandSuitabilityChecker() {
 
             <>
 
-              {/* 1. Tab Bar Navigation (Visible only when result exists) - Moved outside viewport */}
-
-              {/* <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
-
-                <div className="tab-buttons-container">
-
-                  <button className={activeTab === "suitability" ? "active" : ""} onClick={() => setActiveTab("suitability")}>🎯 Suitability</button>
-
-                  <button className={activeTab === "environmental" ? "active" : ""} onClick={() => setActiveTab("environmental")}>🌐 Locational Intelligence</button>
-
-                  <button className={activeTab === "infrastructure" ? "active" : ""} onClick={() => setActiveTab("infrastructure")}>🏗️ Strategic Utility</button>
-
-                </div> */}
-
+             
 
                 <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
 
@@ -5384,12 +5371,34 @@ export default function LandSuitabilityChecker() {
   {isAnalysisFullscreen ? "✕" : "⛶"}
 </button>
 
-
-    {analysisTime && result && (
-      <span className="analysis-time-badge">
-        🕒 {analysisTime}
-      </span>
-    )}
+{/* {analysisTime && result && (
+  <div className="analysis-timestamp-container">
+    <div className="timestamp-content">
+      <span className="timestamp-status-icon">●</span>
+      <span className="timestamp-label">LAST ANALYZED:</span>
+      <span className="timestamp-value">{analysisTime}</span>
+    </div>
+  </div>
+)} */}
+{analysisTime && result && (
+  <div className="analysis-timestamp-container">
+    <div className="timestamp-content">
+      <div className="timestamp-status-group">
+        <span className="timestamp-status-icon">●</span>
+        <span className="live-label">LIVE</span>
+      </div>
+      <div className="timestamp-text-stack">
+        <span className="timestamp-label">LAST ANALYZED AT:</span>
+        <div className="timestamp-value-group">
+          {/* We split the string to style Date and Time differently */}
+          <span className="ts-date">{analysisTime.split(',')[0]}</span>
+          <span className="ts-separator">/</span>
+          <span className="ts-time">{analysisTime.split(',')[1]}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
   </div>
 </div>
 

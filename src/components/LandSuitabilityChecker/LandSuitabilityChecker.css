@@ -12601,3 +12601,355 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
     border-radius: 12px;
     padding: 15px;
 }
+
+
+.analysis-timestamp-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-family: 'Inter', 'Roboto Mono', monospace; /* Technical feel */
+  font-size: 11px;
+  letter-spacing: 0.5px;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.timestamp-status-icon {
+  font-size: 8px;
+  animation: pulse-glow 2s infinite;
+}
+
+.timestamp-label {
+  font-weight: 700;
+  opacity: 0.5;
+}
+
+.timestamp-value {
+  font-weight: 500;
+}
+
+@keyframes pulse-glow {
+  0% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.4; transform: scale(1); }
+}
+
+
+
+
+/* --- TACTICAL TIMESTAMP COMPONENT --- */
+.analysis-timestamp-container {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px; /* Creates the gradient border effect */
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--ts-border-start), var(--ts-border-end));
+  box-shadow: 0 4px 15px var(--ts-shadow);
+  transition: all 0.3s ease;
+}
+
+.timestamp-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px;
+  background: var(--ts-bg);
+  border-radius: 19px;
+  font-family: 'Roboto Mono', 'Inter', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.8px;
+}
+
+.timestamp-status-icon {
+  color: #10b981; /* Success Green */
+  font-size: 8px;
+  filter: drop-shadow(0 0 4px #10b981);
+  animation: pulse-glow 2s infinite;
+}
+
+.timestamp-label {
+  font-weight: 800;
+  color: var(--ts-label);
+  font-size: 9px;
+}
+
+.timestamp-value {
+  font-weight: 600;
+  color: var(--ts-value);
+}
+
+/* --- THEME COLOR DEFINITIONS --- */
+
+/* DARK MODE (Slate-900 Theme) */
+[data-theme="dark"] .analysis-timestamp-container {
+  --ts-bg: #0f172a;           /* Match your slate-900 */
+  --ts-label: rgba(148, 163, 184, 0.7); /* slate-400 */
+  --ts-value: #f1f5f9;        /* slate-100 */
+  --ts-border-start: rgba(59, 130, 246, 0.5); /* blue-500 */
+  --ts-border-end: rgba(16, 185, 129, 0.2);   /* green-500 */
+  --ts-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* LIGHT MODE */
+[data-theme="light"] .analysis-timestamp-container {
+  --ts-bg: #ffffff;
+  --ts-label: rgba(107, 114, 128, 0.8); /* gray-500 */
+  --ts-value: #111827;        /* gray-900 */
+  --ts-border-start: #e2e8f0; /* slate-200 */
+  --ts-border-end: #cbd5e1;   /* slate-300 */
+  --ts-shadow: rgba(0, 0, 0, 0.08);
+}
+
+/* --- ANIMATION --- */
+@keyframes pulse-glow {
+  0% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 6px #10b981); }
+  100% { opacity: 0.5; transform: scale(1); }
+}
+
+/* Ensure it breathes well in Fullscreen */
+.results-tab-bar.fullscreen .analysis-timestamp-container {
+  margin-left: 15px;
+  transform: scale(1.05); /* Slightly larger in focus mode */
+}
+
+
+/* --- TACTICAL GREENISH TIMESTAMP --- */
+.analysis-timestamp-container {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px; 
+  border-radius: 12px; /* Slightly more technical square-round */
+  background: linear-gradient(135deg, var(--ts-border-start), var(--ts-border-end));
+  box-shadow: 0 4px 15px var(--ts-shadow);
+  transition: all 0.3s ease;
+}
+
+.timestamp-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: var(--ts-bg);
+  border-radius: 11px;
+  font-family: 'Roboto Mono', 'Ubuntu Mono', monospace;
+}
+
+.timestamp-text-stack {
+  display: flex;
+  flex-direction: column; /* Stacked for a high-tech data read-out look */
+  line-height: 1.2;
+}
+
+.timestamp-status-icon {
+  color: #10b981; 
+  font-size: 10px;
+  filter: drop-shadow(0 0 5px #10b981);
+  animation: pulse-glow 2s infinite;
+}
+
+/* Visibility fix for the label */
+.timestamp-label {
+  font-weight: 700;
+  color: var(--ts-label);
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.timestamp-value {
+  font-weight: 600;
+  color: var(--ts-value);
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+}
+
+/* --- THEME COLOR DEFINITIONS (GREENISH INJECTED) --- */
+
+/* DARK MODE: Deep Forest Tactical */
+[data-theme="dark"] .analysis-timestamp-container {
+  --ts-bg: rgba(6, 18, 14, 0.9);      /* Deep obsidian green */
+  --ts-label: rgba(16, 185, 129, 0.6); /* Muted emerald label for visibility */
+  --ts-value: #ffffff;                 /* Bright time value */
+  --ts-border-start: #064e3b;          /* Emerald-900 */
+  --ts-border-end: #10b981;            /* Emerald-500 */
+  --ts-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* LIGHT MODE: Mint Analytics */
+[data-theme="light"] .analysis-timestamp-container {
+  --ts-bg: #f0fdf4;                    /* Very light mint background */
+  --ts-label: #065f46;                 /* Deep teal-green for readability */
+  --ts-value: #111827;                 /* Dark slate value */
+  --ts-border-start: #dcfce7;          /* Green-100 */
+  --ts-border-end: #86efac;            /* Green-300 */
+  --ts-shadow: rgba(16, 185, 129, 0.1);
+}
+
+/* --- ANIMATION --- */
+@keyframes pulse-glow {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.6; transform: scale(1); }
+}
+
+/* Responsive Scaling */
+@media (max-width: 768px) {
+  .timestamp-content {
+    padding: 4px 10px;
+  }
+  .timestamp-value {
+    font-size: 10px;
+  }
+}
+
+
+
+
+/* --- DUO-TONE TACTICAL TIMESTAMP --- */
+.analysis-timestamp-container {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px; 
+  border-radius: 8px; /* Sharper, more professional corners */
+  background: linear-gradient(135deg, var(--ts-border-start), var(--ts-border-end));
+  box-shadow: 0 4px 12px var(--ts-shadow);
+}
+
+.timestamp-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 6px 14px;
+  background: var(--ts-bg);
+  border-radius: 7px;
+  font-family: 'Roboto Mono', 'Source Code Pro', monospace;
+}
+
+.timestamp-status-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.live-label {
+  font-size: 7px;
+  font-weight: 900;
+  color: #10b981;
+  letter-spacing: 1px;
+}
+
+.timestamp-text-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timestamp-label {
+  font-weight: 700;
+  color: var(--ts-label); /* Enhanced visibility based on theme */
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  opacity: 0.85; /* Increased from previous version */
+}
+
+/* --- THE DATA READOUT --- */
+.timestamp-value-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.ts-date {
+  color: var(--ts-date-color); /* Tactical Blue/Teal */
+  font-weight: 500;
+}
+
+.ts-separator {
+  color: var(--ts-label);
+  opacity: 0.3;
+}
+
+.ts-time {
+  color: var(--ts-time-color); /* High contrast Main color */
+  font-weight: 700;
+}
+
+/* --- THEME OVERRIDES --- */
+
+[data-theme="dark"] .analysis-timestamp-container {
+  --ts-bg: #0b1220;           /* Solid Deep Dark */
+  --ts-label: #10b981;        /* Emerald Green Label */
+  --ts-date-color: #60a5fa;   /* Tactical Blue Date */
+  --ts-time-color: #ffffff;   /* Crisp White Time */
+  --ts-border-start: #1e293b;
+  --ts-border-end: #059669;
+  --ts-shadow: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .analysis-timestamp-container {
+  --ts-bg: #f8fafc;           /* Light slate background */
+  --ts-label: #047857;        /* Deep Green Label */
+  --ts-date-color: #2563eb;   /* Rich Blue Date */
+  --ts-time-color: #1e293b;   /* Deep Slate Time */
+  --ts-border-start: #e2e8f0;
+  --ts-border-end: #10b981;
+  --ts-shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* --- PULSE ANIMATION --- */
+.timestamp-status-icon {
+  color: #10b981;
+  font-size: 9px;
+  animation: pulse-glow 2.5s infinite;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.2); filter: brightness(1.5) drop-shadow(0 0 4px #10b981); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+
+
+/* --- ENHANCED PROFESSIONAL LIGHT THEME --- */
+[data-theme="light"] .analysis-timestamp-container {
+  /* High-end professional gradient border */
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  --ts-bg: #ffffff;                    /* Pure white for maximum brightness */
+  --ts-label: #065f46;                 /* Deep teal for clear visibility */
+  --ts-date-color: #2563eb;           /* Professional Cobalt Blue */
+  --ts-time-color: #0f172a;           /* Deep Navy for main time */
+  --ts-shadow: rgba(16, 185, 129, 0.15);
+  border: none;
+}
+
+[data-theme="light"] .timestamp-content {
+  background: var(--ts-bg);
+  /* Subtle inner glow to make it look "Brighter" */
+  box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.05);
+}
+
+[data-theme="light"] .timestamp-label {
+  opacity: 1;                          /* Full visibility */
+  font-weight: 800;
+  color: var(--ts-label);
+  filter: saturate(1.5);               /* Makes the green look "fresher" */
+}
+
+[data-theme="light"] .ts-separator {
+  color: #cbd5e1;                      /* Soft slate separator */
+  opacity: 1;
+}
+
+[data-theme="light"] .live-label {
+  background: #dcfce7;                 /* Light green pill background */
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: #166534;                      /* Darker green text */
+}
