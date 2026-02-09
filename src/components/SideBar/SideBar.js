@@ -857,30 +857,16 @@ const generateShareLink = () => {
                       setEditingName(p.name);
                     }}>✎</button>
                   )}
-                  {/* <button className="btn-cross" onClick={(e) => {
-                    e.stopPropagation();
-                    setSavedPlaces(savedPlaces.filter((_, idx) => idx !== i));
-                  }}>✕</button> */}
-                
-<button 
-  onClick={(e) => {
-    e.stopPropagation();
-    setShowLocationB(false);
-    setIsCompareMode(false);
-    setBLatInput("");
-    setBLngInput("");
-    setCompareResult(null);
-    if (setSnapshotDataB) setSnapshotDataB(null);
-    setLocationBName("Site B");
-    if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });
-    localStorage.removeItem("geo_lat_b_analyzed");
-    localStorage.removeItem("geo_lng_b_analyzed");
-  }} 
-  className="btn-cross" 
-  title="Close comparison and stop B analysis"
->
-  ✕
-</button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSavedPlaces(savedPlaces.filter((_, idx) => idx !== i));
+                    }} 
+                    className="btn-cross" 
+                    title="Delete Saved Place"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
             ))}

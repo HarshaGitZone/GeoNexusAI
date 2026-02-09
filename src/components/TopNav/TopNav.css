@@ -3074,3 +3074,8 @@
     box-shadow: 0 0 15px var(--accent-color);
   }
 }
+.team-btn:hover , .team-btn.active{
+  /* color: var(--accent-color) !important; */
+  background: transparent !important;
+  background-color: var(--accent-color) !important;
+}

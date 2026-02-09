@@ -7,21 +7,31 @@
 .search-wrapper.glass-morphic {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(59, 130, 246, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 12px;
   padding: 8px 12px;
+  transition: all 0.3s ease;
+}
+
+.search-wrapper.glass-morphic:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
 .sidebar-search-input {
   background: transparent;
   border: none;
-  color: white;
+  color: #e0e7ff;
   margin-left: 0px;
   width: 100%;
   outline: none;
   font-size: 14px;
+}
+
+.sidebar-search-input::placeholder {
+  color: rgba(224, 231, 255, 0.6);
 }
 
 .sidebar-suggestions {
@@ -29,31 +39,30 @@
   top: 70px;
   left: 15px;
   right: 15px;
-  background: rgba(20, 20, 20, 0.95);
+  background: rgba(30, 41, 59, 0.95);
   backdrop-filter: blur(15px);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   max-height: 250px;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .suggestion-item {
   padding: 12px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  transition: background 0.2s;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  transition: all 0.2s ease;
+  color: #e0e7ff;
 }
 
 .suggestion-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(59, 130, 246, 0.1);
+  border-bottom-color: rgba(59, 130, 246, 0.2);
 }
 
 .main-name { font-weight: 600; font-size: 13px; color: #fff; }
 .sub-name { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-
-
 
 /* Sidebar Search Container */
 .sidebar-search-section {
