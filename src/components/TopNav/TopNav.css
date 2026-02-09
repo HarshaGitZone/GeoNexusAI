@@ -23,6 +23,7 @@
   pointer-events: none;
 }
 
+
 /* Force visible state when active class is present */
 .geo-navbar.is-visible {
   transform: translateX(-50%) translateY(0);
@@ -3116,4 +3117,1069 @@
 .results-tab-bar.fullscreen .nav-divider {
   height: 32px;
   opacity: 0.8;
+}
+
+
+
+
+
+
+/* ============================================================
+   TOPNAV REFINEMENT: FLOATING HUD GLASS
+   ============================================================ */
+
+.geo-navbar {
+    /* 1. Structural Transformation */
+    top: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-100%) !important; /* Start hidden for animation */
+    width: fit-content !important;
+    min-width: 600px;
+    height: 48px !important;
+    border-radius: 50px !important; /* Perfect Pill Shape */
+    
+    /* 2. Glass-Morphic Base */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 10%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    
+    /* 3. Palette-Synced Edge Glow */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 
+                inset 0 0 10px color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    
+    transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease !important;
+}
+
+.geo-navbar.is-visible {
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+/* 4. Segment Separation (Nav Dividers) */
+.nav-divider {
+    width: 1px !important;
+    height: 20px !important;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent) !important;
+    margin: 0 12px !important;
+}
+
+/* 5. The "Team" and "Audio" Buttons Sync */
+.team-btn, .icon-btn {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.team-btn.active, .icon-btn:hover {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+}
+
+/* 6. Logo HUD Style */
+.brand-wrap .logo {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase;
+}
+
+.brand-wrap .logo span {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 7. Adaptive Weather Sliders */
+.opacity-slider {
+    accent-color: var(--accent-color) !important;
+    height: 4px !important;
+}
+
+/* --- LIGHT THEME POLISH --- */
+[data-theme="light"] .geo-navbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+
+
+/* ============================================================
+   TOPNAV REFINEMENT: ENHANCED SCALE & DENSE CLUSTERING
+   ============================================================ */
+
+.geo-navbar {
+    height: 48px !important; /* Increased height to support larger icons */
+    padding: 0 16px !important;
+    gap: 12px !important; /* Tighter overall group spacing */
+    border-radius: 12px !important; /* Slightly sharper "Military" corners */
+}
+
+/* 1. Icon Sizing Upgrade */
+.icon-btn {
+    font-size: 18px !important; /* Upscaled icons for better visibility */
+    width: 38px !important;    /* Larger hit area */
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. Closer Grouping Logic */
+.nav-group {
+    gap: 6px !important; /* Reduces the "dead air" between related icons */
+}
+
+/* 3. Refined Nav Separators */
+.nav-divider {
+    height: 22px !important;
+    width: 1.5px !important;
+    margin: 0 4px !important; /* Pulls the groups closer to the dividers */
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 4. Logo Sync */
+.logo {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+    margin: 0 12px !important;
+}
+
+/* 5. Team Button Scale Sync */
+.team-btn {
+    height: 34px !important;
+    padding: 0 14px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+/* 6. Audio Label Optimization */
+.audio-toggle {
+    position: relative !important;
+}
+
+.audio-label {
+    position: absolute !important;
+    bottom: 2px !important;
+    right: 2px !important;
+    font-size: 8px !important;
+    font-weight: 900 !important;
+    color: var(--accent-color) !important;
+}
+
+/* ============================================================
+   TOPNAV: SINGLE-PILL CONSOLIDATION FIX
+   ============================================================ */
+
+.geo-navbar {
+    /* Ensure only one background exists */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 10%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    
+    /* Clean Single Border */
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 50px !important; /* Perfect Pill Shape */
+    
+    /* Pushes the shadow out from the pill only, not a box */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+    
+    /* Layout Logic */
+    height: 52px !important; /* Increased for the larger icons you wanted */
+    padding: 0 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important; /* Managed by groups below */
+}
+
+/* Remove any background or shadow from the inner shell */
+.nav-content-shell {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+}
+
+/* 2. Upscaled Icons & Dense Clustering */
+.icon-btn {
+    font-size: 20px !important; /* Larger icons as requested */
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important; /* Circular buttons for a technical feel */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 3. Tight Grouping */
+.nav-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important; /* Closer icons */
+}
+
+.nav-divider {
+    height: 20px !important;
+    width: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    margin: 0 8px !important; /* Tightens the space around separators */
+}
+
+
+/* ============================================================
+   TOPNAV: PRECISION GLASS & PALETTE SYNC
+   ============================================================ */
+
+/* 1. Base Icon Button Refinement */
+.icon-btn, .team-btn, .mode-toggle, .fs-toggle {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.5) !important; /* Muted idle state */
+    backdrop-filter: blur(5px) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. Enhanced Hover State: Palette Engagement */
+.icon-btn:hover, .team-btn:hover, .mode-toggle:hover, .fs-toggle:hover {
+    color: var(--accent-color) !important;
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+    border-color: var(--accent-color) !important;
+    /* The "Digital Aura" Glow */
+    box-shadow: 0 0 15px var(--accent-glow), 
+                inset 0 0 8px var(--accent-glow) !important;
+    transform: translateY(-2px) scale(1.05) !important;
+}
+
+/* 3. Active/On State: "Powered On" look */
+.icon-btn.active, .team-btn.active, .weather-toggle.active {
+    color: #ffffff !important;
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+}
+
+/* 4. Special Audio Sync (Site A & B) */
+.audio-toggle.active, .audio-toggle-b.active {
+    background: color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+}
+
+.audio-label {
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 5px var(--accent-glow) !important;
+}
+
+/* 5. Team Button Professional Polish */
+.team-btn {
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 800 !important;
+    border-radius: 6px !important;
+}
+
+/* 6. Palette Dropdown Dots */
+.palette-dropdown .color-dot {
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease !important;
+}
+
+.palette-dropdown .color-dot:hover {
+    transform: scale(1.4);
+    border-color: #ffffff !important;
+    box-shadow: 0 0 10px inherit !important;
+}
+
+/* --- LIGHT THEME ADAPTATION --- */
+[data-theme="light"] .icon-btn, 
+[data-theme="light"] .team-btn {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: #64748b !important;
+}
+
+[data-theme="light"] .icon-btn:hover {
+    background: white !important;
+    color: var(--accent-color) !important;
+}
+
+
+
+/* ============================================================
+   TEAM PANE: ELITE GLASS-MORPHIC HUD
+   ============================================================ */
+
+/* 1. Main Floating Pane */
+.compact-team-pane {
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 10%) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+                inset 0 0 20px rgba(var(--accent-color-rgb), 0.05) !important;
+    padding: 20px !important;
+    width: 320px !important;
+    transform-origin: top !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 2. Professional Header Sync */
+.pane-header .project-title {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    margin-bottom: 4px !important;
+}
+
+.guide-text {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 10px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin-bottom: 12px !important;
+}
+
+.guide-text span {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.header-divider {
+    height: 1px !important;
+    background: linear-gradient(90deg, var(--accent-color), transparent) !important;
+    margin-bottom: 15px !important;
+}
+
+/* 3. Team Grid & Member Cards */
+.team-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.member-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Hover Effect: Member Highlight */
+.member-card:hover {
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    transform: translateX(5px) !important;
+    box-shadow: -5px 0 15px var(--accent-glow) !important;
+}
+
+/* Tactical Indicator for each card */
+.member-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.member-card:hover::before {
+    opacity: 1;
+}
+
+/* --- LIGHT THEME POLISH --- */
+[data-theme="light"] .compact-team-pane {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .member-card {
+    background: rgba(0, 0, 0, 0.02) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+    color: #334155 !important;
+}
+
+
+/* ============================================================
+   TEAM PANE: DEPTH & OVERLAP CORRECTION
+   ============================================================ */
+
+.compact-team-pane {
+    /* 1. LAYER DOMINANCE: Set higher than Leaflet/Map UI (usually 1000) */
+    z-index: 9999 !important; 
+    
+    /* 2. SOLID GLASS SHIELD: Increased opacity to hide zoom controls behind it */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 5%) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+
+    /* 3. PHYSICAL SEPARATION: Stronger shadow to lift it off the map surface */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 
+                0 0 20px rgba(var(--accent-color-rgb), 0.1) !important;
+    
+    /* Ensuring the pane doesn't shift when opened */
+    position: absolute !important;
+    top: calc(100% + 15px) !important;
+}
+
+/* 4. Ensure Team Cards are also physically "above" the frosted glass */
+.member-card {
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* --- LIGHT THEME DEPTH --- */
+[data-theme="light"] .compact-team-pane {
+    background: rgba(255, 255, 255, 0.98) !important; /* Almost solid to block map icons */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+
+
+/* 1. Force the entire Navbar wrapper to the top layer */
+.geo-navbar {
+    z-index: 99999 !important; /* Extremely high value to beat Leaflet/Map layers */
+    position: fixed !important; /* Ensures it ignores relative parent stacking */
+}
+
+/* 2. Target the Team Pane specifically to ensure it stays above the navbar's own background */
+.compact-team-pane {
+    z-index: 100000 !important; 
+    /* This MUST be higher than the .geo-navbar z-index */
+    
+    /* Hard-block background bleed */
+    background: var(--sb-bg, #0f172a) !important; 
+    /* If you still want glass, keep opacity very high (e.g., 0.98) */
+}
+
+/* 3. Disable pointer interaction on map elements when the pane is open */
+/* (Add this class to your map container when showTeam is true if possible) */
+.map-behind-pane-blur {
+    pointer-events: none !important;
+    filter: blur(4px) grayscale(0.5);
+    transition: all 0.4s ease;
+}
+
+
+.member-card {
+    /* "Cute" and professional style */
+    border-radius: 10px !important;
+    margin-bottom: 6px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    
+    /* Font Sync */
+    font-family: 'Roboto Mono', monospace !important;
+    color: var(--accent-color) !important;
+}
+
+.member-card:hover {
+    background: var(--accent-color) !important;
+    color: #000 !important; /* Contrast flip */
+    transform: scale(1.02) !important;
+}
+
+
+
+
+
+
+
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02) !important;
+}
+
+/* ============================================================
+   TOPNAV: ELITE SINGLE-LAYER HUD SYNC
+   ============================================================ */
+
+.geo-navbar {
+    /* POSITIONING */
+    position: fixed !important;
+    top: 15px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important; /* Total dominance over map UI */
+    
+    /* THE SHELL: Removing standard border to kill the "double layer" */
+    border: none !important; 
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 8%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border-radius: 100px !important;
+
+    /* THE STROKE: Using shadow instead of border for a crisp single line */
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.1), /* Sharp inner stroke */
+        0 10px 30px rgba(0, 0, 0, 0.5) !important; /* Outer depth */
+
+    height: 52px !important;
+    padding: 0 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 2. THE SEPARATORS: Making them "Glow-Visible" */
+.nav-divider {
+    width: 1.5px !important;
+    height: 24px !important;
+    margin: 0 14px !important;
+    /* Gradient based on your palette color */
+    background: linear-gradient(
+        to bottom, 
+        transparent, 
+        color-mix(in srgb, var(--accent-color), transparent 50%), 
+        transparent
+    ) !important;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    opacity: 0.8 !important;
+}
+
+/* 3. LOGO HUD SYNC */
+.brand-wrap .logo {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    color: #ffffff !important;
+}
+
+.brand-wrap .logo span {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 4. LIGHT THEME REFINEMENT */
+[data-theme="light"] .geo-navbar {
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 
+        0 0 0 1px rgba(0, 0, 0, 0.05), 
+        0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .nav-divider {
+    background: linear-gradient(
+        to bottom, 
+        transparent, 
+        rgba(0, 0, 0, 0.1), 
+        transparent
+    ) !important;
+}
+/* 1. LOGO COLOR LOGIC: Ensuring visibility in all modes */
+.brand-wrap .logo {
+    color: #ffffff !important; /* Default for Dark Mode */
+    transition: color 0.3s ease !important;
+}
+
+[data-theme="light"] .brand-wrap .logo {
+    color: #1e293b !important; /* Dark Slate for Light Mode visibility */
+}
+
+
+
+/* ============================================================
+   TOPNAV: ULTRA-COMPACT MOBILE MATRIX
+   ============================================================ */
+/* ============================================================
+   TOPNAV: ATOMIC MOBILE COMPRESSION
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .geo-navbar {
+        width: 90% !important; /* Slightly narrower width */
+        padding: 3px 6px !important; /* Extremely tight vertical padding */
+        height: auto !important;
+        min-height: 36px !important; /* Lowered height baseline */
+        border-radius: 10px !important; /* Tighter corners save more usable area */
+        top: 6px !important;
+        gap: 2px !important;
+    }
+
+    .nav-content-shell {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 2px !important; /* Minimal gap between elements */
+    }
+
+    /* 1. Remove all Group Gaps */
+    .nav-group {
+        gap: 1px !important;
+        justify-content: center !important;
+    }
+
+    /* 2. Atomic Icon Scaling */
+    .icon-btn, .mode-toggle, .fs-toggle {
+        width: 26px !important; /* Shrunk from 30px */
+        height: 26px !important; /* Shrunk from 30px */
+        font-size: 12px !important; /* Clear but microscopic */
+        margin: 0 !important;
+        border-width: 0.5px !important; /* Thinner borders for the smaller scale */
+    }
+
+    /* 3. Extreme Logo Compression */
+    .brand-wrap {
+        width: 100% !important;
+        margin-bottom: 1px !important;
+        padding: 0 !important;
+        transform: scale(0.85); /* Scaled down to fit smaller bar height */
+    }
+
+    .logo {
+        font-size: 11px !important; /* Shrunk from 13px */
+        letter-spacing: 0.5px !important;
+    }
+
+    /* 4. Team Button - Micro Tab */
+    .team-btn {
+        height: 24px !important; /* Shrunk from 28px */
+        padding: 0 4px !important;
+        font-size: 7px !important; /* Shrunk from 8px */
+        font-weight: 900 !important;
+    }
+
+    /* 5. Audio Label - Sub-atomic */
+    .audio-label {
+        font-size: 5px !important;
+        bottom: -1px !important;
+        right: -1px !important;
+    }
+
+    /* 6. Enforced Removal of Spacers */
+    .nav-divider, .nav-mobile-spacer {
+        display: none !important;
+    }
+}
+
+/* 7. Super-Narrow Device Fix (Under 320px) */
+@media (max-width: 320px) {
+    .icon-btn {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 10px !important;
+    }
+    .geo-navbar {
+        width: 95% !important;
+        padding: 2px 4px !important;
+    }
+}
+[data-theme="light"] .brand-wrap .logo {
+    color: #0f172a !important; /* Darkest slate for high contrast */
+}
+
+
+
+
+/* ============================================================
+   TOPNAV: COMPACT CLUSTERING REFINEMENT
+   ============================================================ */
+
+.geo-navbar {
+    /* Reduce overall pill width by tightening internal padding */
+    padding: 0 12px !important;
+    height: 52px !important;
+    /* Reduce the major gap between the three main groups (Left, Center, Right) */
+    gap: 0 !important; 
+}
+
+.nav-content-shell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important; /* Tightens the bridge between groups */
+}
+
+/* 1. TIGHTER INDIVIDUAL ICON SPACING */
+.nav-group {
+    display: flex !important;
+    align-items: center !important;
+    /* Significant reduction in dead air between icons */
+    gap: 2px !important; 
+}
+
+/* 2. COMPACT SEPARATORS */
+.nav-divider {
+    width: 1px !important;
+    height: 20px !important;
+    /* Pull groups closer to the vertical line */
+    margin: 0 6px !important; 
+    opacity: 0.15 !important;
+}
+
+/* 3. BUTTONS & TOGGLES */
+.icon-btn, .mode-toggle, .fs-toggle {
+    /* Maintain the size you liked but remove external margins */
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 !important; 
+}
+
+/* 4. BRAND WRAP (CENTER) */
+.brand-wrap {
+    /* Pull logo closer to the surrounding dividers */
+    padding: 0 8px !important;
+    margin: 0 !important;
+}
+
+.logo {
+    font-size: 15px !important;
+    letter-spacing: 1.5px !important;
+}
+
+/* 5. TEAM BUTTON COMPRESSION */
+.team-btn {
+    height: 38px !important;
+    padding: 0 12px !important;
+    margin: 0 2px !important;
+}
+
+/* 6. MOBILE OVERRIDE */
+@media (max-width: 768px) {
+    .nav-group {
+        gap: 1px !important;
+    }
+    .brand-wrap {
+        padding: 0 4px !important;
+    }
+}
+
+/* ============================================================
+   TOPNAV: COMMAND CENTER DENSITY & CHROMATIC SYNC
+   ============================================================ */
+
+.geo-navbar {
+    padding: 0 10px !important;
+    height: 48px !important;
+    gap: 0 !important;
+}
+
+/* 1. ULTRA-TIGHT CLUSTERING AROUND LOGO */
+.brand-wrap {
+    padding: 0 !important;
+    margin: 0 4px !important; /* Minimal breathing room */
+    position: relative;
+}
+
+/* Pull the adjacent groups slightly UNDER the logo's area */
+.nav-group.left {
+    margin-right: -8px !important; 
+}
+
+.nav-group.right {
+    margin-left: -8px !important;
+}
+
+/* 2. THE CHROMATIC TOGGLE (Matches Palette order) */
+.mode-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    /* Use a gradient border that cycles through your palette colors */
+    border: 2px solid transparent !important;
+    background-image: linear-gradient(var(--sb-bg), var(--sb-bg)), 
+                      linear-gradient(to right, #8b5cf6, #06b6d4, #10b981, #f43f5e, #f59e0b) !important;
+    background-origin: border-box !important;
+    background-clip: content-box, border-box !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.mode-toggle:hover {
+    transform: rotate(180deg) scale(1.1);
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 3. ICON PROXIMITY */
+.nav-group {
+    gap: 2px !important;
+}
+
+.icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+}
+
+/* 4. SEPARATOR REFINEMENT (Almost invisible but present) */
+.nav-divider {
+    width: 1px !important;
+    height: 18px !important;
+    margin: 0 4px !important;
+    background: color-mix(in srgb, var(--accent-color), transparent 85%) !important;
+}
+
+/* 5. LIGHT THEME LOGO & BUTTON SYNC */
+[data-theme="light"] .brand-wrap .logo {
+    color: #1a202c !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] .mode-toggle {
+    background-image: linear-gradient(#fff, #fff), 
+                      linear-gradient(to right, #8b5cf6, #06b6d4, #10b981, #f43f5e, #f59e0b) !important;
+}
+
+.status-dot {
+    box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-glow) !important;
+    animation: system-pulse 2.5s infinite ease-in-out !important;
+}
+@keyframes system-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.team-btn {
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px !important;
+    font-size: 10px !important;
+}
+.geo-navbar {
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), 
+                inset 0 1px 1px rgba(255,255,255,0.1) !important;
+}
+
+/* ============================================================
+   TOPNAV: REFINED CHROMATIC THEME TOGGLE
+   ============================================================ */
+
+.mode-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    /* Elegant single-pixel border instead of thick ring */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    overflow: hidden;
+}
+
+/* 2. THE HOVER EFFECT: Chromatic Expansion */
+.mode-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    border-color: var(--accent-color) !important;
+    background: rgba(var(--accent-color-rgb), 0.08) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 3. LIGHT THEME SYNC: Absolute Visibility */
+[data-theme="light"] .mode-toggle {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #475569 !important; /* Professional Slate */
+}
+
+[data-theme="light"] .mode-toggle:hover {
+    background: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 4. THE ICON REFINEMENT */
+.mode-toggle span, .mode-toggle i {
+    font-size: 18px !important;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.mode-toggle:active span {
+    transform: scale(0.8);
+}
+
+
+/* ============================================================
+   TOPNAV: INTERACTIVE SCALING & ICON PROTECTION
+   ============================================================ */
+
+/* 1. ATTRACTIVE HOVER POP */
+.icon-btn, .mode-toggle, .fs-toggle, .team-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.icon-btn:hover, .mode-toggle:hover, .fs-toggle:hover {
+    /* Slightly larger in a minor attractive way */
+    transform: scale(1.15) translateY(-2px) !important;
+    z-index: 10;
+    
+    /* Soft glow sync with palette */
+    box-shadow: 0 5px 15px var(--accent-glow) !important;
+    color: var(--accent-color) !important;
+}
+
+/* 2. GLOBE ICON PROTECTION: No Palette Border */
+.icon-btn a[href="/wild-facts"], 
+.icon-btn:has(span[title="Wild World Facts"]),
+.icon-btn:nth-child(2) { /* Targeting the globe position */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
+/* Specific fix for the Globe in History/Facts */
+.icon-btn:hover:has(.emoji-globe), 
+.icon-btn[title*="Facts"]:hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    color: inherit !important; /* Prevents text color shift to palette color */
+}
+
+/* 3. TEAM BUTTON HOVER REFINEMENT */
+.team-btn:hover {
+    transform: scale(1.05) translateY(-1px) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 12px var(--accent-glow) !important;
+}
+
+/* ============================================================
+   TOPNAV: ICON POP & SELECTIVE BORDER REMOVAL
+   ============================================================ */
+
+/* 1. UNIVERSAL HOVER POP: Larger & Minor Attractive Way */
+.icon-btn, .mode-toggle, .fs-toggle {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.icon-btn:hover, .mode-toggle:hover, .fs-toggle:hover {
+    transform: scale(1.18) translateY(-2px) !important; /* Slightly larger attractive pop */
+    z-index: 50;
+}
+
+/* 2. SPECIFIC ICON PROTECTION: NO PALETTE BORDERS */
+/* Targets the History (Clock) and Facts (Globe) buttons */
+.icon-btn:hover:has(span[title*="History"]), 
+.icon-btn:hover:has(span[title*="Facts"]),
+.icon-btn.active[onClick*="History"],
+.icon-btn:has(a[href="/wild-facts"]):hover {
+    border-color: rgba(255, 255, 255, 0.15) !important; /* Neutral glass border only */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; /* Neutral shadow */
+    color: inherit !important; /* Prevents text color from changing to palette color */
+}
+
+/* 3. FUNCTIONAL ICON SYNC (Weather/Audio/Palette) */
+/* These icons keep the palette glow to show they are "Active Systems" */
+.weather-toggle:hover, .audio-toggle:hover, .palette-trigger:hover {
+    color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 4. LOGO & TOGGLE HARMONIZATION */
+[data-theme="light"] .brand-wrap .logo {
+    color: #1e293b !important; /* High contrast for light theme */
+}
+
+.mode-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important; /* Perfectly circular like palette dots */
+}
+
+
+
+/* ============================================================
+   ANALYSIS HISTORY: ELITE MODAL DOMINANCE
+   ============================================================ */
+
+/* 1. THE OVERLAY: Absolute Depth Fix */
+.modal-overlay {
+    position: fixed !important;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    /* Highest Z-Index to beat map zoom (usually 1000-2000) */
+    z-index: 100000 !important; 
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(12px) !important; /* Blurs map behind history */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 2. THE CARD: Precision Glass HUD */
+.history-table-card.glass-morphic {
+    width: 90% !important;
+    max-width: 900px !important;
+    max-height: 85vh !important;
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 5%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 
+                inset 0 0 20px rgba(255, 255, 255, 0.02) !important;
+    overflow: hidden;
+    position: relative;
+    z-index: 100001 !important;
+}
+
+/* 3. TACTICAL TABLE REFINEMENT */
+.history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Breathing room between rows */
+    padding: 0 20px;
+}
+
+.history-table thead th {
+    font-family: 'Roboto Mono', monospace !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--accent-color);
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-table tbody tr {
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+}
+
+.history-table tbody tr:hover {
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+    transform: scale(1.01);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.history-table td {
+    padding: 12px 15px;
+    font-family: 'Roboto Mono', monospace;
 }

@@ -2784,3 +2784,99 @@ button.mini:hover, .btn-mono-tool:hover {
 
 
 
+/* ============================================================
+   SIDEBAR HEADER: PERFECT SYMMETRY FIX
+   ============================================================ */
+
+.sidebar-top-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 15px !important;
+    width: 100% !important;
+}
+
+/* 1. Force both wings to have equal width to anchor the center */
+.header-wing {
+    flex: 1 !important; /* Both wings take equal space */
+    min-width: 60px !important; /* Adjust based on your icon sizes */
+    display: flex !important;
+    align-items: center !important;
+}
+
+.header-wing.left-wing {
+    justify-content: flex-start !important;
+}
+
+.header-wing.right-wing {
+    justify-content: flex-end !important;
+}
+
+/* 2. Center Element: The Date/Time Display */
+.sidebar-datetime-wrapper {
+    flex: 2 !important; /* Takes more priority in the middle */
+    display: flex !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.sidebar-datetime-display {
+    width: fit-content !important;
+    /* Ensure no extra margins are pushing it left */
+    margin: 0 auto !important; 
+}
+
+/* 3. Compact the internal padding of the date box to prevent overflow */
+.datetime-content {
+    padding: 6px 14px !important; 
+    gap: 10px !important;
+}
+
+.datetime-time {
+    font-size: 13px !important; /* Slightly smaller to fit narrow sidebars */
+}
+
+.datetime-date {
+    font-size: 10px !important;
+}
+.live-status-container {
+    padding: 4px 8px !important; /* Tighter padding */
+    gap: 6px !important;
+}
+
+.status-text-prime {
+    font-size: 10px !important; /* Shrunk slightly for balance */
+    letter-spacing: 1px !important;
+}
+
+
+/* ============================================================
+   MOBILE HEADER ADJUSTMENT: ANTI-OVERLAP
+   ============================================================ */
+
+/* This only triggers on screens smaller than 768px */
+@media (max-width: 768px) {
+    .sidebar-top-header {
+        /* 1. Push down to clear the TopNav area */
+        margin-top: 55px !important; 
+        
+        /* 2. Ensure it physically floats above the map layer */
+        position: relative !important;
+        z-index: 10002 !important; 
+        
+        /* 3. Subtle scaling to fit smaller sidebar widths */
+        transform: scale(0.95);
+        transform-origin: center top;
+    }
+
+    /* 4. Increase contrast for the date display when floating */
+    .sidebar-datetime-display {
+        background: color-mix(in srgb, var(--sb-bg, #0a0a0a), transparent 2%) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+        border: 1px solid var(--accent-color) !important;
+    }
+}
+
+
+
