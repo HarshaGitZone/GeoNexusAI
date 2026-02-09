@@ -73,7 +73,8 @@ export default function TopNav({
 
   const handleMouseEnterPalette = () => {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-    setShowPalette(true);
+    // Remove hover behavior - only show on click
+    // setShowPalette(true);
   };
 
   const handleMouseLeavePalette = () => {
