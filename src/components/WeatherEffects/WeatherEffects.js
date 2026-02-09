@@ -8,7 +8,11 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
     // Use the correct field names from the backend weather API
     const description = (weather.description || weather.conditions || '').toLowerCase();
     const main = (weather.weather_code !== undefined ? weather.weather_code.toString() : '').toLowerCase();
+    const temperature = parseFloat(weather.temperature || weather.temp || weather.temp_c || 0);
     let isDay = weather.is_day;
+    
+    // Temperature-based snow detection
+    const isColdEnoughForSnow = temperature <= 0; // 0°C or below should show snow
     
     // Override isDay with frontend calculation for accuracy
     if (lat && lng) {
@@ -63,29 +67,32 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
       // Night time effects
       if (description.includes('rain') || description.includes('shower') || main.includes('rain')) {
         weatherType = 'night-rain';
-      } else if (description.includes('snow') || main.includes('snow')) {
-        weatherType = 'night-snow';
+      } else if (description.includes('snow') || main.includes('snow') || isColdEnoughForSnow) {
+        weatherType = 'night-snow'; // Show night snow for cold temperatures
       } else if (description.includes('cloud') || description.includes('overcast') || main.includes('cloud')) {
         weatherType = 'night-cloudy';
       } else if (description.includes('clear') || description.includes('mainly clear') || main.includes('clear')) {
-        weatherType = 'night-clear';
+        // Check if it's cold enough for snow even with clear night sky
+        weatherType = isColdEnoughForSnow ? 'night-snow' : 'night-clear';
       } else if (description.includes('storm') || description.includes('thunder')) {
         weatherType = 'night-storm';
       } else if (description.includes('fog') || description.includes('mist')) {
         weatherType = 'night-foggy';
       } else {
-        weatherType = 'night-clear'; // Default night
+        // Default night: check temperature for snow
+        weatherType = isColdEnoughForSnow ? 'night-snow' : 'night-clear';
       }
     } else {
       // Day time effects
       if (description.includes('rain') || description.includes('shower') || main.includes('rain')) {
         weatherType = 'rain';
-      } else if (description.includes('snow') || main.includes('snow')) {
-        weatherType = 'snow';
+      } else if (description.includes('snow') || main.includes('snow') || isColdEnoughForSnow) {
+        weatherType = 'snow'; // Show snow for cold temperatures or snow conditions
       } else if (description.includes('cloud') || description.includes('overcast') || main.includes('cloud')) {
         weatherType = 'cloudy';
       } else if (description.includes('clear') || description.includes('mainly clear') || main.includes('clear')) {
-        weatherType = 'sunny';
+        // Check if it's cold enough for snow even with clear sky
+        weatherType = isColdEnoughForSnow ? 'snow' : 'sunny';
       } else if (description.includes('storm') || description.includes('thunder')) {
         weatherType = 'storm';
       } else if (description.includes('fog') || description.includes('mist')) {
@@ -93,7 +100,8 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
       } else if (description.includes('wind') || description.includes('breez')) {
         weatherType = 'windy';
       } else {
-        weatherType = 'sunny'; // Default day
+        // Default: check temperature for snow
+        weatherType = isColdEnoughForSnow ? 'snow' : 'sunny';
       }
     }
     
@@ -102,6 +110,8 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
       description, 
       main, 
       isDay, 
+      temperature,
+      isColdEnoughForSnow,
       weatherType,
       location: weather?.location || 'Unknown',
       hour: new Date().getHours()
@@ -188,10 +198,25 @@ function RainEffect() {
 }
 
 // Snow Effect Component
-function SnowEffect() {
+function SnowEffect({ weather }) {
+  const temperature = parseFloat(weather?.temperature || weather?.temp || weather?.temp_c || 0);
+  
   return (
     <div className="snow-container">
-      {[...Array(60)].map((_, i) => (
+      {/* Add snow clouds - more clouds when very cold */}
+      <div className="snow-clouds">
+        <div className="snow-cloud snow-cloud-1" />
+        <div className="snow-cloud snow-cloud-2" />
+        <div className="snow-cloud snow-cloud-3" />
+        {temperature <= -5 && (
+          <>
+            <div className="snow-cloud snow-cloud-4" />
+            <div className="snow-cloud snow-cloud-5" />
+          </>
+        )}
+      </div>
+      {/* Snowflakes - more snow when very cold */}
+      {[...Array(temperature <= -5 ? 100 : 60)].map((_, i) => (
         <div
           key={i}
           className="snowflake"
