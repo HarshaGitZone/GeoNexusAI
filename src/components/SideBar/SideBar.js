@@ -509,9 +509,22 @@ const generateShareLink = () => {
   </div>
 </div> */}
 {/* Centered Tactical Datetime Badge */}
-<div className="sidebar-datetime-wrapper">
+<div className="sidebar-top-header">
+  {/* Left Wing: System Connectivity */}
+  <div className="header-wing left-wing">
+    <div className="satellite-hub">
+      <span className="telemetry-icon-large" title="">📡</span>
+      <div className="signal-waves">
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+   
+  </div>
+
+  {/* Your Center Badge (Existing) */}
   <div className="sidebar-datetime-display">
-    <div className="datetime-content">
+     <div className="datetime-content">
       <span className="datetime-date">
         {currentTime.toLocaleDateString('en-GB', { 
           day: '2-digit', 
@@ -530,7 +543,24 @@ const generateShareLink = () => {
       </span>
     </div>
   </div>
+
+  {/* Right Wing: User/Project shorthand */}
+  {/* <div className="header-wing right-wing">
+    <span className="user-badge">LIVE</span> 
+    <div className="live-pulse-dot"></div>
+  </div> */}
+  {/* Right Wing: High-Visibility LIVE Status */}
+<div className="header-wing right-wing">
+  <div className="live-status-container">
+    <div className="live-indicator-hub">
+      <div className="live-pulse-ring"></div>
+      <div className="live-pulse-dot-large"></div>
+    </div>
+    <span className="status-text-prime">LIVE</span>
+  </div>
 </div>
+</div>
+
 
       <div style={{ height: "2px", width: "100%" }}></div>
 
@@ -637,7 +667,7 @@ const generateShareLink = () => {
         <button 
           type="button" 
           onClick={() => setCloseSiteA(true)}
-          className="btn-close-site-a"
+          className="btn-cross"
           title="Close Site A Analysis"
         >
           ✕

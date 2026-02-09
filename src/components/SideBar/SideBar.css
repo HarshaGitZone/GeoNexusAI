@@ -1979,3 +1979,808 @@ button.mini:hover, .btn-mono-tool:hover {
     /* Deepen the accent color for text visibility in light mode */
     filter: brightness(0.6) saturate(1.2); 
 }
+
+
+
+
+.sidebar-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px 0 15px;
+  width: 100%;
+}
+
+.header-wing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9px;
+  /* Use the color-mix or opacity method to keep it subtle */
+  color: color-mix(in srgb, var(--accent-color), white 40%);
+  opacity: 0.6; 
+}
+
+.user-badge {
+  border: 1px solid currentColor;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.live-pulse-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 5px #10b981;
+  animation: pulse-glow 2s infinite;
+}
+
+
+
+/* --- ENHANCED SATELLITE WING --- */
+.satellite-hub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.telemetry-icon-large {
+  font-size: 18px; /* Increased size significantly */
+  filter: drop-shadow(0 0 5px var(--accent-glow));
+  cursor: help;
+  transition: transform 0.3s ease;
+}
+
+.telemetry-icon-large:hover {
+  transform: scale(1.1) rotate(-10deg);
+}
+
+/* Signal Wave Animation */
+.signal-waves {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+  display: flex;
+  gap: 2px;
+}
+
+.signal-waves span {
+  width: 2px;
+  height: 6px;
+  background: var(--accent-color);
+  border-radius: 1px;
+  animation: signal-bounce 1s infinite alternate;
+  opacity: 0.6;
+}
+
+.signal-waves span:nth-child(2) {
+  height: 10px;
+  animation-delay: 0.2s;
+}
+
+@keyframes signal-bounce {
+  from { opacity: 0.2; transform: scaleY(0.5); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+/* Ensure the label sits well next to the larger icon */
+.telemetry-label {
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent-color), white 20%);
+  letter-spacing: 0.5px;
+}
+
+.sidebar-datetime-display:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px var(--accent-glow); /* Dynamic glow from your palette */
+  filter: brightness(1.1);
+  cursor: default;
+}
+
+/* Make the "LIVE" tag on the right match the emerald glow exactly */
+.live-label {
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+}
+
+
+
+
+
+/* ============================================================
+   GEO NEXUS AI: UNIFIED HUD-GLASS SYSTEM
+   ============================================================ */
+
+/* 1. PRIMARY HUD BUTTONS (ANALYZE, GO, PRIMARY ACTIONS) */
+.sidebar .btn-analyze, 
+.sidebar .btn-save, 
+.sidebar .share-action-primary,
+.sidebar button[type="submit"] {
+    position: relative !important;
+    background: var(--btn-glass-bg, rgba(255, 255, 255, 0.05)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    border-radius: 8px !important;
+    
+    /* Double-Layer Glow */
+    box-shadow: 0 0 12px var(--accent-glow), 
+                inset 0 0 8px var(--accent-glow) !important;
+    
+    /* Typography: Tactical Monospace */
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    overflow: hidden !important;
+}
+
+/* 2. THEME-SPECIFIC TEXT LOGIC */
+[data-theme="dark"] .sidebar .btn-analyze, 
+[data-theme="dark"] .sidebar .btn-save,
+[data-theme="dark"] .sidebar .share-action-primary {
+    color: var(--accent-color) !important;
+}
+
+[data-theme="light"] .sidebar .btn-analyze, 
+[data-theme="light"] .sidebar .btn-save,
+[data-theme="light"] .sidebar .share-action-primary {
+    color: #0f172a !important; /* High contrast slate for light mode */
+    --btn-glass-bg: rgba(255, 255, 255, 0.8);
+}
+
+/* 3. HOVER: THE "POWER-ON" EFFECT */
+.sidebar .btn-analyze:hover, 
+.sidebar .btn-save:hover,
+.sidebar .share-action-primary:hover {
+    background: var(--accent-color) !important;
+    color: var(--hover-text, #000000) !important; /* Black text on glowing bg */
+    box-shadow: 0 0 25px var(--accent-color), 
+                0 0 50px var(--accent-glow) !important;
+    transform: translateY(-2px) !important;
+    filter: brightness(1.1) !important;
+}
+
+[data-theme="light"] .sidebar .btn-analyze:hover {
+    --hover-text: #ffffff; /* White text when button turns solid in light mode */
+}
+
+/* 4. SECONDARY HUD TOOLS (MY LOC, SAVE, NEARBY) */
+.sidebar .btn-mono-tool,
+.sidebar .btn-edit {
+    background: transparent !important;
+    border: 1px solid color-mix(in srgb, var(--accent-color), transparent 75%) !important;
+    color: var(--accent-color) !important;
+    opacity: 0.8 !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+}
+
+.sidebar .btn-mono-tool:hover {
+    opacity: 1 !important;
+    background: var(--accent-glow) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 10px var(--accent-glow) !important;
+}
+
+/* 5. TACTICAL DATA INPUTS (LAT/LNG FIELDS) */
+.sidebar .highlighted-box {
+    background: var(--input-bg, rgba(0, 0, 0, 0.3)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--accent-color) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    border-radius: 4px !important;
+    padding: 6px !important;
+    transition: border 0.3s ease !important;
+}
+
+.sidebar .highlighted-box:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 8px var(--accent-glow) !important;
+    outline: none !important;
+}
+
+[data-theme="light"] .sidebar .highlighted-box {
+    --input-bg: #ffffff;
+    border-color: #e2e8f0 !important;
+}
+
+/* 6. THE MAP BUTTON (BLUEPRINT NAVIGATION) */
+.sidebar .btn-save.mini {
+    border-color: #3b82f6 !important; /* Blueprint Blue */
+    color: #60a5fa !important;
+}
+
+.sidebar .btn-save.mini:hover {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* 7. CRITICAL ACTION (CLOSE COMPARISON) */
+.sidebar .compare-toggle-btn {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3) !important;
+}
+
+.sidebar .compare-toggle-btn:hover {
+    background: #dc2626 !important;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
+    transform: scale(1.02) !important;
+}
+
+
+
+
+
+/* ============================================================
+   FINAL HUD REFINEMENTS & "GO" TEXT FIX
+   ============================================================ */
+
+/* 1. VISIBILITY FIX: Force GO and ANALYZE text to be visible */
+[data-theme="dark"] .sidebar .btn-analyze, 
+[data-theme="dark"] .sidebar .btn-go, 
+[data-theme="dark"] .sidebar .btn-analyze:not(:disabled),
+[data-theme="dark"] .sidebar .btn-analyze {
+    color: #f9f8f8 !important; /* Sharp black text on glowing emerald */
+    font-weight: 900 !important;
+    text-shadow: none !important;
+}
+/* LIGHT THEME: Forces the text to White as requested */
+[data-theme="light"] .sidebar .btn-analyze,
+[data-theme="light"] .sidebar .btn-go {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    /* Add a subtle dark shadow to make white text pop on light backgrounds */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 2. SAVED PLACES: THE "DATA-CHIP" LOOK */
+.place-card-compact {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(4px) !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.place-card-compact:hover {
+    border-color: var(--accent-color) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 3. INPUT BOXES: TACTICAL MONO SYNC */
+.sidebar .highlighted-box {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--accent-color) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+}
+
+/* 4. ACTIONS SECTION: GLASS-MODAL FEEL */
+.sidebar .control-group.compact-group {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+}
+
+/* 5. SEARCH SECTION: NEON FOCUS */
+.sidebar .search-wrapper:focus-within {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 10px var(--accent-glow) !important;
+}
+
+
+
+
+
+/* ============================================================
+   TACTICAL HUD CROSS BUTTONS (ULTRA-DARK HOVER)
+   ============================================================ */
+
+/* 1. Base State: HUD Glass Red */
+.sidebar .btn-close-site-a,
+.sidebar .btn-cross {
+    background: rgba(239, 68, 68, 0.08) !important; 
+    border: 1.5px solid rgba(239, 68, 68, 0.4) !important;
+    color: #ef4444 !important;
+    width: 32px !important;
+    height: 34px !important; /* Matched to Analyze/Go button height */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+/* 2. Hover State: EVEN DARKER RED (Tactical Crimson) */
+.sidebar .btn-close-site-a:hover,
+.sidebar .btn-cross:hover {
+    background: #450a0a !important; /* Deepest Blood Red / Ultra Dark */
+    border-color: #ef4444 !important;
+    color: #ffffff !important;      /* Pop to white for high-tech contrast */
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4),
+                inset 0 0 12px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 3. Theme-Specific Logic for Light Mode */
+[data-theme="light"] .sidebar .btn-close-site-a:hover,
+[data-theme="light"] .sidebar .btn-cross:hover {
+    background: #7f1d1d !important; /* Slightly brighter for visibility in light theme */
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* 4. Active/Click State */
+.sidebar .btn-close-site-a:active,
+.sidebar .btn-cross:active {
+    transform: scale(0.92) !important;
+    filter: brightness(0.7) !important;
+    background: #000000 !important; /* Instant black on click */
+}
+
+
+
+
+.btn-close-site-a:hover{
+    background-color: #ef4444 !important;
+}
+
+
+
+
+/* ============================================================
+   SAVED PLACES: EDIT MODE VISIBILITY FIX
+   ============================================================ */
+
+/* LIGHT THEME: Forced White Background for Edit Input */
+[data-theme="light"] .place-info-mini input.highlighted-box {
+    background-color: #ffffff !important; /* Pure White to fix gray invisibility */
+    color: #0f172a !important;           /* Deep Charcoal for high readability */
+    border: 1.5px solid var(--accent-color) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* DARK THEME: Keeps the Tactical HUD look */
+[data-theme="dark"] .place-info-mini input.highlighted-box {
+    background-color: #000000 !important;
+    color: var(--accent-color) !important;
+    border: 1px solid var(--accent-color) !important;
+}
+
+/* Common Styles for the Edit Input */
+.place-info-mini input.highlighted-box {
+    width: 100% !important;
+    padding: 4px 8px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 12px !important;
+    border-radius: 4px !important;
+    outline: none !important;
+}
+
+/* Placeholder visibility for the edit field */
+.place-info-mini input.highlighted-box::placeholder {
+    color: var(--sb-text-dim, #808080) !important;
+    opacity: 0.6;
+}
+
+/* ============================================================
+   UNIFIED HUD CONTAINER DEPTH
+   ============================================================ */
+
+/* Targets every major section card in the sidebar */
+.sidebar-search-section, 
+.control-group.compact-group, 
+.comparison-box,
+.saved-places-section {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    margin: 8px !important;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease !important;
+}
+
+/* Subtle glow when the section contains an active result */
+.sidebar section:has(.result-active),
+.sidebar section:has(.btn-go) {
+    border-color: color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.place-card-compact {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 10px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.place-card-compact:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: var(--accent-color) !important;
+    transform: translateX(4px) !important; /* Subtle "slide-in" effect */
+    box-shadow: -4px 0 0 var(--accent-color) !important; /* Color bar indicator */
+}
+
+/* Edit/Delete Icons - Match the Palette */
+.btn-edit {
+    color: var(--accent-color) !important;
+    opacity: 0.6 !important;
+}
+
+.btn-edit:hover {
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 5px var(--accent-glow)) !important;
+}
+
+/* 2. THE MAP BUTTON: EXCLUSIVE "BLUEPRINT BLUE" */
+.sidebar .btn-save.mini, 
+.sidebar .btn-map-blueprint {
+    border-color: #3b82f6 !important; /* Tactical Blue */
+    color: #60a5fa !important;
+    background: rgba(59, 130, 246, 0.05) !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.2) !important;
+}
+
+.sidebar .btn-save.mini:hover {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5) !important;
+}
+
+
+/* ============================================================
+   LARGE TACTICAL LIVE INDICATOR
+   ============================================================ */
+
+.header-wing.right-wing {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    opacity: 1 !important; /* Ensure full visibility */
+}
+
+.live-status-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid color-mix(in srgb, var(--accent-color), transparent 80%);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.live-indicator-hub {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The Core Dot */
+.live-pulse-dot-large {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent-glow);
+    z-index: 2;
+}
+
+/* The Radiating Ring */
+.live-pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--accent-color);
+    border-radius: 50%;
+    animation: tactical-pulse 2s infinite;
+    opacity: 0;
+    z-index: 1;
+}
+
+.status-text-prime {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px; /* Increased size */
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: var(--accent-color);
+    text-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes tactical-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* Light Theme Adjustments */
+[data-theme="light"] .live-status-container {
+    background: #f0fdf4;
+    border-color: color-mix(in srgb, var(--accent-color), black 80%);
+}
+
+[data-theme="light"] .status-text-prime {
+    filter: brightness(0.7); /* Darken for light mode readability */
+}
+
+
+
+/* ============================================================
+   LIGHT THEME: "ELITE PAPER" REFINEMENTS
+   ============================================================ */
+
+[data-theme="light"] .sidebar.glass-morphic {
+    background: #f8fafc !important; /* Soft paper white */
+}
+
+/* 1. Deepen the Glass Cards */
+[data-theme="light"] .sidebar-search-section, 
+[data-theme="light"] .control-group.compact-group, 
+[data-theme="light"] .comparison-box,
+[data-theme="light"] .saved-places-section {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    /* Soft but deep shadow to create "lift" */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 2. Fix the "Analyze" & "Go" Buttons */
+[data-theme="light"] .btn-analyze, 
+[data-theme="light"] .btn-go {
+    background: var(--accent-color) !important;
+    color: #ffffff !important; /* Pure White text for maximum pop */
+    border: none !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px var(--accent-glow) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="light"] .btn-analyze:hover {
+    background: #000000 !important; /* Tactical Black on hover */
+    color: #ffffff !important;
+}
+
+/* 3. Refine the Search Bar */
+[data-theme="light"] .search-wrapper {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .search-wrapper:focus-within {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 12px var(--accent-glow) !important;
+}
+
+/* 4. The Live Badge Balance */
+[data-theme="light"] .live-status-container {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid var(--accent-color) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ============================================================
+   THEME-ADAPTIVE SATELLITE ICON
+   ============================================================ */
+
+/* DARK THEME: Glowing Neon Asset */
+[data-theme="dark"] .telemetry-icon-large {
+    filter: drop-shadow(0 0 5px var(--accent-glow)) brightness(1.2) !important;
+    opacity: 1 !important;
+}
+
+/* LIGHT THEME: Sharp Metallic Black Asset */
+[data-theme="light"] .telemetry-icon-large {
+    /* Grayscale makes it monochromatic, brightness(0) makes it black */
+    filter: grayscale(1) brightness(0) !important;
+    opacity: 0.8 !important; /* Slightly softened for the "Elite Paper" look */
+    transition: filter 0.3s ease, opacity 0.3s ease !important;
+}
+
+/* Hover effect for light mode to show interactive state */
+[data-theme="light"] .telemetry-icon-large:hover {
+    filter: grayscale(1) brightness(0.3) !important;
+    opacity: 1 !important;
+}
+
+/* ============================================================
+   SAVED PLACES: HOVER DATA EXPANSION
+   ============================================================ */
+
+/* Base state for the text - limited to one line */
+.place-info-mini strong,
+.place-info-mini span {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    transition: all 0.3s ease !important;
+    max-width: 120px; /* Adjust based on your sidebar width */
+}
+
+/* Hover state - Reveal full data */
+.place-card-compact:hover .place-info-mini strong,
+.place-card-compact:hover .place-info-mini span {
+    white-space: normal !important; /* Allows text to wrap */
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: 100% !important;
+}
+
+.place-card-compact:hover {
+    z-index: 10 !important; /* Ensures expanded card stays on top */
+    min-height: fit-content !important;
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+}
+
+/* Light theme contrast boost for full coordinates */
+[data-theme="light"] .place-card-compact:hover span {
+    color: #1e293b !important; /* Deep slate for readability */
+    font-weight: 500 !important;
+}
+.place-info-mini span {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 10px !important;
+}
+
+
+
+
+
+
+/* ============================================================
+   ULTRA-COMPACT HUD SYSTEM (SPACE OPTIMIZATION)
+   ============================================================ */
+
+/* 1. Reduce spacing between main section cards */
+.sidebar-search-section, 
+.control-group.compact-group, 
+.comparison-box,
+.saved-places-section {
+    margin: 4px 8px !important; /* Half the original margin */
+    padding: 6px 10px !important; /* Tighter internal padding */
+    border-radius: 8px !important;
+}
+
+/* 2. Compact Data Inputs (Lat/Lng Fields) */
+.geo-unified-logic-row {
+    gap: 3px !important;
+    margin-top: 4px !important;
+}
+
+.geo-unified-logic-row .field label {
+    font-size: 8px !important; /* Shrunk label for space */
+    margin-bottom: 1px !important;
+}
+
+.geo-unified-logic-row input {
+    height: 26px !important; /* Shorter input height */
+    font-size: 10px !important;
+    padding: 0 6px !important;
+}
+
+/* 3. Button Compaction */
+.btn-analyze, 
+.btn-go, 
+.btn-save.mini, 
+.btn-cross {
+    height: 26px !important; /* Standardized shorter height */
+    font-size: 10px !important;
+    padding: 0 8px !important;
+}
+
+/* 4. Action Buttons Grid (Top Section) */
+.control-group.compact-group .compact-row {
+    gap: 4px !important;
+}
+
+.control-group.compact-group button {
+    padding: 6px 4px !important;
+    font-size: 9px !important;
+}
+
+/* 5. Saved Places Density */
+.places-grid {
+    gap: 4px !important; /* Closer chips */
+}
+
+.place-card-compact {
+    padding: 4px 6px !important; /* Tighter chips */
+    min-height: 28px !important;
+}
+
+.place-info-mini strong {
+    font-size: 10px !important;
+}
+
+.place-info-mini span {
+    font-size: 8px !important;
+}
+
+/* 6. Header Badge Compaction */
+.sidebar-datetime-display {
+    padding: 4px 12px !important;
+    margin-bottom: 2px !important;
+}
+
+.datetime-time {
+    font-size: 10px !important;
+}
+
+
+
+/* ============================================================
+   GEO NEXUS AI: GLOBAL TYPOGRAPHY SYNC
+   ============================================================ */
+
+/* 1. Universal Monospace for all UI Text */
+.sidebar, 
+.sidebar-search-input, 
+.highlighted-box, 
+.compare-toggle-btn,
+.search-result-description,
+.place-info-mini,
+.input-label {
+    font-family: 'Roboto Mono', 'JetBrains Mono', monospace !important;
+}
+
+/* 2. Professional Search Bar Refinement */
+.sidebar-search-input {
+    font-size: 13px !important;
+    letter-spacing: -0.2px !important;
+}
+
+/* 3. Close Comparison Button (B) Refinement */
+.sidebar .compare-toggle-btn {
+    text-transform: uppercase !important;
+    font-weight: 800 !important;
+    letter-spacing: 1.5px !important;
+    font-size: 11px !important;
+    /* Maintain the tactical red look you established */
+    background: #ef4444 !important; 
+    color: #ffffff !important;
+}
+
+/* 4. Description & Data Display Labels */
+.desc-label, 
+.suggestion-main,
+.suggestion-sub {
+    font-family: 'Roboto Mono', monospace !important;
+    letter-spacing: 0.2px !important;
+}
+
+
+
+
+
