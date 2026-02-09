@@ -199,6 +199,7 @@
   align-items: center;
   justify-content: center;
   transition: 0.3s;
+  position: relative; /* Anchor for absolute positioning if needed, though we might use the container */
 }
 
 .weather-toggle.active {
@@ -213,55 +214,51 @@
   border-color: rgba(59, 130, 246, 0.4);
 }
 
+/* Container for the slider - Absolutely positioned to remove it from flow */
 .weather-controls {
+  position: absolute;
+  top: 120%; /* Push it below the navbar */
+  right: 60px; /* Align slightly to the left of the right edge (adjust as needed based on exact location) */
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 8px;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.95); /* distinct background */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   opacity: 0;
+  visibility: hidden;
   transform: translateY(-10px);
-  transition: all 0.3s ease;
-  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10000;
 }
 
-.weather-toggle:hover ~ .weather-controls .weather-opacity-control {
+/* Light theme support */
+[data-theme="light"] .weather-controls {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Show when hovering the toggle OR the controls themselves */
+.weather-toggle:hover + .weather-controls,
+.weather-controls:hover {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0);
-  pointer-events: auto;
-}
-
-.weather-opacity-wrapper {
-  position: relative;
-}
-
-.weather-opacity-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 8px;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  pointer-events: none;
 }
 
 .opacity-label {
   font-size: 10px;
   color: #94a3b8;
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .opacity-slider {
-  width: 80px;
+  width: 100px;
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
@@ -271,32 +268,29 @@
   cursor: pointer;
 }
 
+[data-theme="light"] .opacity-slider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
 .opacity-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 12px;
   height: 12px;
-  background: #8b5cf6;
+  background: #3b82f6;
   border-radius: 50%;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
 }
 
 .opacity-slider::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  background: #8b5cf6;
+  background: #3b82f6;
   border-radius: 50%;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.opacity-value {
-  font-size: 10px;
-  color: #8b5cf6;
-  font-weight: 700;
-  min-width: 30px;
-  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.8);
 }
 
 .mode-toggle:hover {

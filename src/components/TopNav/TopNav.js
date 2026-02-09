@@ -259,7 +259,7 @@ export default function TopNav({
               {adaptiveWeather ? "🌦️" : "🌤️"}
             </button>
             {adaptiveWeather && (
-              <div className="weather-opacity-control">
+              <div className="weather-controls">
                 <span className="opacity-label">Intensity</span>
                 <input
                   type="range"

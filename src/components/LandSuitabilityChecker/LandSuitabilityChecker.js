@@ -1485,13 +1485,13 @@ export default function LandSuitabilityChecker() {
     if (payload?.siteA?.lat != null) setLat(String(payload.siteA.lat));
     if (payload?.siteA?.lng != null) setLng(String(payload.siteA.lng));
     if (payload?.siteA?.name) setLocationAName(payload.siteA.name);
-    
+
     // Restore Result A
     if (payload?.siteA?.result) {
       setResult(payload.siteA.result);
       setAnalyzedCoords({ lat: payload.siteA.lat, lng: payload.siteA.lng });
     }
-    
+
     // Restore Compare Mode
     if (payload?.compare?.enabled && payload?.siteB?.lat && payload?.siteB?.lng) {
       setShowLocationB(true);
@@ -1634,7 +1634,7 @@ export default function LandSuitabilityChecker() {
 
   const [result, setResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_result")) || null);
   const [closeSiteA, setCloseSiteA] = useState(false);
-  
+
   // Handle Site A close action
   useEffect(() => {
     if (closeSiteA) {
@@ -1643,7 +1643,7 @@ export default function LandSuitabilityChecker() {
       setCloseSiteA(false);
     }
   }, [closeSiteA]);
-  
+
   const [analysisTime, setAnalysisTime] = useState(() => {
     return localStorage.getItem("geo_last_analysis_time");
   });
@@ -1780,10 +1780,10 @@ export default function LandSuitabilityChecker() {
 
   const handleDigitalTwinMouseMove = useCallback((e) => {
     if (!isDigitalTwinDragging) return;
-    
+
     const newX = e.clientX - digitalTwinStart.x;
     const newY = e.clientY - digitalTwinStart.y;
-    
+
     setDigitalTwinPosition({ x: newX, y: newY });
   }, [isDigitalTwinDragging, digitalTwinStart]);
 
@@ -2239,14 +2239,14 @@ export default function LandSuitabilityChecker() {
         // ⏱️ ADD THIS (TIME STAMP)
         // const now = new Date().toLocaleString();
         const now = new Date().toLocaleString('en-GB', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false
-});
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
 
         setAnalysisTime(now);
         localStorage.setItem("geo_last_analysis_time", now);
@@ -2786,7 +2786,7 @@ export default function LandSuitabilityChecker() {
     localStorage.setItem("geo_theme", JSON.stringify(isDarkMode));
 
     localStorage.setItem("geo_adaptive_weather", JSON.stringify(adaptiveWeather));
-    
+
     localStorage.setItem("geo_weather_opacity", JSON.stringify(weatherOpacity));
 
     localStorage.setItem("geo_map_style", mapVariety);
@@ -5027,21 +5027,23 @@ export default function LandSuitabilityChecker() {
 
 
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-        <WeatherEffects 
-          weather={result?.weather} 
+        <WeatherEffects
+          weather={result?.weather}
           adaptiveWeather={adaptiveWeather}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
+          weatherOpacity={weatherOpacity}
         />
         <section className="map-container" style={{ flex: 1, position: 'relative' }}>
           {/* Add WeatherEffects for fullscreen map */}
-          <WeatherEffects 
-            weather={result?.weather} 
+          <WeatherEffects
+            weather={result?.weather}
             adaptiveWeather={adaptiveWeather}
             isDarkMode={isDarkMode}
             setIsDarkMode={setIsDarkMode}
+            weatherOpacity={weatherOpacity}
           />
-          
+
           {/* 🎯 MOVE THE REF TO WRAP EVERYTHING */}
 
           <div
@@ -5358,39 +5360,39 @@ export default function LandSuitabilityChecker() {
 
             <>
 
-             
 
-                <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
 
-  {/* Center Tabs */}
-  <div className="tab-buttons-container">
-    <button className={activeTab === "suitability" ? "active" : ""} onClick={() => setActiveTab("suitability")}>
-      <span className="tab-icon">🎯</span>
-      <span className="tab-text">Suitability</span>
-    </button>
-    <button className={activeTab === "environmental" ? "active" : ""} onClick={() => setActiveTab("environmental")}>
-      <span className="tab-icon">🌐</span>
-      <span className="tab-text">Locational Intelligence</span>
-    </button>
-    <button className={activeTab === "infrastructure" ? "active" : ""} onClick={() => setActiveTab("infrastructure")}>
-      <span className="tab-icon">🏗️</span>
-      <span className="tab-text">Strategic Utility</span>
-    </button>
-  </div>
+              <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
 
-  {/* Right Controls */}
-  <div className="analysis-header">
-    {/* <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
+                {/* Center Tabs */}
+                <div className="tab-buttons-container">
+                  <button className={activeTab === "suitability" ? "active" : ""} onClick={() => setActiveTab("suitability")}>
+                    <span className="tab-icon">🎯</span>
+                    <span className="tab-text">Suitability</span>
+                  </button>
+                  <button className={activeTab === "environmental" ? "active" : ""} onClick={() => setActiveTab("environmental")}>
+                    <span className="tab-icon">🌐</span>
+                    <span className="tab-text">Locational Intelligence</span>
+                  </button>
+                  <button className={activeTab === "infrastructure" ? "active" : ""} onClick={() => setActiveTab("infrastructure")}>
+                    <span className="tab-icon">🏗️</span>
+                    <span className="tab-text">Strategic Utility</span>
+                  </button>
+                </div>
+
+                {/* Right Controls */}
+                <div className="analysis-header">
+                  {/* <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
       {isAnalysisFullscreen ? "✕" : "⛶"}
     </button> */}
-    <button
-  className={`fullscreen-tab-btn ${isAnalysisFullscreen ? "close-btn" : ""}`}
-  onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}
->
-  {isAnalysisFullscreen ? "✕" : "⛶"}
-</button>
+                  <button
+                    className={`fullscreen-tab-btn ${isAnalysisFullscreen ? "close-btn" : ""}`}
+                    onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}
+                  >
+                    {isAnalysisFullscreen ? "✕" : "⛶"}
+                  </button>
 
-{/* {analysisTime && result && (
+                  {/* {analysisTime && result && (
   <div className="analysis-timestamp-container">
     <div className="timestamp-content">
       <span className="timestamp-status-icon">●</span>
@@ -5399,27 +5401,27 @@ export default function LandSuitabilityChecker() {
     </div>
   </div>
 )} */}
-{analysisTime && result && (
-  <div className="analysis-timestamp-container">
-    <div className="timestamp-content">
-      <div className="timestamp-status-group">
-        <span className="timestamp-status-icon">●</span>
-        <span className="live-label">LIVE</span>
-      </div>
-      <div className="timestamp-text-stack">
-        <span className="timestamp-label">LAST ANALYZED AT:</span>
-        <div className="timestamp-value-group">
-          {/* We split the string to style Date and Time differently */}
-          <span className="ts-date">{analysisTime.split(',')[0]}</span>
-          <span className="ts-separator">/</span>
-          <span className="ts-time">{analysisTime.split(',')[1]}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-  </div>
-</div>
+                  {analysisTime && result && (
+                    <div className="analysis-timestamp-container">
+                      <div className="timestamp-content">
+                        <div className="timestamp-status-group">
+                          <span className="timestamp-status-icon">●</span>
+                          <span className="live-label">LIVE</span>
+                        </div>
+                        <div className="timestamp-text-stack">
+                          <span className="timestamp-label">LAST ANALYZED AT:</span>
+                          <div className="timestamp-value-group">
+                            {/* We split the string to style Date and Time differently */}
+                            <span className="ts-date">{analysisTime.split(',')[0]}</span>
+                            <span className="ts-separator">/</span>
+                            <span className="ts-time">{analysisTime.split(',')[1]}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
             
@@ -5438,8 +5440,8 @@ export default function LandSuitabilityChecker() {
                   </button>
                 </div> */}
 
-                {/* Right Side: Control Icons */}
-                {/* <div className="fullscreen-controls">
+              {/* Right Side: Control Icons */}
+              {/* <div className="fullscreen-controls">
                   <button
                     className="fullscreen-tab-btn"
                     onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}
@@ -5450,7 +5452,7 @@ export default function LandSuitabilityChecker() {
                 </div> */}
 
 
-                {/* <div className="fullscreen-controls">
+              {/* <div className="fullscreen-controls">
                   <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
                     {isAnalysisFullscreen ? "✕" : "⛶"}
                   </button>
@@ -5464,7 +5466,7 @@ export default function LandSuitabilityChecker() {
 
                 </div> */}
 
-                  {/* <div className="analysis-header">
+              {/* <div className="analysis-header">
   <div className="analysis-header-left">
      <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
                     {isAnalysisFullscreen ? "✕" : "⛶"}
@@ -5503,13 +5505,13 @@ export default function LandSuitabilityChecker() {
               <div className={`tab-viewport ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
 
                 {/* Add WeatherEffects for fullscreen analysis */}
-                <WeatherEffects 
-                  weather={result?.weather} 
+                <WeatherEffects
+                  weather={result?.weather}
                   adaptiveWeather={adaptiveWeather}
                   isDarkMode={isDarkMode}
                   setIsDarkMode={setIsDarkMode}
                 />
-                
+
                 {/* Floating Close Button for Fullscreen */}
 
                 {isAnalysisFullscreen && (
