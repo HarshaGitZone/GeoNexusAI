@@ -53,11 +53,24 @@ export default function TopNav({
   const hideTimeoutRef = useRef(null);
 
   const themes = [
-    { name: "Purple", color: "#8b5cf6" },
-    { name: "Cyan", color: "#06b6d4" },
-    { name: "Emerald", color: "#10b981" },
-    { name: "Rose", color: "#f43f5e" },
-    { name: "Amber", color: "#f59e0b" },
+    // Dark Unique Colors (8)
+    { name: "Obsidian", color: "#303030" },
+    { name: "Deep Violet", color: "#4B0082" },
+    { name: "Midnight Teal", color: "#005555" },
+    { name: "Burgundy Wine", color: "#722F37" },
+    { name: "Forest Moss", color: "#556B2F" },
+    { name: "Royal Indigo", color: "#4B5320" },
+    { name: "Charcoal Gray", color: "#36454F" },
+    { name: "Bronze Age", color: "#CD7F32" },
+    // Light Unique Colors (8)
+    { name: "Mint Julep", color: "#F0FFF0" },
+    { name: "Peach Fuzz", color: "#FFE5B4" },
+    { name: "Sky Blue", color: "#87CEEB" },
+    { name: "Lavender Mist", color: "#E6E6FA" },
+    { name: "Coral Reef", color: "#FF7F50" },
+    { name: "Goldenrod", color: "#DAA520" },
+    { name: "Turquoise", color: "#40E0D0" },
+    { name: "Rose Quartz", color: "#F7CAC9" }
   ];
 
   const toggleFullscreen = () => {
@@ -300,18 +313,36 @@ export default function TopNav({
               </button>
 
               <div className={`palette-dropdown ${showPalette ? "expanded" : ""}`}>
-                {themes.map((t) => (
-                  <div
-                    key={t.name}
-                    className="color-dot"
-                    style={{ backgroundColor: t.color }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      changeThemeColor(t.color);
-                      setShowPalette(false);
-                    }}
-                  />
-                ))}
+                <div className="palette-row">
+                  {themes.slice(0, 8).map((t, index) => (
+                    <div
+                      key={`dark-${index}`}
+                      className="color-dot"
+                      style={{ backgroundColor: t.color }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        changeThemeColor(t.color);
+                        setShowPalette(false);
+                      }}
+                      title={t.name}
+                    />
+                  ))}
+                </div>
+                <div className="palette-row">
+                  {themes.slice(8).map((t, index) => (
+                    <div
+                      key={`light-${index}`}
+                      className="color-dot"
+                      style={{ backgroundColor: t.color }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        changeThemeColor(t.color);
+                        setShowPalette(false);
+                      }}
+                      title={t.name}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
             <button className="mode-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
