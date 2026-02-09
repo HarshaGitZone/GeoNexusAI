@@ -163,22 +163,19 @@ function SnowEffect() {
 function CloudyEffect() {
   return (
     <div className="cloudy-container">
-      {[...Array(8)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <div
           key={i}
           className="cloud"
           style={{
-            left: `${Math.random() * 80}%`,
-            top: `${Math.random() * 30}%`,
-            animationDelay: `${Math.random() * 10}s`,
-            animationDuration: `${20 + Math.random() * 10}s`,
+            left: `${Math.random() * 90}%`,
+            top: `${Math.random() * 60}%`,
             width: `${80 + Math.random() * 120}px`,
             height: `${40 + Math.random() * 60}px`,
+            animationDelay: `${Math.random() * 10}s`,
+            animationDuration: `${20 + Math.random() * 20}s`,
           }}
-        >
-          <span className="cloud-puff-1" />
-          <span className="cloud-puff-2" />
-        </div>
+        />
       ))}
     </div>
   );
@@ -254,19 +251,49 @@ function NightClearEffect() {
         <div className="moon-crater-2" />
         <div className="moon-crater-3" />
       </div>
-      {[...Array(50)].map((_, i) => (
+      {[...Array(120)].map((_, i) => (
         <div
           key={i}
           className="star"
           style={{
             left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 70}%`,
-            animationDelay: `${Math.random() * 3}s`,
-            animationDuration: `${2 + Math.random() * 2}s`,
-            fontSize: `${1 + Math.random() * 3}px`,
+            top: `${Math.random() * 85}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${3 + Math.random() * 4}s`,
+            fontSize: `${2 + Math.random() * 3}px`,
           }}
         >
           ✦
+        </div>
+      ))}
+      {[...Array(50)].map((_, i) => (
+        <div
+          key={i}
+          className="small-star"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 95}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${2 + Math.random() * 3}s`,
+            fontSize: `${1 + Math.random() * 2}px`,
+          }}
+        >
+          •
+        </div>
+      ))}
+      {[...Array(30)].map((_, i) => (
+        <div
+          key={i}
+          className="tiny-star"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 90}%`,
+            animationDelay: `${Math.random() * 2}s`,
+            animationDuration: `${1 + Math.random() * 2}s`,
+            fontSize: `${0.5 + Math.random() * 1}px`,
+          }}
+        >
+          ·
         </div>
       ))}
     </div>
@@ -321,17 +348,17 @@ function NightCloudyEffect() {
   return (
     <div className="night-cloudy-container">
       <NightClearEffect />
-      {[...Array(6)].map((_, i) => (
+      {[...Array(8)].map((_, i) => (
         <div
           key={i}
           className="night-cloud"
           style={{
             left: `${Math.random() * 80}%`,
-            top: `${Math.random() * 30}%`,
-            animationDelay: `${Math.random() * 10}s`,
-            animationDuration: `${20 + Math.random() * 10}s`,
-            width: `${80 + Math.random() * 120}px`,
-            height: `${40 + Math.random() * 60}px`,
+            top: `${Math.random() * 40}%`,
+            width: `${60 + Math.random() * 100}px`,
+            height: `${30 + Math.random() * 50}px`,
+            animationDelay: `${Math.random() * 8}s`,
+            animationDuration: `${25 + Math.random() * 15}s`,
           }}
         >
           <span className="cloud-puff-1" />

@@ -46,8 +46,9 @@
 
 /* Dark Theme Palette */
 [data-theme="dark"] .nav-content-shell {
-  background: rgba(15, 23, 42, 0.7);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 35, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 /* Light Theme Palette */
