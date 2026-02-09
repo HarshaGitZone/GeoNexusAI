@@ -355,7 +355,7 @@ def get_live_weather(lat, lng):
             except requests.exceptions.RequestException as e:
                 if attempt == max_retries - 1:  # Last attempt
                     # Network error - use intelligent fallback data
-                    logger.warning(f"Weather API Error after {max_retries} attempts: {e}")
+                    logger.debug(f"Weather API Error after {max_retries} attempts: {e}")
                     
                     # Enhanced fallback for DNS resolution failures
                     if "getaddrinfo failed" in str(e) or "NameResolutionError" in str(e):
@@ -368,7 +368,7 @@ def get_live_weather(lat, lng):
                     weather_estimate = _get_regional_weather_estimate(lat, lng)
                     return weather_estimate
                 else:
-                    logger.warning(f"Weather API attempt {attempt + 1} failed, retrying...")
+                    logger.debug(f"Weather API attempt {attempt + 1} failed, retrying...")
                     continue
         
         # Check if we got valid data
@@ -391,6 +391,10 @@ def get_live_weather(lat, lng):
 
         code = current.get("weather_code", 0)
         is_day = current.get("is_day")
+        
+        # Debug day/night detection
+        current_hour = datetime.now().hour
+        logger.info(f"Day/Night Debug - Hour: {current_hour}, API is_day: {is_day}, Location: {lat}, {lng}")
         
         # Enhanced weather description mapping
         description = "Clear Sky"
@@ -5287,7 +5291,7 @@ def fetch_realtime_pollution(lat, lng):
         }
 
     except Exception as e:
-        logger.warning(f"Pollution Fetch Error: {e}")
+        logger.debug(f"Pollution Fetch Error: {e}")
         
         # Enhanced fallback for DNS resolution failures
         if "getaddrinfo failed" in str(e) or "NameResolutionError" in str(e):
@@ -5549,6 +5553,49 @@ def _get_regional_weather_estimate(lat, lng):
     base_values["wind"] = max(0, min(50, base_values["wind"]))
     base_values["precip"] = max(0, min(300, base_values["precip"]))
     
+    # Calculate actual sunrise/sunset times based on latitude and date
+    from datetime import datetime, timezone, timedelta
+    import math
+    
+    # Get current UTC time and convert to location's local time
+    utc_now = datetime.now(timezone.utc)
+    # Approximate timezone offset from longitude (15 degrees = 1 hour)
+    timezone_offset = round(lng / 15)
+    local_time = utc_now + timedelta(hours=timezone_offset)
+    current_hour = local_time.hour
+    current_month = local_time.month
+    
+    # Simple sunrise/sunset calculation based on latitude and month
+    if lat > 0:  # Northern Hemisphere
+        if current_month in [12, 1, 2]:  # Winter
+            sunrise_hour = 7 + (abs(lat) / 30)  # Later sunrise in winter
+            sunset_hour = 17 - (abs(lat) / 30)   # Earlier sunset in winter
+        elif current_month in [6, 7, 8]:  # Summer
+            sunrise_hour = 5 + (abs(lat) / 60)  # Earlier sunrise in summer
+            sunset_hour = 19 - (abs(lat) / 60)   # Later sunset in summer
+        else:  # Spring/Fall
+            sunrise_hour = 6 + (abs(lat) / 45)
+            sunset_hour = 18 - (abs(lat) / 45)
+    else:  # Southern Hemisphere (opposite seasons)
+        if current_month in [12, 1, 2]:  # Summer
+            sunrise_hour = 5 + (abs(lat) / 60)
+            sunset_hour = 19 - (abs(lat) / 60)
+        elif current_month in [6, 7, 8]:  # Winter
+            sunrise_hour = 7 + (abs(lat) / 30)
+            sunset_hour = 17 - (abs(lat) / 30)
+        else:  # Spring/Fall
+            sunrise_hour = 6 + (abs(lat) / 45)
+            sunset_hour = 18 - (abs(lat) / 45)
+    
+    # Ensure reasonable bounds
+    sunrise_hour = max(4, min(8, sunrise_hour))
+    sunset_hour = max(16, min(20, sunset_hour))
+    
+    is_day_time = 1 if sunrise_hour <= current_hour < sunset_hour else 0
+    
+    # Debug fallback day/night detection
+    logger.info(f"Fallback Day/Night Debug - UTC Hour: {utc_now.hour}, Local Hour: {current_hour}, TZ Offset: {timezone_offset}, Sunrise: {sunrise_hour:.1f}, Sunset: {sunset_hour:.1f}, is_day: {is_day_time}, Location: {lat}, {lng}")
+    
     return {
         "status": "available",
         "source": "Regional Baseline Model (DNS Fallback)",
@@ -5557,7 +5604,7 @@ def _get_regional_weather_estimate(lat, lng):
             "temperature_2m": round(base_values["temp"], 1),
             "relative_humidity_2m": round(base_values["humidity"], 1),
             "apparent_temperature": round(base_values["temp"] - 2, 1),  # Wind chill effect
-            "is_day": 1 if 6 <= datetime.now().hour <= 18 else 0,
+            "is_day": is_day_time,
             "precipitation": round(base_values["precip"] / 30, 1) if datetime.now().month in [6, 7, 8] else 0,  # Seasonal precipitation
             "weather_code": 0,  # Clear skies as default
             "cloud_cover": 30,
@@ -5565,7 +5612,7 @@ def _get_regional_weather_estimate(lat, lng):
             "wind_direction_10m": 270,  # Prevailing westerlies
             "wind_gusts_10m": round(base_values["wind"] * 1.3, 1),
             "surface_pressure": 1013.25,
-            "visibility": 10000,
+            "visibility": round(5000 + (base_values["humidity"] * 50) + (abs(lat) * 20)),  # Dynamic visibility based on humidity and latitude
             "uv_index": max(1, min(11, int((90 - abs(lat)) / 8))),
             "dew_point_2m": round(base_values["temp"] - (100 - base_values["humidity"]) / 5, 1)
         },

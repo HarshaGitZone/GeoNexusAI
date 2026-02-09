@@ -305,7 +305,7 @@ def get_infrastructure_score(latitude: float, longitude: float) -> Dict:
         if resp.status_code == 200:
             elements = resp.json().get("elements", [])
     except Exception as e:
-        logger.warning(f"OSM Infrastructure query failed: {e}")
+        logger.debug(f"OSM Infrastructure query failed: {e}")
 
     # 5. 🧮 STEP 4: ACCUMULATIVE SCORING (Strict Evidence)
     if elements:
