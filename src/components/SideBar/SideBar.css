@@ -3277,7 +3277,7 @@ body [data-theme="dark"] .sidebar .compare-toggle-btn {
     background-color: transparent !important;
     
     /* 2. Apply Dynamic Palette Tint (92% Transparent) */
-    background: color-mix(in srgb, var(--accent-color, #10b981), transparent 92%) !important;
+    /* background: color-mix(in srgb, var(--accent-color, #10b981), transparent 92%) !important; */
     
     /* 3. Max-Glass Atmospheric Effects */
     backdrop-filter: blur(20px) saturate(180%) !important;
@@ -3325,4 +3325,573 @@ body .sidebar .compare-toggle-btn:hover {
     align-items: center !important;
     justify-content: center !important;
     transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+/* ============================================================
+   ABSOLUTE AUTHORITY: PRIMARY BUTTON OVERRIDE
+   ============================================================ */
+
+/* We use the :root and body prefix to achieve maximum hierarchy */
+:root body .sidebar .btn-analyze, 
+:root body .sidebar button.btn-analyze[type="submit"],
+:root body .sidebar .btn-go,
+:root body .sidebar .compare-toggle-btn {
+    /* 1. THE NUCLEAR RESET: Kills ALL previous green, red, or gradients */
+    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    
+    /* 2. FORCED ATMOSPHERIC GLASS */
+    /* This creates a tinted glass base using your palette color */
+    background-color: color-mix(in srgb, var(--accent-color), transparent 85%) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    
+    /* 3. DYNAMIC CHROME SYNC */
+    border: 2px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    /* 4. TACTICAL TYPOGRAPHY */
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    
+    /* 5. THE NEURAL RADIANCE */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                inset 0 0 15px var(--accent-glow) !important;
+    
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* --- THE "POWER-ON" HOVER STATE --- */
+:root body .sidebar .btn-analyze:hover, 
+:root body .sidebar .btn-go:hover,
+:root body .sidebar .compare-toggle-btn:hover {
+    background-color: var(--accent-color) !important; /* Full Palette Fill */
+    color: #ffffff !important; /* White contrast flip */
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 0 25px var(--accent-glow), 
+                0 0 50px rgba(var(--accent-color-rgb), 0.3) !important;
+}
+
+/* --- LIGHT THEME SPECIFIC FORCE --- */
+:root body[data-theme="light"] .sidebar .btn-analyze,
+:root body[data-theme="light"] .sidebar .btn-go,
+:root body[data-theme="light"] .sidebar .compare-toggle-btn {
+    background-color: color-mix(in srgb, var(--accent-color), transparent 94%) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+:root body[data-theme="light"] .sidebar .btn-analyze:hover,
+:root body[data-theme="light"] .sidebar .btn-go:hover {
+    background-color: #000000 !important; /* Tactical Black Authority */
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+/* ============================================================
+   ELITE PRISM: MAX-GLASS PRIMARY BUTTON DOMINANCE
+   ============================================================ */
+
+/* High-hierarchy selector to ensure total system dominance */
+html:root body .sidebar .btn-analyze, 
+html:root body .sidebar .btn-go,
+html:root body .sidebar button[type="submit"],
+html:root body .sidebar .compare-toggle-btn {
+    /* 1. NUCLEAR CLEANUP */
+    background: none !important;
+    background-image: none !important;
+    
+    /* 2. MAX-GLASS SLAB CONSTRUCTION */
+    /* Mixes 15% of your palette color with a crystalline base */
+    /* background-color: color-mix(in srgb, var(--accent-color), transparent 85%) !important; */
+    backdrop-filter: blur(25px) saturate(250%) contrast(110%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(250%) !important;
+    
+    /* 3. REFLECTIVE PERIMETER */
+    /* Thick, glowing border that reflects your chosen color */
+    border: 2px solid var(--accent-color) !important;
+    border-radius: 14px !important;
+    
+    /* 4. SPECULAR HIGHLIGHT (The "Nicer" Fill) */
+    /* Adds a fake light source from the top-left to make it look like real glass */
+    background-image: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        transparent 50%, 
+        rgba(0, 0, 0, 0.1) 100%
+    ) !important;
+    
+    /* 5. TACTICAL HUD TEXT */
+    color: #ffffff !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    
+    /* 6. NEURAL CORE GLOW */
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.6), 
+        inset 0 0 20px var(--accent-glow),
+        0 0 15px rgba(var(--accent-color-rgb), 0.2) !important;
+    
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    height: 40px !important; /* Larger size for dominance */
+    cursor: pointer !important;
+}
+
+/* --- THE "ACTIVE-POWER" HOVER STATE --- */
+html:root body .sidebar .btn-analyze:hover, 
+html:root body .sidebar .btn-go:hover,
+html:root body .sidebar .compare-toggle-btn:hover {
+    /* Button 'powers up' with your full palette color */
+    background-color: var(--accent-color) !important;
+    color: #000000 !important; /* Sharp contrast flip */
+    transform: translateY(-3px) scale(1.04) !important;
+    
+    /* Massive atmospheric glow expansion */
+    box-shadow: 
+        0 0 30px var(--accent-glow), 
+        0 0 60px rgba(var(--accent-color-rgb), 0.5),
+        inset 0 0 10px rgba(255, 255, 255, 0.5) !important;
+    
+    text-shadow: none !important;
+}
+
+/* --- LIGHT THEME CRYSTAL ADAPTATION --- */
+html:root body[data-theme="light"] .sidebar .btn-analyze,
+html:root body[data-theme="light"] .sidebar .btn-go,
+html:root body[data-theme="light"] .sidebar .compare-toggle-btn {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light Theme Hover Authority */
+html:root body[data-theme="light"] .sidebar .btn-analyze:hover,
+html:root body[data-theme="light"] .sidebar .btn-go:hover {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+
+/* ============================================================
+   AUTHORITY CORE: ELITE PRISM PRIMARY ACTIONS
+   ============================================================ */
+
+/* High-hierarchy selector to kill all previous green/red/monochrome styles */
+html:root body .sidebar .btn-analyze, 
+html:root body .sidebar .btn-go,
+html:root body .sidebar button[type="submit"],
+html:root body .sidebar .compare-toggle-btn {
+    /* 1. NUCLEAR CLEANUP */
+    background: none !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    
+    /* 2. MAX-GLASS SLAB CONSTRUCTION */
+    /* Mixes your current palette color with deep transparency for the 'hologram' look */
+    /* background-color: color-mix(in srgb, var(--accent-color), transparent 82%) !important; */
+    backdrop-filter: blur(25px) saturate(250%) contrast(110%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(250%) !important;
+    
+    /* 3. REFLECTIVE PERIMETER */
+    border: 2px solid var(--accent-color) !important;
+    border-radius: 14px !important;
+    
+    /* 4. SPECULAR HIGHLIGHT (High-End Fill) */
+    /* Adds a fake light source from the top-left to make it look like a physical glass slab */
+    background-image: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.18) 0%, 
+        transparent 50%, 
+        rgba(0, 0, 0, 0.2) 100%
+    ) !important;
+    
+    /* 5. TACTICAL HUD TEXT */
+    color: #ffffff !important; /* Pure white text for maximum pop */
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    letter-spacing: 2.5px !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    
+    /* 6. NEURAL CORE GLOW */
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.6), 
+        inset 0 0 20px var(--accent-glow),
+        0 0 15px rgba(var(--accent-color-rgb), 0.3) !important;
+    
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    height: 42px !important; /* Larger size for primary dominance */
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* --- THE "POWER-ON" HOVER STATE --- */
+html:root body .sidebar .btn-analyze:hover, 
+html:root body .sidebar .btn-go:hover,
+html:root body .sidebar .compare-toggle-btn:hover {
+    /* Button 'powers up' with your full palette color */
+    /* background-color: var(--accent-color) !important; */
+    color: #000000 !important; /* Sharp contrast flip to black */
+    transform: translateY(-3px) scale(1.04) !important;
+    
+    /* Massive atmospheric glow expansion */
+    box-shadow: 
+        0 0 35px var(--accent-glow), 
+        0 0 70px rgba(var(--accent-color-rgb), 0.5),
+        inset 0 0 12px rgba(255, 255, 255, 0.5) !important;
+    
+    text-shadow: none !important;
+}
+
+/* --- LIGHT THEME CRYSTAL ADAPTATION --- */
+html:root body[data-theme="light"] .sidebar .btn-analyze,
+html:root body[data-theme="light"] .sidebar .btn-go,
+html:root body[data-theme="light"] .sidebar .compare-toggle-btn {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light Theme Hover Power */
+html:root body[data-theme="light"] .sidebar .btn-analyze:hover,
+html:root body[data-theme="light"] .sidebar .btn-go:hover {
+    background-color: #000000 !important; /* Tactical Black authority */
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+/* ============================================================
+   COMPACT AUTHORITY: REFINED PRIMARY GLASS ACTIONS
+   ============================================================ */
+
+/* Universal smaller sizing and baseline styles */
+html:root body .sidebar .btn-analyze, 
+html:root body .sidebar .btn-go,
+html:root body .sidebar button[type="submit"],
+html:root body .sidebar .compare-toggle-btn {
+    /* 1. PHYSICAL SIZE REFINEMENT */
+    height: 32px !important; /* Smaller, more tactical height */
+    padding: 0 16px !important;
+    border-radius: 8px !important; /* Sharper radius for compact look */
+    font-size: 10px !important; /* Smaller tactical font */
+    letter-spacing: 1.5px !important;
+    
+    /* 2. ATMOSPHERIC GLASS SLAB (Fills with palette) */
+    background: none !important;
+    /* background-color: color-mix(in srgb, var(--accent-color), transparent 82%) !important; */
+    backdrop-filter: blur(20px) saturate(220%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(220%) !important;
+    
+    /* 3. DYNAMIC CHROME SYNC */
+    border: 1.5px solid var(--accent-color) !important;
+    
+    /* 4. TEXT COLORS: Force White in Dark Theme */
+    color: #ffffff !important; 
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+
+    /* 5. SPECULAR HIGHLIGHT */
+    background-image: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.12) 0%, 
+        transparent 50%, 
+        rgba(0, 0, 0, 0.15) 100%
+    ) !important;
+
+    /* 6. NEURAL RADIANCE */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 
+                inset 0 0 12px var(--accent-glow) !important;
+    
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* --- DARK THEME SPECIFIC: Ensure White Text Only --- */
+html:root body[data-theme="dark"] .sidebar .btn-analyze,
+html:root body[data-theme="dark"] .sidebar .btn-go,
+html:root body[data-theme="dark"] .sidebar .compare-toggle-btn {
+    color: #ffffff !important; /* Force pure white regardless of palette */
+}
+
+/* --- LIGHT THEME REFINEMENT --- */
+html:root body[data-theme="light"] .sidebar .btn-analyze,
+html:root body[data-theme="light"] .sidebar .btn-go,
+html:root body[data-theme="light"] .sidebar .compare-toggle-btn {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    color: var(--accent-color) !important; /* Use palette for text in light mode */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    text-shadow: none !important;
+}
+
+/* --- POWER-ON HOVER STATE --- */
+html:root body .sidebar .btn-analyze:hover, 
+html:root body .sidebar .btn-go:hover,
+html:root body .sidebar .compare-toggle-btn:hover {
+    /* background-color: var(--accent-color) !important; */
+    color: #000000 !important; /* Sharp contrast flip on hover */
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 0 25px var(--accent-glow), 
+                0 0 45px rgba(var(--accent-color-rgb), 0.3) !important;
+}
+
+
+
+
+
+/* ============================================================
+   TACTICAL RED: CROSS BUTTON VISIBILITY FIX
+   ============================================================ */
+
+/* 1. IDLE STATE: Slightly visible Red Glass */
+html:root body .sidebar .btn-cross,
+html:root body .sidebar .btn-close-site-a {
+    /* Persistent Red - visible in both themes */
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: rgba(239, 68, 68, 0.8) !important;
+    
+    /* Reset invisibility */
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-image: none !important;
+    
+    /* Shape & Transition */
+    border-radius: 6px !important;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. HOVER STATE: Completely Dark & Solid Red */
+html:root body .sidebar .btn-cross:hover,
+html:root body .sidebar .btn-close-site-a:hover {
+    /* Becomes deep, solid red for high-tech contrast */
+    background-color: #ef4444 !important; 
+    border-color: #ef4444 !important;
+    color: #ffffff !important; /* Pure white X on solid red */
+    
+    /* Glow effect specific to the Red system */
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5),
+                inset 0 0 10px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-1px) scale(1.05) !important;
+}
+
+/* 3. LIGHT THEME SPECIFIC: Boost visibility */
+html:root body[data-theme="light"] .sidebar .btn-cross,
+html:root body[data-theme="light"] .sidebar .btn-close-site-a {
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* 4. ACTIVE: Mechanical click effect */
+html:root body .sidebar .btn-cross:active,
+html:root body .sidebar .btn-close-site-a:active {
+    transform: scale(0.92) !important;
+    filter: brightness(0.8);
+}
+/* ============================================================
+   LIGHT THEME: DEEP CRIMSON HOVER DOMINANCE
+   ============================================================ */
+
+/* 1. IDLE STATE: Professional Glass-Red (Barely visible but present) */
+html:root body[data-theme="light"] .sidebar .btn-cross,
+html:root body[data-theme="light"] .sidebar .btn-close-site-a {
+    background-color: rgba(220, 38, 38, 0.08) !important;
+    border: 1px solid rgba(220, 38, 38, 0.2) !important;
+    color: #dc2626 !important; /* Visible Red text */
+    opacity: 0.8 !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+/* 2. HOVER STATE: Complete Dark/Solid Red Override */
+/* This specific selector forces the background to turn DARK RED */
+html:root body[data-theme="light"] .sidebar .btn-cross:hover,
+html:root body[data-theme="light"] .sidebar .btn-close-site-a:hover {
+    background-color: #991b1b !important; /* Deepest Blood Red */
+    background-image: none !important;    /* Kills any light gradients */
+    border-color: #7f1d1d !important;
+    
+    color: #ffffff !important;           /* Forced White X for high contrast */
+    opacity: 1 !important;
+    
+    /* Tactical Depth */
+    box-shadow: 0 4px 12px rgba(153, 27, 27, 0.4) !important;
+    transform: translateY(-1px) scale(1.05) !important;
+}
+
+/* 3. ACTIVE STATE: Instant Mechanical Feedback */
+html:root body[data-theme="light"] .sidebar .btn-cross:active,
+html:root body[data-theme="light"] .sidebar .btn-close-site-a:active {
+    background-color: #000000 !important; /* Flips to black on click */
+    transform: scale(0.95) !important;
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   AUTHORITY FIX: PALETTE-SYNCED SAVED PLACES DROPDOWN
+   ============================================================ */
+
+/* 1. THE MAIN SELECT BOX: Atmospheric Glass */
+html:root body .sidebar select.btn-save.mini,
+html:root body .sidebar .saved-places-dropdown {
+    /* Nuclear Reset */
+    background: none !important;
+    background-image: none !important;
+    appearance: none !important; /* Removes default arrow */
+    -webkit-appearance: none !important;
+    
+    /* Max-Glass Construction */
+    background-color: color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    
+    /* Palette Perimeter Sync */
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    /* Tactical Typography */
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-size: 10px !important;
+    
+    /* Neural Glow */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 
+                inset 0 0 10px var(--accent-glow) !important;
+    
+    padding-right: 25px !important; /* Space for custom arrow */
+    transition: all 0.4s ease !important;
+}
+
+/* 2. CLICKED/FOCUS STATE: Chromatic Engagement */
+html:root body .sidebar select.btn-save.mini:focus,
+html:root body .sidebar select.btn-save.mini:active {
+    background-color: var(--accent-color) !important;
+    color: #000000 !important; /* Contrast flip */
+    outline: none !important;
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+}
+
+/* 3. DROPDOWN OPTIONS: Tactical List (Dark Theme) */
+html:root body[data-theme="dark"] .sidebar select option {
+    background-color: #0f172a !important; /* Deep command background */
+    color: #ffffff !important;
+    font-family: 'Roboto Mono', monospace !important;
+}
+
+/* 4. LIGHT THEME ADAPTATION */
+html:root body[data-theme="light"] .sidebar select.btn-save.mini {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+    color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 5. ARROW ICON REPLACEMENT: Mirroring TopNav style */
+.sidebar .saved-places-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.sidebar .saved-places-wrapper::after {
+    content: "▼";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    color: var(--accent-color);
+    pointer-events: none;
+}
+/* ============================================================
+   AUTHORITY CORE: DROPDOWN ARROW RESTORATION & PALETTE SYNC
+   ============================================================ */
+
+/* 1. CONTAINER PREPARATION: Ensuring the parent can hold the arrow */
+html:root body .sidebar .compact-row:has(select),
+html:root body .sidebar section:has(select) {
+    position: relative !important;
+    display: flex !important;
+}
+
+/* 2. THE CUSTOM ARROW: Replacing the default blue browser arrow */
+html:root body .sidebar section:has(select)::after,
+html:root body .sidebar .compact-row:has(select)::after {
+    /* The Arrow Icon */
+    content: "▼" !important;
+    position: absolute !important;
+    
+    /* Perfect Alignment within the select box */
+    right: 18px !important; 
+    top: 50% !important;
+    transform: translateY(-50%) scale(0.8) !important;
+    
+    /* Chromatic Continuity: Matches TopNav Palette */
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    
+    /* Technical Precision */
+    font-size: 10px !important;
+    pointer-events: none !important; /* Clicks pass through to the select */
+    z-index: 10 !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 3. INTERACTIVE FEEDBACK: Arrow rotates on hover/focus */
+html:root body .sidebar section:has(select:focus-within)::after {
+    transform: translateY(-50%) scale(0.8) rotate(180deg) !important;
+    color: #ffffff !important; /* Pop to white when active */
+}
+
+/* 4. THE SELECT BOX FIX: Removing OS-level blue and white defaults */
+html:root body .sidebar select.btn-save.mini {
+    /* Max-Glass Slab Construction */
+    background: none !important;
+    background-color: color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    
+    /* Removing the default browser arrow permanently */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+
+    /* Palette Perimeter */
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    /* Space for our custom arrow */
+    padding-right: 32px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+}
+
+/* 5. HOVER/CLICK AUTHORITY */
+html:root body .sidebar select.btn-save.mini:hover {
+    background-color: color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
 }
