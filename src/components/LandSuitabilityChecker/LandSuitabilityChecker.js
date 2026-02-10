@@ -771,7 +771,7 @@ const FactorsSection = memo(({
 
   active3DStyle, setLat, setLng, isSelectingB, handleCompareSelect,
 
-  currentZoom, setCurrentZoom, zoom// ✅ CLEAN NAMES
+  currentZoom, setCurrentZoom, zoom,lastAnalyzedTime// ✅ CLEAN NAMES
 
 }) => {
 
@@ -1149,7 +1149,27 @@ const FactorsSection = memo(({
           </div>
 
         )}
-
+        {/* 🕒 NEW: INDEPENDENT TIMESTAMP UI */}
+{/* {lastAnalyzedTime && (
+    <div className="card-timestamp-footer">
+        <span className="ts-label">LAST ANALYZED:</span>
+        <span className="ts-value">{lastAnalyzedTime}</span>
+    </div>
+)} */}
+{/* Inside the hero-card div, right before .history-action-container */}
+{lastAnalyzedTime && (
+    <div className="tactical-timestamp-box">
+        <div className="ts-indicator">
+            <span className="ts-pulse"></span>
+            <span className="ts-label">LAST ANALYZED</span>
+        </div>
+        <div className="ts-value-wrapper">
+            <span className="ts-date">{lastAnalyzedTime.split(',')[0]}</span>
+            <span className="ts-divider">|</span>
+            <span className="ts-time">{lastAnalyzedTime.split(',')[1]}</span>
+        </div>
+    </div>
+)}
         <div className="history-action-container">
 
           <button
@@ -1469,7 +1489,9 @@ const TacticalMapController = ({
 
 
 export default function LandSuitabilityChecker() {
-
+  // Change the existing analysisTime to siteATime for clarity
+const [siteATime, setSiteATime] = useState(() => localStorage.getItem("geo_last_analysis_time_a"));
+const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_analysis_time_b"));
   const [analysisComplete, setAnalysisComplete] = useState(false);
 
   const handleZoomIn = () => {
@@ -2123,7 +2145,20 @@ export default function LandSuitabilityChecker() {
 
 
   const handleSubmit = useCallback(async (e) => {
-
+//     const now = new Date().toLocaleString('en-GB', {
+//     day: '2-digit', month: '2-digit', year: 'numeric',
+//     hour: '2-digit', minute: '2-digit', second: '2-digit',
+//     hour12: false
+// });
+  const now = new Date().toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
     // Safe check for automatic calls from useEffect (where 'e' might be undefined)
 
     if (e && e.preventDefault) e.preventDefault();
@@ -2239,15 +2274,21 @@ export default function LandSuitabilityChecker() {
         setAnalysisComplete(true);
         // ⏱️ ADD THIS (TIME STAMP)
         // const now = new Date().toLocaleString();
-        const now = new Date().toLocaleString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        });
+        // const now = new Date().toLocaleString('en-GB', {
+        //   day: '2-digit',
+        //   month: '2-digit',
+        //   year: 'numeric',
+        //   hour: '2-digit',
+        //   minute: '2-digit',
+        //   second: '2-digit',
+        //   hour12: false
+        // });
+        // Set Site A Timestamp
+    setSiteATime(now);
+    setAnalysisTime(now);
+    localStorage.setItem("geo_last_analysis_time_a", now);
+    
+    setAnalyzedCoords({ lat, lng });
 
         setAnalysisTime(now);
         localStorage.setItem("geo_last_analysis_time", now);
@@ -2340,7 +2381,9 @@ export default function LandSuitabilityChecker() {
           const compareData = results[2].value;
 
           setCompareResult(compareData);
-
+          // Set Site B Timestamp
+        setSiteBTime(now);
+        localStorage.setItem("geo_last_analysis_time_b", now);
           setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
 
         }
@@ -2400,6 +2443,7 @@ export default function LandSuitabilityChecker() {
     analyzedCoords.lat,
 
     analyzedCoords.lng,
+    setSiteATime, setSiteBTime, setAnalysisTime
 
   ]);
 
@@ -3646,6 +3690,8 @@ export default function LandSuitabilityChecker() {
               onZoomOut={handleZoomOut}
               isSelectingB={isSelectingB}
               handleCompareSelect={handleCompareSelect}
+              lastAnalyzedTime={name === locationAName ? siteATime : siteBTime}
+              
             />
 
             {/* Render the lighter categories below the radar chart ONLY on full screen single mode */}
@@ -5392,14 +5438,11 @@ export default function LandSuitabilityChecker() {
                 {analysisTime && result && (
                     <div className="analysis-timestamp-container">
                       <div className="timestamp-content">
-                        {/* <div className="timestamp-status-group">
-                          <span className="timestamp-status-icon">●</span>
-                          <span className="live-label">LIVE</span>
-                        </div> */}
+                        
                         <div className="timestamp-text-stack">
                           <span className="timestamp-label">LAST ANALYZED AT:</span>
                           <div className="timestamp-value-group">
-                            {/* We split the string to style Date and Time differently */}
+                           
                             <span className="ts-date">{analysisTime.split(',')[0]}</span>
                             <span className="ts-separator">/</span>
                             <span className="ts-time">{analysisTime.split(',')[1]}</span>
