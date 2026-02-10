@@ -8,8 +8,6 @@ from flask import jsonify, request
 from flask_cors import CORS
 from typing import List
 import traceback
-
-# Production optimizations
 import production_optimizations
 
 from projects_db import init_db, save_project, load_project
@@ -86,15 +84,6 @@ except ImportError:
 
 
 from integrations import (
-    # compute_suitability_score,
-    # estimate_flood_risk_score,
-    # compute_proximity_score,
-    # estimate_landslide_risk_score,
-    # estimate_water_proximity_score,
-    # estimate_pollution_score,
-    # infer_landuse_score,
-    # estimate_soil_quality_score,
-    # estimate_rainfall_score,
     nearby_places,
 )
 from suitability_factors.geo_data_service import GeoDataService
@@ -284,57 +273,6 @@ def _predict_suitability_ml(flat_factors):
     except Exception:
         return None, False, None
 
-
-# def get_live_weather(lat, lng):
-#     try:
-#         url = "https://api.open-meteo.com/v1/forecast"
-#         params = {
-#             "latitude": lat,
-#             "longitude": lng,
-#             "current": ["temperature_2m", "relative_humidity_2m", "precipitation", "weather_code", "is_day"],
-#             "timezone": "auto" # Resolves local time for Site A
-#         }
-#         response = requests.get(url, params=params, timeout=5)
-#         response.raise_for_status() # Check for HTTP errors
-#         data = response.json()
-        
-#         current = data.get("current")
-#         if not current:
-#             return None
-
-#         code = current.get("weather_code", 0)
-#         is_day = current.get("is_day") # 1 for day, 0 for night
-        
-#         # Expanded WMO Code Mapping
-#         description = "Clear Sky"
-#         icon = "☀️" if is_day else "🌙"
-        
-#         if code in [1, 2]:
-#             description = "Mainly Clear"
-#             icon = "🌤️" if is_day else "☁️"
-#         elif code == 3:
-#             description = "Overcast"
-#             icon = "☁️"
-#         elif code in [51, 53, 55, 61, 63, 65]:
-#             description = "Rainy"
-#             icon = "🌧️"
-#         elif code in [95, 96, 99]:
-#             description = "Thunderstorm"
-#             icon = "⛈️"
-#         # Extract the ISO-formatted local time from the API response
-#         local_time_iso = current.get("time")
-#         return {
-#             "temp_c": current.get("temperature_2m"),
-#             "local_time": data.get("current", {}).get("time"),
-#             "timezone": data.get("timezone"),
-#             "humidity": current.get("relative_humidity_2m"),
-#             "rain_mm": current.get("precipitation"),
-#             "description": description,
-#             "icon": icon,
-#             "is_day": is_day # Pass this to React for conditional styling
-#         }
-#     except Exception as e:
-#         logger.error(f"Weather Fetch Error: {e}")
 def get_live_weather(lat, lng):
     try:
         lat, lng = normalize_coords(lat, lng)
@@ -754,70 +692,6 @@ def get_aqi_description(aqi):
     elif aqi <= 300: return "Health warnings issued"
     else: return "Emergency conditions"
 
-
-# def get_visual_forensics(lat, lng, past_year=2017):
-#     """
-#     Final Production Build: Siamese-CNN Visual Forensics.
-#     Includes: Dimension Locking, Data-Gap Fallbacks, and Radiometric Normalization.
-#     """
-#     try:
-#         import math
-#         # 1. Tile Coordinate Calculation (Zoom 18)
-#         zoom = 18
-#         n = 2.0 ** zoom
-#         xtile = int((lng + 180.0) / 360.0 * n)
-#         lat_rad = math.radians(max(min(lat, 85.0511), -85.0511))
-#         ytile = int((1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n)
-
-#         # 2. Fallback Logic: Detect 'Pure White' data gaps
-#         years_to_try = [past_year, 2018, 2019]
-#         valid_b_img = None
-#         used_year = past_year
-
-#         for year in years_to_try:
-#             url = f"https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-{year}_3857/default/g/{zoom}/{ytile}/{xtile}.jpg"
-#             res = requests.get(url, timeout=5)
-#             if res.status_code == 200:
-#                 # Open and convert to grayscale
-#                 img_temp = Image.open(BytesIO(res.content)).convert('L')
-#                 # DIMENSION LOCK: Force all tiles to 256x256 to prevent matrix math errors
-#                 img_temp = img_temp.resize((256, 256))
-                
-#                 if np.mean(img_temp) < 240:  # Valid if not pure white/clouds
-#                     valid_b_img = np.array(img_temp) / 255.0 # Normalize 0-1
-#                     used_year = year
-#                     break
-        
-#         if valid_b_img is None:
-#             return None
-
-#         # 3. Fetch Current (2020) Reference
-#         url_current = f"https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{zoom}/{ytile}/{xtile}.jpg"
-#         res_c = requests.get(url_current, timeout=5)
-#         img_c_raw = Image.open(BytesIO(res_c.content)).convert('L').resize((256, 256))
-#         img_c = np.array(img_c_raw) / 255.0
-
-#         # 4. Visual Drift Calculation (Siam-CNN Pixel Variance)
-#         # diff represents the 'Distance Layer' of the twin networks
-#         diff = np.abs(img_c - valid_b_img)
-        
-#         # Threshold: Only pixels that changed by more than 35% brightness are 'Constructed'
-#         raw_intensity = np.mean(diff > 0.35) * 100 
-        
-#         # Cap at 91.5% for scientific realism (Total change is geologically impossible)
-#         calibrated_intensity = min(raw_intensity, 91.5)
-        
-#         return {
-#             "intensity": round(calibrated_intensity, 1),
-#             "baseline_img": f"https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-{used_year}_3857/default/g/{zoom}/{ytile}/{xtile}.jpg",
-#             "current_img": url_current,
-#             "baseline_year": used_year,
-#             "velocity": "Accelerated" if calibrated_intensity > 22 else "Stable",
-#             "status": "Verified Visual Analysis"
-#         }
-#     except Exception as e:
-#         logger.error(f"Visual Forensics Engine Failure: {e}")
-#         return None
 def get_visual_forensics(lat, lng, past_year=2017):
     """
     Final Production Build: Siamese-CNN Visual Forensics.
@@ -3321,15 +3195,7 @@ def _extract_flat_factors(factors: dict) -> dict:
     """
     Flattens the nested 23-factor structure into a simple dict for ML and history analysis.
     """
-    # def _get_val(cat: str, key: str, fallback: float = 50.0) -> float:
-    #     try:
-    #         cat_data = factors.get(cat, {})
-    #         factor_data = cat_data.get(key, {})
-    #         if isinstance(factor_data, dict):
-    #             return float(factor_data.get("value", fallback))
-    #         return float(factor_data) if factor_data is not None else fallback
-    #     except (TypeError, ValueError):
-    #         return fallback
+   
     def _get_val(cat_name, factor_name):
         # Access category
         cat = factors.get(cat_name, {})
@@ -3343,41 +3209,7 @@ def _extract_flat_factors(factors: dict) -> dict:
             return float(factor.get('value', 50.0))
         return float(factor)
     
-    # return {
-    #     # Physical (4)
-    #     "slope": _get_val("physical", "slope"),
-    #     "elevation": _get_val("physical", "elevation"),
-    #     "ruggedness": _get_val("physical", "ruggedness"),
-    #     "stability": _get_val("physical", "stability"),
-    #     # Hydrology (4)
-    #     "flood": _get_val("hydrology", "flood"),
-    #     "water": _get_val("hydrology", "water"),
-    #     "drainage": _get_val("hydrology", "drainage"),
-    #     "groundwater": _get_val("hydrology", "groundwater"),
-    #     # Environmental (5)
-    #     "vegetation": _get_val("environmental", "vegetation"),
-    #     "pollution": _get_val("environmental", "pollution"),
-    #     "soil": _get_val("environmental", "soil"),
-    #     "biodiversity": _get_val("environmental", "biodiversity"),
-    #     "heat_island": _get_val("environmental", "heat_island"),
-    #     # Climatic (3)
-    #     "rainfall": _get_val("climatic", "rainfall"),
-    #     "thermal": _get_val("climatic", "thermal"),
-    #     "intensity": _get_val("climatic", "intensity"),
-    #     # Socio-Economic (3)
-    #     "landuse": _get_val("socio_econ", "landuse"),
-    #     "infrastructure": _get_val("socio_econ", "infrastructure"),
-    #     "population": _get_val("socio_econ", "population"),
-    #     # Risk & Resilience (4)
-    #     "multi_hazard": _get_val("risk_resilience", "multi_hazard"),
-    #     "climate_change": _get_val("risk_resilience", "climate_change"),
-    #     "recovery": _get_val("risk_resilience", "recovery"),
-    #     "habitability": _get_val("risk_resilience", "habitability"),
-    #     # Legacy mappings for ML model compatibility
-    #     "landslide": _get_val("physical", "slope"),  # slope is proxy for landslide
-    #     "proximity": _get_val("socio_econ", "infrastructure"),  # infrastructure is proximity
-    # }
-    # Return a flat dictionary for the drift/history calculations
+ 
     return {
         "slope": _get_val("physical", "slope"),
         "elevation": _get_val("physical", "elevation"),
@@ -3477,31 +3309,7 @@ def get_history():
             # Historical Weather Archive
             p_rain_mm = fetch_historical_weather_stats(lat, lng, int(offset) if offset >= 1 else 1)
             p_rain_score = max(0, min(100, 100 - (p_rain_mm / 10) if p_rain_mm < 800 else 20))
-            
-            # # Get actual current values for all factors
-            # current_slope = f['physical']['slope']['value']
-            # current_elevation = f['physical']['elevation']['value']
-            # current_ruggedness = f['physical']['ruggedness']['value']
-            # current_stability = f['physical']['stability']['value']
-            # current_vegetation = f['environmental']['vegetation']['value']
-            # current_pollution = f['environmental']['pollution']['value']
-            # current_soil = f['environmental']['soil']['value']
-            # current_biodiversity = f['environmental']['biodiversity']['value']
-            # current_heat_island = f['environmental']['heat_island']['value']
-            # current_thermal = f['climatic']['thermal']['value']
-            # current_intensity = f['climatic']['intensity']['value']
-            # current_water = f['hydrology']['water']['value']
-            # current_drainage = f['hydrology']['drainage']['value']
-            # current_groundwater = f['hydrology']['groundwater']['value']
-            # current_flood = f['hydrology']['flood']['value']
-            # current_infrastructure = f['socio_econ']['infrastructure']['value']
-            # current_landuse = f['socio_econ']['landuse']['value']
-            # current_population = f['socio_econ']['population']['value']
-            # current_multi_hazard = f['risk_resilience']['multi_hazard']['value']
-            # current_climate_change = f['risk_resilience']['climate_change']['value']
-            # current_recovery = f['risk_resilience']['recovery']['value']
-            # current_habitability = f['risk_resilience']['habitability']['value']
-            # 1. Get actual current values from the FLAT dictionary 'f'
+     
             current_slope = f.get('slope', 50.0)
             current_elevation = f.get('elevation', 50.0)
             current_ruggedness = f.get('ruggedness', 50.0)
@@ -3729,196 +3537,7 @@ def calculate_historical_suitability(current_lat, current_lng, range_type):
     multiplier = drift_factors.get(range_type, 0.1)
 
     return multiplier * 100
-
-# @app.route('/suitability', methods=['POST'])
-# def suitability():
-#     try:
-#         data = request.json or {}
-#         latitude = float(data.get("latitude", 17.3850))
-#         longitude = float(data.get("longitude", 78.4867))
-
-#         # 1. CHECK CACHE & CNN (Preserved Logic)
-#         cache_key = get_cache_key(latitude, longitude)
-#         cnn_analysis = get_cnn_classification(latitude, longitude)
-        
-#         if cache_key in ANALYSIS_CACHE:
-#             result = ANALYSIS_CACHE[cache_key]
-#             result['cnn_analysis'] = cnn_analysis 
-#             return jsonify(result)
-
-#         # 2. 🚀 TRIGGER 23-FACTOR ANALYSIS (Integrated Logic)
-#         # Calls GeoDataService and Aggregator inside your master function
-#         result = _perform_suitability_analysis(latitude, longitude)
-
-#         # 3. INJECT CNN DATA (Preserved Logic)
-#         result['cnn_analysis'] = cnn_analysis
-
-       
-#         ff = result["factors"]
-
-#         # Extract values for classification logic
-#         # Note: We use .get() and ['value'] to ensure we hit the correct nested structure
-#         vegetation_score = ff["environmental"]["vegetation"]["value"]
-#         landuse_score     = ff["socio_econ"]["landuse"]["value"]
-#         infrastructure_score = ff["socio_econ"]["infrastructure"]["value"] # Renamed for clarity
-#         poll_score        = ff["environmental"]["pollution"]["value"]
-#         slope_score       = ff["physical"]["slope"]["value"]
-#         water_score       = ff["hydrology"]["water"]["value"]
-#         flood_score       = ff["hydrology"]["flood"]["value"]
-#         drainage_score    = ff["hydrology"]["drainage"]["value"]
-#         soil_score        = ff["environmental"]["soil"]["value"]
-#         rainfall_score    = ff["climatic"]["rainfall"]["value"]
-#         thermal_score     = ff["climatic"]["thermal"]["value"]
-#         pop_score         = ff["socio_econ"]["population"]["value"]
-
-        
-        
-#         inferred_class = "Mixed land use"
-#         base_conf = 65.0
-#         reasoning = []
-        
-        
-#         urban_index = (infrastructure_score * 0.4 + pop_score * 0.3 + (100 - vegetation_score) * 0.2 + poll_score * 0.1)
-#         rural_index = (vegetation_score * 0.4 + (100 - infrastructure_score) * 0.3 + (100 - pop_score) * 0.2 + water_score * 0.1)
-#         industrial_index = (poll_score * 0.5 + infrastructure_score * 0.3 + (100 - vegetation_score) * 0.2)
-        
-#         # 1️⃣ Urban/Commercial Detection
-#         if urban_index > 70:
-#             inferred_class = "Urban/Commercial"
-#             conf = min(95, base_conf + (urban_index - 70) * 0.8)
-#             reasoning.append(f"Urban index {urban_index:.1f}: Infrastructure {infrastructure_score:.0f} + Population {pop_score:.0f} - Vegetation {vegetation_score:.0f}")
-#             reasoning.append(f"Commercial viability: {(infrastructure_score + pop_score)/2:.0f}%")
-        
-#         # 2️⃣ Industrial Detection
-#         elif industrial_index > 65:
-#             inferred_class = "Industrial Zone"
-#             conf = min(92, base_conf + (industrial_index - 65) * 0.7)
-#             reasoning.append(f"Industrial index {industrial_index:.1f}: Pollution {poll_score:.0f} + Infrastructure {infrastructure_score:.0f} - Vegetation {vegetation_score:.0f}")
-#             reasoning.append(f"Environmental impact score: {poll_score + (100-vegetation_score):.0f}")
-        
-#         # 3️⃣ Agricultural Detection
-#         elif rural_index > 60 and soil_score > 60 and water_score > 50:
-#             inferred_class = "Agricultural"
-#             conf = min(88, base_conf + (rural_index - 60) * 0.6)
-#             reasoning.append(f"Agricultural index {rural_index:.1f}: Vegetation {vegetation_score:.0f} + Soil {soil_score:.0f} + Water {water_score:.0f}")
-#             reasoning.append(f"Farm suitability: {(vegetation_score + soil_score + water_score)/3:.0f}%")
-        
-#         # 4️⃣ Residential Detection (Maintained original thresholds)
-#         elif infrastructure_score > 50 and pop_score > 40 and pop_score < 80 and vegetation_score > 30:
-#             inferred_class = "Residential"
-#             conf = min(85, base_conf + ((infrastructure_score + pop_score + vegetation_score)/3 - 40) * 0.5)
-#             reasoning.append(f"Residential balance: Infra {infrastructure_score:.0f} + Pop {pop_score:.0f} + Env {vegetation_score:.0f}")
-#             reasoning.append(f"Livability index: {(infrastructure_score + pop_score + (100-poll_score))/3:.0f}%")
-        
-#         # 5️⃣ Forest/Natural Detection
-#         elif vegetation_score > 70 and pop_score < 30 and infrastructure_score < 40:
-#             inferred_class = "Forest/Natural"
-#             conf = min(90, base_conf + (vegetation_score - 70) * 0.4)
-#             reasoning.append(f"Natural index: Vegetation {vegetation_score:.0f} - Population {pop_score:.0f} - Infrastructure {infrastructure_score:.0f}")
-#             reasoning.append(f"Wilderness score: {(vegetation_score + (100-pop_score) + (100-infrastructure_score))/3:.0f}%")
-        
-#         # 6️⃣ Water/Wetland Detection
-#         elif water_score > 70 and drainage_score > 60:
-#             inferred_class = "Wetland/Water"
-#             conf = min(87, base_conf + (water_score - 70) * 0.5)
-#             reasoning.append(f"Hydrology index: Water {water_score:.0f} + Drainage {drainage_score:.0f}")
-#             reasoning.append(f"Water abundance: {(water_score + drainage_score)/2:.0f}%")
-        
-#         # 7️⃣ Default: Mixed Use
-#         else:
-#             conf = base_conf + abs(50 - ((infrastructure_score + vegetation_score + poll_score)/3)) * 0.3
-#             reasoning.append(f"Mixed characteristics: Infra {infrastructure_score:.0f} + Veg {vegetation_score:.0f} + Poll {poll_score:.0f}")
-#             reasoning.append(f"Development pressure: {(infrastructure_score + pop_score)/2:.0f}%")
-        
-#         # Final stress/complexity modifiers
-#         env_stress = max(0, (poll_score - 50) + (100 - vegetation_score) + abs(rainfall_score - 50))
-#         if env_stress > 30:
-#             conf = max(40, conf - env_stress * 0.2)
-#             reasoning.append(f"Environmental stress: {env_stress:.0f} points")
-        
-#         terrain_complex = abs(slope_score - 50) + abs(100 - soil_score)
-#         if terrain_complex > 60:
-#             conf = max(35, conf - terrain_complex * 0.1)
-#             reasoning.append(f"Terrain complexity: {terrain_complex:.0f} (reduces confidence)")
-        
-#         conf = max(25, min(95, conf))
-        
-#         # Update CNN object with enhanced geospatial context
-#         result['cnn_analysis']['class'] = inferred_class
-#         cnn_analysis = get_cnn_classification(latitude, longitude) or {}
-
-#         result['cnn_analysis']['confidence'] = round(conf, 1)
-#         result['cnn_analysis']['confidence_display'] = f"{round(conf, 1)}%"
-#         result['cnn_analysis']['note'] = f"Enhanced 23-factor geospatial analysis"
-#         result['cnn_analysis']['reasoning'] = reasoning
-        
-#         if result['cnn_analysis'].get('telemetry'):
-#             result['cnn_analysis']['telemetry']['verified_by'] = "Enhanced 23-factor geospatial cross-check"
-#             result['cnn_analysis']['telemetry']['inferred_from'] = f"veg={vegetation_score:.0f}, landuse={landuse_score:.0f}, infra={infrastructure_score:.0f}, poll={poll_score:.0f}, pop={pop_score:.0f}"
-#             result['cnn_analysis']['telemetry']['vegetation_score'] = round(vegetation_score, 1)
-#             result['cnn_analysis']['telemetry']['landuse_score'] = round(landuse_score, 1)
-#             result['cnn_analysis']['telemetry']['slope_suitability'] = round(slope_score, 1)
-#             result['cnn_analysis']['telemetry']['water_proximity'] = round(water_score, 1)
-#             result['cnn_analysis']['telemetry']['infrastructure_score'] = round(infrastructure_score, 1)
-#             result['cnn_analysis']['telemetry']['population_density'] = round(pop_score, 1)
-#             result['cnn_analysis']['telemetry']['pollution_level'] = round(poll_score, 1)
-#             result['cnn_analysis']['telemetry']['soil_quality'] = round(soil_score, 1)
-#             result['cnn_analysis']['telemetry']['rainfall_level'] = round(rainfall_score, 1)
-#             result['cnn_analysis']['telemetry']['thermal_intensity'] = round(thermal_score, 1)
-#             result['cnn_analysis']['telemetry']['flood_risk'] = round(flood_score, 1)
-#             result['cnn_analysis']['telemetry']['drainage_quality'] = round(drainage_score, 1)
-#             result['cnn_analysis']['telemetry']['classification_reasoning'] = reasoning
-
-#         # 5. FETCH NEARBY AMENITIES (Preserved Logic)
-#         nearby_list = get_nearby_named_places(latitude, longitude)
-#         result['nearby'] = {"places": nearby_list}
-
-       
-#         # 6. STRATEGIC INTELLIGENCE (The Main Update)
-#         # We must create a dictionary that matches the 23-factor expectations exactly
-#         flat_factors_for_intel = {
-#             "slope": slope_score,
-#             "elevation": ff["physical"]["elevation"]["value"],
-#             "flood": flood_score,
-#             "water": water_score,
-#             "drainage": drainage_score,
-#             "vegetation": vegetation_score,
-#             "pollution": poll_score,
-#             "soil": soil_score,
-#             "rainfall": rainfall_score,
-#             "thermal": thermal_score,
-#             "intensity": ff["climatic"]["intensity"]["value"],
-#             "landuse": landuse_score,
-#             "infrastructure": infrastructure_score, # Key must be 'infrastructure'
-#             "population": pop_score
-#         }
-        
-#         # Now pass the clean flat dictionary to the strategic engine
-#         result['strategic_intelligence'] = generate_strategic_intelligence(
-#             flat_factors_for_intel,
-#             result['suitability_score'],
-#             nearby_list
-#         )
-
-#         # 6b. Expose these for the frontend "Strategic Utility" tab
-#         result['flat_factors'] = flat_factors_for_intel
-
-#         # 7. WEATHER & CACHING
-#         result['weather'] = get_live_weather(latitude, longitude)
-#         ANALYSIS_CACHE[cache_key] = result        
-#         return jsonify(result)
-
-#     # except Exception as e:
-#     #     logger.exception(f"Critical Suitability Error: {e}")
-#     #     return jsonify({"error": str(e)}), 500
-#     except Exception as e:
-#         logger.exception("Critical Suitability Error")
-#         return jsonify({
-#             "error": "Suitability failed",
-#             "details": str(e)
-#         }), 500
-
-    
+   
 @app.route('/suitability', methods=['POST'])
 def suitability():
     try:
