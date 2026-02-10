@@ -1411,11 +1411,26 @@ COLOR_BORDER = colors.HexColor("#e2e8f0")
 # ============================================================
 
 def _score_color(score: float):
-    if score < 40:
-        return COLOR_DANGER
-    if score < 70:
-        return COLOR_WARNING
-    return COLOR_SUCCESS
+    """Enhanced color scheme with better gradients"""
+    if score >= 80:
+        return colors.HexColor("#10b981")  # Green
+    elif score >= 60:
+        return colors.HexColor("#06b6d4")  # Blue
+    elif score >= 40:
+        return colors.HexColor("#f59e0b")  # Orange
+    else:
+        return colors.HexColor("#ef4444")  # Red
+
+def _score_color_light(score: float):
+    """Lighter version for backgrounds"""
+    if score >= 80:
+        return colors.HexColor("#d1fae5")  # Light green
+    elif score >= 60:
+        return colors.HexColor("#cffafe")  # Light blue
+    elif score >= 40:
+        return colors.HexColor("#fed7aa")  # Light orange
+    else:
+        return colors.HexColor("#fee2e2")  # Light red
 
 
 def _safe_num(v, default=0.0):
@@ -1739,81 +1754,130 @@ def _draw_radar_and_bars(cur: PDFCursor, data):
     if not order:
         return
 
-    # Radar (limit labels for readability)
-    radar_order = order[:23]  # allow all 23 but tiny labels
+    # Ensure we have enough space for the entire section
+    cur.ensure_space(320)
 
-    labels = [FACTOR_LABELS.get(k, k.upper()) for k in radar_order]
-    values = [flat_score.get(k, 0) for k in radar_order]
+    # Title
+    c.setFillColor(colors.HexColor("#1e293b"))
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(cur.x_margin, cur.y, "SUITABILITY ANALYSIS")
+    cur.y -= 25
 
-    cur.ensure_space(200)
+    # Radar with all available factors
+    radar_x = cur.x_margin
+    radar_y = cur.y - 140
 
-    # Radar left
-    radar_x = 35
-    radar_y = cur.y - 175
+    # Use all available factors for radar, not just 12
+    available_factors = [k for k in order if k in flat_score]
+    labels = [FACTOR_LABELS.get(k, k.upper())[:8] for k in available_factors]  # Shorter labels for readability
+    values = [flat_score.get(k, 0) for k in available_factors]
 
-    fig = plt.figure(figsize=(3, 3), dpi=150)
+    fig = plt.figure(figsize=(2.8, 2.8), dpi=120)
     ax = fig.add_subplot(111, polar=True)
 
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    ax.fill(angles + angles[:1], values + values[:1], color="#06b6d4", alpha=0.25)
-    ax.plot(angles + angles[:1], values + values[:1], color="#06b6d4", linewidth=1)
+    ax.fill(angles + angles[:1], values + values[:1], color="#06b6d4", alpha=0.4)
+    ax.plot(angles + angles[:1], values + values[:1], color="#06b6d4", linewidth=2.5)
 
     ax.set_xticks(angles)
-    ax.set_xticklabels(labels, fontsize=4.1)
+    ax.set_xticklabels(labels, fontsize=4, fontweight='bold')  # Smaller font for more factors
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_yticklabels([])
+    ax.set_ylim(0, 100)
+    ax.grid(True, alpha=0.4, linestyle='--')
+    ax.set_facecolor('#f8fafc')
+    fig.patch.set_alpha(0)
 
     chart_io = io.BytesIO()
-    plt.savefig(chart_io, format="png", transparent=True)
+    plt.savefig(chart_io, format="png", transparent=True, bbox_inches='tight')
     plt.close(fig)
     chart_io.seek(0)
 
-    c.drawImage(ImageReader(chart_io), radar_x, radar_y, width=170, height=170, mask="auto")
+    c.drawImage(ImageReader(chart_io), radar_x, radar_y, width=140, height=140, mask="auto")
 
-    # Bars right
-    y_bar = cur.y - 15
-    bar_x = w / 2 + 10
-    bar_w = 150
+    # 6-COLUMN LAYOUT FOR ALL FACTORS
+    cur.y = radar_y - 20
+    
+    # Define the 6 categories with their factors
+    categories = {
+        'PHYSICAL': ['elevation', 'ruggedness', 'slope', 'stability'],
+        'ENVIRONMENTAL': ['biodiversity', 'heat_island', 'pollution', 'soil', 'vegetation'],
+        'HYDROLOGY': ['drainage', 'flood', 'groundwater', 'water'],
+        'CLIMATIC': ['intensity', 'rainfall', 'thermal'],
+        'SOCIO-ECONOMIC': ['infrastructure', 'landuse', 'population'],
+        'RISK & RESILIENCE': ['climate_change', 'habitability', 'multi_hazard', 'recovery']
+    }
 
-    # NOTE: bars must not collide with radar bottom on same page
-    radar_bottom_safe_y = radar_y + 10
-
-    for k in order:
-        v = float(flat_score.get(k, 0))
-        wt = flat_weight.get(k, None)
-        label = FACTOR_LABELS.get(k, k.upper())[:18]
-
-        # If bars go below radar, push to next page
-        if y_bar < radar_bottom_safe_y:
-            cur.new_page()
-            _draw_tab_header(cur, "TAB 1: SUITABILITY (CONTINUED)")
-            y_bar = cur.y - 10
-
-        c.setFillColor(colors.black)
-        c.setFont("Helvetica", 7)
-        c.drawString(bar_x, y_bar, label)
-
-        c.setFillColor(COLOR_BORDER)
-        c.roundRect(bar_x + 80, y_bar - 2, bar_w, 6, 2, fill=1, stroke=0)
-
-        c.setFillColor(_score_color(v))
-        c.roundRect(bar_x + 80, y_bar - 2, (v / 100) * bar_w, 6, 2, fill=1, stroke=0)
-
-        # right score
-        c.setFillColor(colors.black)
-        c.setFont("Helvetica-Bold", 6.5)
-        c.drawString(bar_x + 80 + bar_w + 8, y_bar, f"{v:.1f}%")
-
-        # weight
-        if wt is not None:
-            c.setFont("Helvetica", 6.3)
-            c.setFillColor(colors.HexColor("#334155"))
-            c.drawRightString(bar_x + 75, y_bar, f"W: {wt:.1f}")
-
-        y_bar -= 11
-
-    # move cursor below radar
-    cur.y = radar_y - 25
+    # Calculate column width
+    page_width = w - (cur.x_margin * 2)
+    col_width = page_width / 6
+    col_spacing = 5
+    
+    # Track the maximum height needed
+    max_height = 0
+    
+    # Draw each category in its column
+    col_idx = 0
+    for category, factors in categories.items():
+        col_x = cur.x_margin + (col_idx * col_width) + col_spacing
+        
+        # Category header
+        c.setFillColor(colors.HexColor("#1e293b"))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(col_x, cur.y, category)
+        cur.y -= 15
+        
+        # Draw factors in this category
+        for k in factors:
+            if k not in flat_score:
+                continue
+                
+            v = float(flat_score.get(k, 0))
+            wt = flat_weight.get(k, None)
+            label = FACTOR_LABELS.get(k, k.upper())[:12]
+            
+            # Factor label
+            c.setFillColor(colors.black)
+            c.setFont("Helvetica", 6)
+            c.drawString(col_x + 2, cur.y, label)
+            
+            # Mini bar
+            bar_w = col_width - 25
+            bar_h = 6
+            
+            # Background
+            c.setFillColor(colors.HexColor("#f1f5f9"))
+            c.roundRect(col_x + 2, cur.y - 8, bar_w, bar_h, 1, fill=1, stroke=0)
+            
+            # Score bar
+            bar_color = _score_color(v)
+            c.setFillColor(bar_color)
+            bar_width = max(1, (v / 100) * bar_w)
+            c.roundRect(col_x + 2, cur.y - 8, bar_width, bar_h, 1, fill=1, stroke=0)
+            
+            # Score text
+            c.setFillColor(colors.black)
+            c.setFont("Helvetica-Bold", 5.5)
+            c.drawString(col_x + 2 + bar_w + 2, cur.y - 6, f"{v:.0f}%")
+            
+            # Weight (tiny)
+            if wt is not None:
+                c.setFont("Helvetica", 4.5)
+                c.setFillColor(colors.HexColor("#94a3b8"))
+                c.drawString(col_x + 2, cur.y - 15, f"W:{wt:.1f}")
+            
+            cur.y -= 18
+        
+        # Reset Y for next column
+        cur.y = radar_y - 20
+        col_idx += 1
+        
+        # Track max height
+        category_height = len([f for f in factors if f in flat_score]) * 18 + 15
+        max_height = max(max_height, category_height)
+    
+    # Move cursor down based on content
+    cur.y -= max_height + 10
 
 
 # ============================================================
