@@ -6,6 +6,7 @@ from io import BytesIO
 import uuid
 from flask import jsonify, request
 from flask_cors import CORS
+from typing import List
 
 from projects_db import init_db, save_project, load_project
 
