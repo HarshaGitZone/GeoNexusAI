@@ -184,7 +184,7 @@ CORS(app, resources={r"/*": {
     "origins": ALLOWED_ORIGINS,
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization", "Accept"],
-}})
+}}, supports_credentials=True)
 init_db()
 def normalize_coords(lat, lng):
     # Clamp latitude to Web Mercator / Earth limits
@@ -196,20 +196,20 @@ def normalize_coords(lat, lng):
     return lat, lng
 
 # 3. SAFER header injector (Handles error cases and 502s)
-# @app.after_request
-# def add_cors_headers(response):
-#     origin = request.headers.get('Origin')
-#     if origin in ALLOWED_ORIGINS:
-#         # Avoid duplicate header error if flask-cors already added it
-#         if 'Access-Control-Allow-Origin' not in response.headers:
-#             response.headers.add('Access-Control-Allow-Origin', origin)
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        # Avoid duplicate header error if flask-cors already added it
+        if 'Access-Control-Allow-Origin' not in response.headers:
+            response.headers.add('Access-Control-Allow-Origin', origin)
         
-#     # Standard security headers for split-stack linkage
-#     response.headers.add('Access-Control-Allow-Credentials', 'true')
-#     # Use 'add' to append if not present, preventing the 'not allowed' error
-#     if 'Access-Control-Allow-Headers' not in response.headers:
-#         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
-#     return response
+        # Standard security headers for split-stack linkage
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        # Use 'add' to append if not present, preventing the 'not allowed' error
+        if 'Access-Control-Allow-Headers' not in response.headers:
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
+    return response
 ANALYSIS_CACHE = {}
 
 def get_cache_key(lat, lng):
@@ -5466,7 +5466,13 @@ from datetime import datetime
 @app.route("/generate_report", methods=["POST", "OPTIONS"])
 def generate_report():
     if request.method == "OPTIONS":
-        return jsonify({}), 200
+        response = jsonify({})
+        origin = request.headers.get('Origin')
+        if origin in ALLOWED_ORIGINS:
+            response.headers.add('Access-Control-Allow-Origin', origin)
+            response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
+        return response, 200
 
     try:
         data = request.json or {}

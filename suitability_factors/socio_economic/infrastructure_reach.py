@@ -248,13 +248,14 @@ def get_infrastructure_score(latitude: float, longitude: float) -> Dict:
 
     # 2. 🔥 STEP 1: SPATIAL INTEGRITY CHECK (Water/Forest Detection)
     # This prevents the 'Ocean' or 'Deep Woods' from getting infrastructure points.
+    # More precise detection - only large water bodies and protected areas
     integrity_query = f"""
     [out:json][timeout:15];
     (
-      node["natural"~"water|sea|ocean|wood"](around:300,{latitude},{longitude});
-      way["natural"~"water|sea|ocean|wood"](around:300,{latitude},{longitude});
-      way["landuse"~"forest|wood|reservoir"](around:300,{latitude},{longitude});
-      relation["boundary"~"protected_area"](around:300,{latitude},{longitude});
+      way["natural"="water"]["water"="sea"](around:200,{latitude},{longitude});
+      way["natural"="water"]["water"="ocean"](around:200,{latitude},{longitude});
+      way["natural"="coastline"](around:200,{latitude},{longitude});
+      relation["boundary"="protected_area"]["protect_class"="1|2"](around:500,{latitude},{longitude});
     );
     out tags;
     """
@@ -263,17 +264,31 @@ def get_infrastructure_score(latitude: float, longitude: float) -> Dict:
         if i_resp.status_code == 200:
             i_elements = i_resp.json().get("elements", [])
             if i_elements:
-                blocker = "Water Body" if any("water" in str(e) or "sea" in str(e) for e in i_elements) else "Protected Forest"
-                return {
-                    "value": 0.0,
-                    "label": f"Forbidden Zone: {blocker}",
-                    "distance_km": 0.0,
-                    "details": {
-                        "diversity_index": [],
-                        "explanation": f"CRITICAL: Site identified as {blocker}. Human settlement and infrastructure development are prohibited.",
-                        "real_world_proof": [f"{blocker} detected at coordinates", "Automatic suitability rejection"]
+                # Only flag as water if it's ocean/sea coastline or highly protected area
+                is_large_water = False
+                for e in i_elements:
+                    tags = e.get("tags", {})
+                    water_type = tags.get("water", "")
+                    natural = tags.get("natural", "")
+                    # Only flag ocean/sea, not lakes, rivers, or urban water features
+                    if natural == "water" and water_type in ["sea", "ocean"]:
+                        is_large_water = True
+                        break
+                    elif natural == "coastline":
+                        is_large_water = True
+                        break
+                
+                if is_large_water:
+                    return {
+                        "value": 0.0,
+                        "label": "Forbidden Zone: Water Body",
+                        "distance_km": 0.0,
+                        "details": {
+                            "diversity_index": [],
+                            "explanation": "CRITICAL: Site identified as Water Body. Human settlement and infrastructure development are prohibited.",
+                            "real_world_proof": ["Ocean/sea detected at coordinates", "Automatic suitability rejection"]
+                        }
                     }
-                }
     except Exception: pass 
 
     # 3. 🏙️ STEP 2: GLOBAL HUB SAFETY NET (Valencia/Dubai)
@@ -288,13 +303,17 @@ def get_infrastructure_score(latitude: float, longitude: float) -> Dict:
         }
 
     # 4. 🛰️ STEP 3: MAIN INFRASTRUCTURE QUERY (Expanded 5km scan)
+    # Enhanced query to detect more infrastructure types
     query = f"""
     [out:json][timeout:25];
     (
-      node["shop"~"mall|supermarket|marketplace|store"](around:3000,{latitude},{longitude});
-      node["place"~"city|town|suburb|village"](around:5000,{latitude},{longitude});
-      node["public_transport"~"station|hub|stop"](around:2000,{latitude},{longitude});
-      way["highway"~"^(motorway|trunk|primary|secondary|tertiary)$"](around:3000,{latitude},{longitude});
+      node["shop"~"mall|supermarket|marketplace|store|convenience"](around:3000,{latitude},{longitude});
+      node["place"~"city|town|suburb|village|hamlet"](around:5000,{latitude},{longitude});
+      node["public_transport"~"station|hub|stop|platform"](around:2000,{latitude},{longitude});
+      node["amenity"~"school|hospital|clinic|bank|restaurant|hotel|fuel"](around:2000,{latitude},{longitude});
+      way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential|service)$"](around:3000,{latitude},{longitude});
+      way["railway"~"rail|light_rail|subway|tram"](around:2000,{latitude},{longitude});
+      node["building"~"commercial|retail|office|public"](around:1500,{latitude},{longitude});
     );
     out tags center;
     """
@@ -321,28 +340,61 @@ def get_infrastructure_score(latitude: float, longitude: float) -> Dict:
             prox_weight = 1 / (1 + 1.2 * dist) 
             name = tags.get("name", tags.get("highway", "Strategic Link"))
 
+            # Commercial/Retail (highest weight)
             if "shop" in tags:
-                total_score += (22 * prox_weight)
+                total_score += (25 * prox_weight)
                 found_categories.add("Commercial")
                 anchor_proofs.append(f"{name} (Market) at {dist:.2f}km")
+            # Urban Centers (highest weight)
             elif "place" in tags:
-                total_score += (28 * prox_weight)
+                total_score += (30 * prox_weight)
                 found_categories.add("Urban Core")
                 anchor_proofs.append(f"{name} (Center) at {dist:.2f}km")
+            # Public Transport
+            elif "public_transport" in tags:
+                total_score += (20 * prox_weight)
+                found_categories.add("Transport")
+                anchor_proofs.append(f"{name} (Transit) at {dist:.2f}km")
+            # Essential Services (schools, hospitals, banks, etc.)
+            elif "amenity" in tags:
+                total_score += (18 * prox_weight)
+                found_categories.add("Services")
+                anchor_proofs.append(f"{name} (Service) at {dist:.2f}km")
+            # Roads (primary infrastructure)
             elif "highway" in tags:
-                total_score += (15 * prox_weight)
+                highway_type = tags.get("highway", "")
+                if highway_type in ["motorway", "trunk", "primary"]:
+                    total_score += (20 * prox_weight)
+                    anchor_proofs.append(f"{name} (Major Road) at {dist:.2f}km")
+                elif highway_type in ["secondary", "tertiary"]:
+                    total_score += (15 * prox_weight)
+                    anchor_proofs.append(f"{name} (Artery) at {dist:.2f}km")
+                else:  # residential, service
+                    total_score += (10 * prox_weight)
+                    anchor_proofs.append(f"{name} (Local Road) at {dist:.2f}km")
                 found_categories.add("Strategic Roads")
-                anchor_proofs.append(f"{name} (Artery) at {dist:.2f}km")
+            # Rail Transport
+            elif "railway" in tags:
+                total_score += (18 * prox_weight)
+                found_categories.add("Transport")
+                anchor_proofs.append(f"{name} (Rail) at {dist:.2f}km")
+            # Commercial Buildings
+            elif "building" in tags:
+                building_type = tags.get("building", "")
+                if building_type in ["commercial", "retail", "office"]:
+                    total_score += (15 * prox_weight)
+                    found_categories.add("Commercial")
+                    anchor_proofs.append(f"{name} (Building) at {dist:.2f}km")
 
         # Mix Bonus: Reward having a variety of anchors
         diversity_bonus = len(found_categories) * 12
         final_score = round(min(100, total_score + diversity_bonus), 1)
         
-        # Final cleanup: If land is buildable but no major anchors, baseline is 35.0
-        if final_score < 35.0: final_score = 35.0
+        # Final cleanup: If land is buildable but no major anchors, baseline is higher
+        if final_score < 50.0: final_score = 50.0
     else:
-        # Truly remote but buildable land
-        final_score = 15.0
+        # Truly remote but buildable land - increased baseline
+        final_score = 35.0
         label = "Remote / Undeveloped"
 
     # 6. 📝 STEP 5: DYNAMIC REASONING ENGINE
