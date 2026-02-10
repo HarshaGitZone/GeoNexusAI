@@ -20,7 +20,7 @@ class ParallelAPIExecutor:
     
     async def __aenter__(self):
         connector = aiohttp.TCPConnector(limit=self.max_concurrent)
-        timeout = aiohttp.ClientTimeout(total=30.0, connect=10.0)
+        timeout = aiohttp.ClientTimeout(total=60.0, connect=20.0)
         self.session = aiohttp.ClientSession(
             connector=connector,
             timeout=timeout

@@ -619,7 +619,7 @@ def get_air_quality_data(lat, lng):
             "parameter": ["pm25", "pm10", "no2", "o3", "so2", "co"]
         }
         
-        response = requests.get(url, params=params, timeout=5)
+        response = retry_request(url, params=params, timeout=15)
         
         if response.status_code == 200:
             data = response.json()
@@ -868,7 +868,7 @@ def get_visual_forensics(lat, lng, past_year=2017):
                 f"{zoom}/{ytile}/{xtile}.jpg"
             )
             try:
-                res = requests.get(url, timeout=5, verify=False)
+                res = retry_request(url, timeout=15, verify=False)
                 if res.status_code == 200:
                     img_temp = Image.open(BytesIO(res.content)).convert('L')
                     img_temp = img_temp.resize((256, 256))
@@ -878,7 +878,7 @@ def get_visual_forensics(lat, lng, past_year=2017):
                         used_year = year
                         break
             except Exception as e:
-                logger.error(f"Tile fetch error for year {year}: {e}")
+                logger.error(f"Tile fetch error for year {year} at {url}: {e}")
                 continue
 
         if valid_b_img is None:
@@ -893,11 +893,11 @@ def get_visual_forensics(lat, lng, past_year=2017):
             f"{zoom}/{ytile}/{xtile}.jpg"
         )
         try:
-            res_c = requests.get(url_current, timeout=5, verify=False)
+            res_c = retry_request(url_current, timeout=15, verify=False)
             img_c_raw = Image.open(BytesIO(res_c.content)).convert('L').resize((256, 256))
             img_c = np.array(img_c_raw) / 255.0
         except Exception as e:
-            logger.error(f"Current tile fetch error: {e}")
+            logger.error(f"Current tile fetch error at {url_current}: {e}")
             return None
 
         # ---------------------------------------------------
@@ -1179,7 +1179,7 @@ def get_cnn_classification(lat, lng):
         )
 
         headers = {"User-Agent": "GeoAI-Client/1.0"}
-        response = requests.get(tile_url, headers=headers, timeout=5, verify=False)
+        response = retry_request(tile_url, headers=headers, timeout=15, verify=False)
         response.raise_for_status()
 
         img = Image.open(BytesIO(response.content)).convert('RGB')
@@ -2705,6 +2705,28 @@ def assess_drought_risk(lat, lon):
     else:  # Higher latitudes
         return {"risk_level": "Low", "factors": ["Regular precipitation"]}
 
+def retry_request(url, timeout=15, max_retries=2, verify=True, headers=None, params=None):
+    """Helper function to retry HTTP requests with better error handling"""
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(
+                url, 
+                timeout=timeout, 
+                verify=verify, 
+                headers=headers, 
+                params=params
+            )
+            response.raise_for_status()
+            return response
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:  # Last attempt
+                logger.error(f"Request failed after {max_retries} attempts for {url}: {e}")
+                raise
+            else:
+                logger.warning(f"Request attempt {attempt + 1} failed for {url}, retrying...")
+                time.sleep(1 * (attempt + 1))  # Exponential backoff
+    return None
+
 def get_snapshot_identity(lat, lon, timeout=10):
     # 1. Global Distances
     dist_to_equator = calculate_haversine(lat, lon, 0, lon)
@@ -2884,7 +2906,7 @@ def fetch_historical_weather_stats(lat, lng, year_offset):
             "daily": "precipitation_sum",
             "timezone": "auto"
         }
-        res = requests.get(url, params=params, timeout=5)
+        res = retry_request(url, params=params, timeout=15)
         data = res.json()
         
         # Calculate total rainfall in that 60-day period 10 years ago
@@ -2892,7 +2914,7 @@ def fetch_historical_weather_stats(lat, lng, year_offset):
         total_rain = sum(precip_list) if precip_list else 150.0 # Fallback to moderate
         return total_rain
     except Exception as e:
-        logger.error(f"Historical Weather Error: {e}")
+        logger.error(f"Historical Weather Error at {url}: {e}")
         return 150.0
 
 def calculate_time_to_readiness(roadmap_items):
