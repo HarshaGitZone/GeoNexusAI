@@ -4698,3 +4698,141 @@ html:root body[data-theme="light"] .history-table-card {
     z-index: 10;
     background: inherit; /* Matches your white/dark background logic */
 }
+
+
+
+
+
+/* Base styles for the palette dropdown */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: none; /* Controlled by .expanded class in JS */
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.palette-dropdown.expanded {
+  display: flex;
+}
+
+/* Ensure the two rows are clearly separated */
+.palette-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap; /* Keep 8 colors per row as defined in JS */
+}
+
+.color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+  border-color: #fff;
+}
+
+/* 📱 MOBILE SPECIFIC REFINEMENT */
+@media (max-width: 768px) {
+  .palette-wrapper {
+    position: static; /* Allows the dropdown to reference the whole nav width if needed */
+  }
+
+  .palette-dropdown {
+    /* Center the dropdown under the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 90vw; /* Prevent overflow on very narrow screens */
+    padding: 15px;
+  }
+
+  .color-dot {
+    width: 28px; /* Slightly bigger for easier touch on mobile */
+    height: 28px;
+  }
+
+  /* If 8 colors per row is too wide for small screens, 
+     we allow them to wrap while maintaining row integrity */
+  .palette-row {
+    flex-wrap: wrap; 
+    max-width: 220px; /* Forces roughly 4-5 dots per sub-row */
+    justify-content: center;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* 🛠️ FIX: Dynamic Container Height */
+.geo-navbar {
+  /* Remove any fixed height: 60px or similar */
+  height: auto !important; 
+  min-height: 50px;
+  
+  /* Ensure padding handles the internal spacing */
+  padding: 10px 15px !important;
+  
+  /* Background styling to ensure it covers the expanded area */
+  background: rgba(15, 15, 20, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* Force flex to wrap content if needed */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  /* Transition for smooth expansion */
+  transition: all 0.3s ease-in-out;
+}
+
+/* 🛠️ FIX: Content Shell alignment */
+.nav-content-shell {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping to 2nd row */
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px; /* Vertical and horizontal spacing between icons */
+}
+
+/* 📱 MOBILE REFINEMENT */
+@media (max-width: 768px) {
+  .geo-navbar.is-mobile {
+    /* Ensure the container width doesn't squish icons */
+    width: 95%; 
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px;
+    
+    /* Extra padding for mobile touch density */
+    padding: 12px 10px !important; 
+  }
+
+  /* If the buttons are forced into two rows, 
+     this ensures they don't touch each other */
+  .nav-group {
+    padding: 4px 0;
+  }
+}

@@ -135,7 +135,7 @@ export default function TopNav({
     const screenWidth = window.innerWidth;
     
     // Force two-row layout for all screens smaller than 1200px
-    const shouldWrap = screenWidth < 1200;
+    const shouldWrap = screenWidth < 400;
     
     setNeedsSecondRow(shouldWrap);
   };
@@ -240,6 +240,7 @@ export default function TopNav({
                   title={siteAWeather ? "Disable Site A Adaptive Weather" : "Enable Site A Adaptive Weather"}
                 >
                   {siteAWeather ? "🌦️" : "🌤️"}
+                  <span className="audio-label">A</span>
                 </button>
                 {siteAWeather && (
                   <div className="weather-controls">
@@ -270,6 +271,7 @@ export default function TopNav({
                   title={siteBWeather ? "Disable Site B Adaptive Weather" : "Enable Site B Adaptive Weather"}
                 >
                   {siteBWeather ? "🌦️" : "🌤️"}
+                  <span className="audio-label">B</span>
                 </button>
                 {siteBWeather && (
                   <div className="weather-controls">
