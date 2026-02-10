@@ -1959,13 +1959,14 @@ export default function LandSuitabilityChecker() {
 
 
 
-    let name = existingName || resolveLocationName(tLat, tLng, "Site B");
-
-
-
+    let resolvedNameB = resolveLocationName(tLat, tLng, "Site B");
+    let name = existingName || resolvedNameB;
+    
     setCompareName(name);
-
-    setLocationBName(name);
+    // Update locationBName to reflect current location (preserve custom names, update resolved names)
+    if (locationBName === "Site B" || locationBName !== resolvedNameB) {
+      setLocationBName(name);
+    }
 
     setCompareLoading(true);
 
@@ -2015,7 +2016,7 @@ export default function LandSuitabilityChecker() {
 
     }
 
-  }, [resolveLocationName, performAnalysis, fetchSnapshot]);
+  }, [resolveLocationName, performAnalysis, fetchSnapshot, locationBName]);
 
 
 
@@ -2110,13 +2111,10 @@ export default function LandSuitabilityChecker() {
     setLocationAName,
     setResult,
     setAnalyzedCoords,
-    setIsCompareMode,
-    setShowLocationB,
-    setCompareResult,
-    setSnapshotDataB,
     setBLatInput, setBLngInput,
     setLocationBName,
     setCompareName,
+    setCompareResult,
     setAnalyzedCoordsB
   ]);
 
@@ -2190,22 +2188,14 @@ export default function LandSuitabilityChecker() {
 
       setIsCompareMode(true);
 
-      setCompareLoading(true);
-
-
-
-      // Determine Name B for UI consistency
-
-      const nameB = (locationBName && locationBName !== "Site B")
-
-        ? locationBName
-        : resolveLocationName(bLatInput, bLngInput, "Site B");
-      setLocationBName(nameB);
+      // Update locationBName to preserve user's custom name during analysis
+      const resolvedNameB = resolveLocationName(bLatInput, bLngInput, "Site B");
+      const nameB = (locationBName && locationBName !== "Site B" && locationBName !== resolvedNameB)
+        ? locationBName  // Keep user's custom name
+        : resolvedNameB; // Use resolved name for new location or if no custom name
       setCompareName(nameB);
-
-    } else {
-
-      setIsCompareMode(false);
+      // Always update locationBName to reflect current location
+      setLocationBName(nameB);
 
     }
 
@@ -2455,9 +2445,9 @@ export default function LandSuitabilityChecker() {
 
       setLocationBName(matchedB.name);
 
-    } else if (analyzedCoordsB.lat && bLatInput !== analyzedCoordsB.lat.toString()) {
+    } else if (analyzedCoordsB.lat && bLatInput !== analyzedCoordsB.lat.toString() && locationBName === "Site B") {
 
-      // 4. Reset to "Site B" and clear old comparison data
+      // 4. Reset to "Site B" and clear old comparison data (only if still default name)
 
       setLocationBName("Site B");
 
@@ -2465,7 +2455,7 @@ export default function LandSuitabilityChecker() {
 
     }
 
-  }, [bLatInput, bLngInput, analyzedCoordsB.lat, savedPlaces]);
+  }, [bLatInput, bLngInput, analyzedCoordsB.lat, savedPlaces, locationBName]);
 
 
 

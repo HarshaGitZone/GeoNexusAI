@@ -194,6 +194,7 @@ const importProjectFile = async (file) => {
       if (setSnapshotDataB) setSnapshotDataB(null);
       if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });
       localStorage.removeItem("geo_snapshot_data_b"); // Clear localStorage
+      localStorage.removeItem("geo_name_b"); // Clear persisted name
     }
 
     setProjectName(payload.projectName || "");
@@ -781,6 +782,7 @@ const generateShareLink = () => {
   setCompareResult(null);       // 🔥 TRIGGER: Kills Site B Audio
   if (setSnapshotDataB) setSnapshotDataB(null);
   setLocationBName("Site B");
+  localStorage.removeItem("geo_name_b"); // Clear persisted name
   if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });  // Remove red pointer
   localStorage.removeItem("geo_lat_b_analyzed");
   localStorage.removeItem("geo_lng_b_analyzed");
@@ -888,6 +890,7 @@ const generateShareLink = () => {
       setBLatInput("");
       setBLngInput("");
       setLocationBName("Site B");
+      localStorage.removeItem("geo_name_b"); // Clear persisted name
       if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });
       localStorage.removeItem("geo_lat_b_analyzed");
       localStorage.removeItem("geo_lng_b_analyzed");
