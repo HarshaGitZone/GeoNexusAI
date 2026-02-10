@@ -7,7 +7,7 @@ Data Sources: USGS Groundwater, FAO Aquifer Data, Global Precipitation Data
 import math
 import requests
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 logger = logging.getLogger(__name__)
 
