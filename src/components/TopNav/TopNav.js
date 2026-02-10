@@ -33,8 +33,10 @@ export default function TopNav({
   const [showHistoryTable, setShowHistoryTable] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+  const [needsSecondRow, setNeedsSecondRow] = useState(false);
   const navHideTimeoutRef = useRef(null);
   const [expandedQR, setExpandedQR] = useState(null);
+  const navContentRef = useRef(null);
 
   const handleNavMouseEnter = () => {
     if (navHideTimeoutRef.current) {
@@ -117,11 +119,33 @@ export default function TopNav({
     }
   }, [isAudioEnabled, setSiteAPlaying, setSiteBPlaying]);
 
+  // Check for second row when relevant dependencies change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkIfNeedsSecondRow();
+    }, 100); // Small delay to ensure DOM is rendered
+    
+    return () => clearTimeout(timer);
+  }, [isAudioEnabled, isCompareMode, result, compareResult, showTeam, showPalette]);
+
+  const checkIfNeedsSecondRow = () => {
+    // eslint-disable-next-line no-unused-vars
+    if (!navContentRef.current) return;
+    
+    const screenWidth = window.innerWidth;
+    
+    // Force two-row layout for all screens smaller than 1200px
+    const shouldWrap = screenWidth < 1200;
+    
+    setNeedsSecondRow(shouldWrap);
+  };
+
   useEffect(() => {
     const handleResize = () => {
       const small = window.innerWidth < 768;
       setIsSmallScreen(small);
       if (small) setIsVisible(true);
+      checkIfNeedsSecondRow();
     };
 
     window.addEventListener("resize", handleResize);
@@ -145,16 +169,12 @@ export default function TopNav({
         <div className="nav-trigger-zone" onMouseEnter={() => setIsVisible(true)} />
       )}
 
-      <nav className={`geo-navbar ${isVisible ? "is-visible" : ""} ${isSmallScreen ? "is-mobile" : "is-floating"}`}
+      <nav className={`geo-navbar ${isVisible ? "is-visible" : ""} ${isSmallScreen ? "is-mobile" : "is-floating"} ${needsSecondRow ? "needs-second-row" : ""}`}
         onMouseEnter={handleNavMouseEnter}
         onMouseLeave={handleNavMouseLeave}
       >
-        <div className="nav-content-shell">
+        <div className="nav-content-shell" ref={navContentRef}>
           <div className="nav-group left">
-
-            <div className="nav-group right">
-              
-             
               <button className={`icon-btn ${showHistoryTable ? "active" : ""}`} onClick={() => setShowHistoryTable(true)}>🕒</button>
               <a href="/wild-facts" target="_blank" rel="noopener noreferrer" className="icon-btn" title="Wild World Facts" style={{ textDecoration: 'none', color: 'inherit' }}>🌍</a>
                <NavSeparator />
@@ -201,8 +221,7 @@ export default function TopNav({
                 <span className="audio-label">B</span>
               </button>
             )}
-              
-            </div>
+          </div>
              <NavSeparator />
             <div className="nav-group center">
               <div className="brand-wrap">
@@ -211,36 +230,7 @@ export default function TopNav({
               </div>
             </div>
              <NavSeparator />
-
-
-  {/* {isAudioEnabled && (
-    <button 
-      className={`icon-btn audio-toggle ${siteAPlaying ? "active" : "muted"}`} 
-      onClick={() => setSiteAPlaying(!siteAPlaying)}
-      title={siteAPlaying ? "Mute Site A" : "Unmute Site A"}
-    >
-      {siteAPlaying ? "🔊" : "🔇"}
-      <span className="audio-label">A</span>
-    </button>
-  )}
-
-
-  {isAudioEnabled && isCompareMode && compareResult && (
-    <button 
-      className={`icon-btn audio-toggle-b ${siteBPlaying ? "active" : "muted"}`} 
-      onClick={() => setSiteBPlaying(!siteBPlaying)}
-      title={siteBPlaying ? "Mute Site B" : "Unmute Site B"}
-    >
-      {siteBPlaying ? "🔊" : "🔇"}
-      <span className="audio-label">B</span>
-    </button>
-  )} */}
-  
-            
-            
-           
             <div className="nav-group right">
-            
             {/* Site A Weather Adapter - Show when Site A analysis exists */}
             {result && (
               <div className="weather-controls-group">
@@ -350,7 +340,6 @@ export default function TopNav({
             </button>
             <button className="icon-btn fs-toggle" onClick={toggleFullscreen}>⛶</button>
           </div>
-        </div>
         </div>
       </nav>
 

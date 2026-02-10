@@ -1047,6 +1047,249 @@
 
 
 /* --- Navigation Core --- */
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 8px;
+  align-self: center;
+}
+
+[data-theme="light"] .nav-divider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* --- Responsive Two-Row Navigation --- */
+.geo-navbar.needs-second-row .nav-content-shell {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 54px;
+  padding: 8px 20px;
+}
+
+.geo-navbar.needs-second-row .nav-group {
+  flex-basis: 100%;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.geo-navbar.needs-second-row .nav-group.left {
+  order: 2;
+  justify-content: center;
+  gap: 20px;
+}
+
+.geo-navbar.needs-second-row .nav-group.center {
+  order: 1;
+  justify-content: center;
+}
+
+.geo-navbar.needs-second-row .nav-group.right {
+  order: 3;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Adjust navbar height when using two rows */
+.geo-navbar.needs-second-row {
+  height: auto;
+  min-height: 90px;
+  max-height: 120px;
+}
+
+/* Ensure separators are visible in two-row layout */
+.geo-navbar.needs-second-row .nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 8px;
+}
+
+[data-theme="light"] .geo-navbar.needs-second-row .nav-divider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* --- Force Responsive Behavior for All Small Screens --- */
+@media (max-width: 1200px) {
+  .geo-navbar .nav-content-shell {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 54px;
+    padding: 8px 20px;
+  }
+  
+  .geo-navbar .nav-group {
+    flex-basis: 100%;
+    justify-content: center;
+    margin: 4px 0;
+  }
+  
+  .geo-navbar .nav-group.left {
+    order: 2;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .geo-navbar .nav-group.center {
+    order: 1;
+    justify-content: center;
+  }
+  
+  .geo-navbar .nav-group.right {
+    order: 3;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .geo-navbar {
+    height: auto;
+    min-height: 90px;
+    max-height: 140px;
+  }
+  
+  .nav-group {
+    gap: 8px;
+  }
+  
+  .icon-btn {
+    font-size: 0.9rem;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  
+  .team-btn {
+    font-size: 0.6rem;
+    padding: 4px 8px;
+  }
+}
+
+/* --- Responsive Breakpoints --- */
+@media (max-width: 1024px) {
+  .geo-navbar .nav-content-shell {
+    min-width: auto;
+    width: 95%;
+    max-width: 900px;
+  }
+  
+  .nav-group {
+    gap: 8px;
+  }
+  
+  .icon-btn {
+    font-size: 0.85rem;
+  }
+  
+  .team-btn {
+    font-size: 0.6rem;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .geo-navbar.is-mobile .nav-content-shell {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 60px;
+    padding: 8px 15px;
+  }
+  
+  .geo-navbar.is-mobile .nav-group {
+    flex-basis: 100%;
+    justify-content: center;
+    margin: 2px 0;
+    flex-wrap: wrap;
+  }
+  
+  .geo-navbar.is-mobile .nav-group.left {
+    order: 2;
+    gap: 6px;
+  }
+  
+  .geo-navbar.is-mobile .nav-group.center {
+    order: 1;
+  }
+  
+  .geo-navbar.is-mobile .nav-group.right {
+    order: 3;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  .geo-navbar.is-mobile .icon-btn {
+    font-size: 0.8rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  
+  .geo-navbar.is-mobile .team-btn {
+    font-size: 0.55rem;
+    padding: 2px 6px;
+  }
+  
+  .geo-navbar.is-mobile .weather-toggle {
+    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+  }
+  
+  .geo-navbar.is-mobile .mode-toggle {
+    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+  }
+  
+  .geo-navbar.is-mobile .palette-trigger {
+    font-size: 0.8rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  
+  .geo-navbar.is-mobile .fs-toggle {
+    font-size: 0.8rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+}
+
+/* Handle very small screens */
+@media (max-width: 480px) {
+  .geo-navbar.is-mobile .nav-content-shell {
+    padding: 6px 10px;
+  }
+  
+  .geo-navbar.is-mobile .nav-group {
+    gap: 4px;
+  }
+  
+  .geo-navbar.is-mobile .icon-btn {
+    font-size: 0.75rem;
+    min-width: 24px;
+    min-height: 24px;
+  }
+  
+  .geo-navbar.is-mobile .team-btn {
+    font-size: 0.5rem;
+    padding: 2px 4px;
+  }
+  
+  .geo-navbar.is-mobile .weather-toggle,
+  .geo-navbar.is-mobile .mode-toggle,
+  .geo-navbar.is-mobile .palette-trigger,
+  .geo-navbar.is-mobile .fs-toggle {
+    font-size: 0.75rem;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .geo-navbar.is-mobile .nav-divider {
+    height: 16px;
+    margin: 0 4px;
+  }
+}
+
+/* --- Navigation Core --- */
 .geo-navbar {
   position: fixed;
   top: 15px;
@@ -1526,8 +1769,27 @@
 }
 
 .nav-mobile-spacer {
-  height: var(--nav-height);
+  height: 60px; /* Default single row height */
   width: 100%;
+}
+
+/* Adjust spacer height for small screens with expanded navigation */
+@media (max-width: 1200px) {
+  .nav-mobile-spacer {
+    height: 90px; /* Two-row navigation height */
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-mobile-spacer {
+    height: 100px; /* Mobile navigation height */
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-mobile-spacer {
+    height: 120px; /* Small mobile navigation height */
+  }
 }
 
 .geo-navbar {
@@ -1554,7 +1816,7 @@
 /* Mobile Fixed Mode */
 .geo-navbar.is-mobile {
   top: 0; left: 0; width: 100%; 
-  height: var(--nav-height);
+  height: var(--nav-height); 
   transform: none; opacity: 1;
 }
 
