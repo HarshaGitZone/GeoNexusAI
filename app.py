@@ -169,7 +169,7 @@ ALLOWED_ORIGINS = [
     "https://geonexus-ai.vercel.app/"
 ]
 
-# 2. Configure CORS correctly - This handles the 'OPTIONS' preflight for you!
+
 # CORS(app, resources={r"/*": {
 #     "origins": ALLOWED_ORIGINS,
 #     "methods": ["GET", "POST", "OPTIONS"],
@@ -206,7 +206,7 @@ def normalize_coords(lat, lng):
 #     if 'Access-Control-Allow-Headers' not in response.headers:
 #         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
 #     return response
-# ANALYSIS_CACHE = {}
+ANALYSIS_CACHE = {}
 
 def get_cache_key(lat, lng):
     """Generate cache key with 4 decimal precision"""
@@ -3880,9 +3880,16 @@ def suitability():
         ANALYSIS_CACHE[cache_key] = result        
         return jsonify(result)
 
+    # except Exception as e:
+    #     logger.exception(f"Critical Suitability Error: {e}")
+    #     return jsonify({"error": str(e)}), 500
     except Exception as e:
-        logger.exception(f"Critical Suitability Error: {e}")
-        return jsonify({"error": str(e)}), 500
+        logger.exception("Critical Suitability Error")
+        return jsonify({
+            "error": "Suitability failed",
+            "details": str(e)
+        }), 500
+
     
 
 def build_factor_evidence(f):
