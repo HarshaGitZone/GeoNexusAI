@@ -138,7 +138,7 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
       case 'rain':
         return <RainEffect />;
       case 'snow':
-        return <SnowEffect />;
+        return <SnowEffect weather={weather} />;
       case 'cloudy':
         return <CloudyEffect />;
       case 'sunny':
@@ -153,7 +153,7 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
       case 'night-rain':
         return <NightRainEffect />;
       case 'night-snow':
-        return <NightSnowEffect />;
+        return <NightSnowEffect weather={weather} />;
       case 'night-cloudy':
         return <NightCloudyEffect />;
       case 'night-clear':
@@ -414,11 +414,13 @@ function NightRainEffect() {
 }
 
 // Night Snow Effect Component
-function NightSnowEffect() {
+function NightSnowEffect({ weather }) {
+  const temperature = parseFloat(weather?.temperature || weather?.temp || weather?.temp_c || 0);
+  
   return (
     <div className="night-snow-container">
       <NightClearEffect />
-      {[...Array(60)].map((_, i) => (
+      {[...Array(temperature <= -5 ? 80 : 60)].map((_, i) => (
         <div
           key={i}
           className="night-snowflake"

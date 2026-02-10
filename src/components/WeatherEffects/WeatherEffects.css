@@ -203,9 +203,46 @@
 .snowflake {
   position: absolute;
   color: #FFFFFF;
+  -webkit-animation: snow-fall linear infinite;
+  -moz-animation: snow-fall linear infinite;
+  -o-animation: snow-fall linear infinite;
   animation: snow-fall linear infinite;
   text-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
   filter: blur(0.5px);
+  will-change: transform;
+}
+
+@-webkit-keyframes snow-fall {
+  from {
+    -webkit-transform: translateY(-100px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg);
+  }
+  to {
+    -webkit-transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+  }
+}
+
+@-moz-keyframes snow-fall {
+  from {
+    -moz-transform: translateY(-100px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg);
+  }
+  to {
+    -moz-transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+  }
+}
+
+@-o-keyframes snow-fall {
+  from {
+    -o-transform: translateY(-100px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg);
+  }
+  to {
+    -o-transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+  }
 }
 
 @keyframes snow-fall {
@@ -897,9 +934,46 @@
 .night-snowflake {
   position: absolute;
   color: rgba(255, 255, 255, 0.8);
+  -webkit-animation: night-snow-fall linear infinite;
+  -moz-animation: night-snow-fall linear infinite;
+  -o-animation: night-snow-fall linear infinite;
   animation: night-snow-fall linear infinite;
   text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
   filter: blur(0.5px);
+  will-change: transform;
+}
+
+@-webkit-keyframes night-snow-fall {
+  from {
+    -webkit-transform: translateY(-100px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg);
+  }
+  to {
+    -webkit-transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+  }
+}
+
+@-moz-keyframes night-snow-fall {
+  from {
+    -moz-transform: translateY(-100px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg);
+  }
+  to {
+    -moz-transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+  }
+}
+
+@-o-keyframes night-snow-fall {
+  from {
+    -o-transform: translateY(-100px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg);
+  }
+  to {
+    -o-transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    transform: translateY(calc(100vh + 100px)) rotate(360deg);
+  }
 }
 
 @keyframes night-snow-fall {
