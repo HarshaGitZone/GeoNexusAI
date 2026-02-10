@@ -1195,18 +1195,17 @@ button.mini:hover, .btn-mono-tool:hover {
 .sidebar .btn-cross,
 .sidebar button.btn-cross,
 .sidebar .compare-toggle-btn,
-.sidebar button[style*="backgroundColor: #ef4444"],
+
 .sidebar button[onClick*="setShowLocationB"] {
-    background-color: #7f1d1d !important; /* Deep Red for Light Theme */
-    background-image: none !important;    /* Removes any gradients */
+   /* Deep Red for Light Theme */
+       /* Removes any gradients */
     color: #ffffff !important;            /* Pure White Text */
     border: none !important;
     transition: all 0.2s ease-in-out !important;
 }
 
 /* Base State override for Dark Theme */
-[data-theme="dark"] .sidebar .btn-cross,
-[data-theme="dark"] .sidebar .compare-toggle-btn {
+[data-theme="dark"] .sidebar .btn-cross {
     background-color: #ef4444 !important; /* Vibrant Red for Dark Theme */
 }
 
@@ -2880,3 +2879,450 @@ button.mini:hover, .btn-mono-tool:hover {
 
 
 
+/* ============================================================
+   SIDEBAR: PALETTE-SYNCED COMPARISON TOGGLE
+   ============================================================ */
+
+.compare-toggle-btn {
+    width: calc(100% - 20px) !important;
+    margin: 8px 10px !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    
+    /* 1. Tactical Glass Base */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 15%) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--accent-color) !important; /* Continuous Palette Border */
+    border-radius: 8px !important;
+    
+    /* 2. Typography & Color */
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-color) !important;
+    
+    /* 3. Subtle Aura Glow */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 
+                inset 0 0 10px var(--accent-glow) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* 4. HOVER STATE: Chromatic Engagement */
+.compare-toggle-btn:hover {
+    background: var(--accent-color) !important; /* Fills with Palette Color on Hover */
+    color: #ffffff !important; /* Contrast flip */
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* 5. ACTIVE/OPEN STATE: High-Visibility HUD */
+/* When comparison is active, we give it a more intense glow */
+.compare-toggle-btn:active {
+    transform: scale(0.98);
+}
+
+/* 6. LIGHT THEME SYNC */
+[data-theme="light"] .compare-toggle-btn {
+    background: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .compare-toggle-btn:hover {
+    background: var(--accent-color) !important;
+    color: #fff !important;
+}
+/* ============================================================
+   SIDEBAR: CHROMATIC MAX-GLASS COMPARISON TOGGLE
+   ============================================================ */
+
+.compare-toggle-btn {
+    /* 1. Dimensions & Spacing */
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    padding: 10px !important;
+    cursor: pointer !important;
+    
+    /* 2. Max-Glass Architecture */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 15%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    
+    /* 3. Palette-Synced Perimeter */
+    border: 1.5px solid var(--accent-color) !important;
+    border-radius: 12px !important;
+    
+    /* 4. Tactical Typography */
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase;
+    color: var(--accent-color) !important;
+    
+    /* 5. The "Neural Glow" Effect */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 
+                inset 0 0 15px var(--accent-glow) !important;
+    
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 6. HOVER: Chromatic Expansion */
+.compare-toggle-btn:hover {
+    background: var(--accent-color) !important; /* Solid fill with palette color */
+    color: #ffffff !important; /* Contrast flip to white */
+    box-shadow: 0 0 25px var(--accent-glow), 
+                0 0 40px rgba(var(--accent-color-rgb), 0.2) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* 7. ACTIVE: Tactile Feedback */
+.compare-toggle-btn:active {
+    transform: scale(0.98);
+}
+
+/* 8. LIGHT THEME CONTINUATION */
+[data-theme="light"] .compare-toggle-btn {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .compare-toggle-btn:hover {
+    background: var(--accent-color) !important;
+    color: #ffffff !important;
+}
+/* ============================================================
+   SIDEBAR: CHROMATIC GLASS COMPARISON TOGGLE
+   ============================================================ */
+
+.compare-toggle-btn {
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    padding: 12px !important;
+    cursor: pointer !important;
+    
+    /* 1. THE CHROMATIC BACKGROUND: Syncing with Palette */
+    /* This mixes your palette color with the dark background for a rich tint */
+    background: color-mix(in srgb, var(--accent-color), transparent 85%) !important;
+    
+    /* 2. MAX-GLASS DEPTH */
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    
+    /* 3. DYNAMIC BORDER & SHADOW */
+    border: 1.5px solid var(--accent-color) !important;
+    border-radius: 12px !important;
+    
+    /* 4. TACTICAL TYPOGRAPHY */
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    color: #ffffff !important; /* Keep text white for maximum pop against colored glass */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    
+    /* 5. NEURAL GLOW AURA */
+    box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.4),
+        0 0 15px var(--accent-glow),
+        inset 0 0 10px var(--accent-glow) !important;
+    
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 6. HOVER STATE: FULL PALETTE IMMERSION */
+.compare-toggle-btn:hover {
+    /* Background becomes more intense palette color */
+    background: var(--accent-color) !important;
+    color: #000000 !important; /* Flip text to dark for readability if color is bright */
+    box-shadow: 0 0 30px var(--accent-glow) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* 7. LIGHT THEME SYNC */
+[data-theme="light"] .compare-toggle-btn {
+    /* Use a very light tint of the palette color */
+    background: color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .compare-toggle-btn:hover {
+    background: var(--accent-color) !important;
+    color: #ffffff !important;
+}
+
+
+/* ============================================================
+   SIDEBAR: DYNAMIC CHROMATIC COMPARISON TOGGLE
+   ============================================================ */
+
+.compare-toggle-btn {
+    width: calc(100% - 20px) !important;
+    margin: 8px 10px !important;
+    padding: 10px !important;
+    cursor: pointer !important;
+    
+    /* 1. Tactical Glass Base (Works for both states) */
+    background: color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    border-radius: 8px !important;
+    
+    /* 2. Typography Sync */
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent-color) !important;
+    
+    /* 3. Neural Glow Aura */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 
+                inset 0 0 10px var(--accent-glow) !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 4. HOVER STATE: Full Palette Immersion */
+.compare-toggle-btn:hover {
+    background: var(--accent-color) !important; /* Solid fill with palette color */
+    color: #ffffff !important; /* Contrast flip */
+    box-shadow: 0 0 25px var(--accent-glow) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* 5. DARK THEME SPECIFIC: Deepen the Glass */
+[data-theme="dark"] .compare-toggle-btn {
+    background: color-mix(in srgb, var(--accent-color), transparent 92%) !important;
+    /* Stronger inner glow for dark mode visibility */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 
+                inset 0 0 15px var(--accent-glow) !important;
+}
+
+/* 6. LIGHT THEME SPECIFIC: Elite Paper Contrast */
+[data-theme="light"] .compare-toggle-btn {
+    background: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .compare-toggle-btn:hover {
+    background: var(--accent-color) !important;
+    color: #ffffff !important;
+}
+
+/* 7. STATE-SPECIFIC TEXT SHADOWS */
+/* "Close Comparison" should feel more urgent but still palette-synced */
+.compare-toggle-btn:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+}
+
+/* ============================================================
+   SIDEBAR: ATMOSPHERIC MAX-GLASS COMPARISON TOGGLE
+   ============================================================ */
+
+.compare-toggle-btn {
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    padding: 12px !important;
+    cursor: pointer !important;
+    border-radius: 12px !important;
+    
+    /* Tactical Typography */
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase;
+    
+    /* Layout & Layering */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    position: relative !important;
+    z-index: 10 !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* --- DARK THEME: Deep Intelligence Glass --- */
+[data-theme="dark"] .compare-toggle-btn {
+    background: color-mix(in srgb, var(--accent-color, #10b981), transparent 92%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    /* Double-Layer Neural Glow */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
+                inset 0 0 15px var(--accent-glow) !important;
+}
+
+/* --- LIGHT THEME: Elite Frosted Paper --- */
+[data-theme="light"] .compare-toggle-btn {
+    background: color-mix(in srgb, var(--accent-color, #065f46), transparent 95%) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- INTERACTIVE HOVER: The "Power-On" State --- */
+.compare-toggle-btn:hover {
+    background: var(--accent-color) !important; /* Becomes solid palette color */
+    color: #ffffff !important; /* Contrast flip */
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 0 25px var(--accent-glow), 
+                0 0 45px rgba(var(--accent-color-rgb), 0.3) !important;
+}
+
+/* Specific Hover for Light Mode to ensure black/white flip if needed */
+[data-theme="light"] .compare-toggle-btn:hover {
+    color: #ffffff !important;
+    background: #000000 !important; /* Tactical Black on hover for light mode */
+    border-color: #000000 !important;
+}
+
+/* Active State: Mechanical Click */
+.compare-toggle-btn:active {
+    transform: scale(0.96) translateY(0) !important;
+    filter: brightness(0.8);
+}
+
+/* ============================================================
+   SIDEBAR: ATMOSPHERIC MAX-GLASS COMPARISON TOGGLE
+   ============================================================ */
+
+.compare-toggle-btn {
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    padding: 12px !important;
+    cursor: pointer !important;
+    border-radius: 12px !important;
+    
+    /* 1. UNIVERSAL TACTICAL TYPOGRAPHY */
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase;
+    
+    /* 2. LAYOUT & Z-INDEX DOMINANCE */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    position: relative !important;
+    z-index: 10 !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    
+    /* 3. RESET: Killing any lingering red/pink gradients */
+    background-image: none !important; 
+}
+
+/* --- DARK THEME: Deep Intelligence Tint --- */
+[data-theme="dark"] .compare-toggle-btn {
+    /* Uses palette color at 8% opacity for a deep tinted glass look */
+    background: color-mix(in srgb, var(--accent-color, #10b981), transparent 92%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    /* Double-Layer Neural Glow */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
+                inset 0 0 15px var(--accent-glow) !important;
+}
+
+/* --- LIGHT THEME: Elite Frosted Paper --- */
+[data-theme="light"] .compare-toggle-btn {
+    background: color-mix(in srgb, var(--accent-color, #065f46), transparent 95%) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- INTERACTIVE HOVER: The "Power-On" State --- */
+.compare-toggle-btn:hover {
+    background: var(--accent-color) !important; /* Becomes solid palette color */
+    color: #ffffff !important; /* Contrast flip to white */
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 0 25px var(--accent-glow), 
+                0 0 45px rgba(var(--accent-color-rgb), 0.3) !important;
+}
+
+/* Specific Hover for Light Mode to ensure Authoritative Contrast */
+[data-theme="light"] .compare-toggle-btn:hover {
+    background: #000000 !important; /* Tactical Black on hover for light theme */
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+/* ============================================================
+   ULTIMATE SPECIFICITY FIX: MAX-GLASS COMPARISON TOGGLE
+   ============================================================ */
+
+/* We use 'body' to ensure this rule wins over any previous attribute selectors */
+body [data-theme="dark"] .sidebar .compare-toggle-btn {
+    /* 1. Kill the Red permanently */
+    background-image: none !important;
+    background-color: transparent !important;
+    
+    /* 2. Apply Dynamic Palette Tint (92% Transparent) */
+    background: color-mix(in srgb, var(--accent-color, #10b981), transparent 92%) !important;
+    
+    /* 3. Max-Glass Atmospheric Effects */
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    
+    /* 4. Chrome Sync */
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    
+    /* 5. Neural Glow */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
+                inset 0 0 15px var(--accent-glow) !important;
+}
+
+/* Light Theme Authoritative Fix */
+body [data-theme="light"] .sidebar .compare-toggle-btn {
+    background: color-mix(in srgb, var(--accent-color, #065f46), transparent 95%) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Hover Authority */
+body .sidebar .compare-toggle-btn:hover {
+    background: var(--accent-color) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 0 25px var(--accent-glow) !important;
+}
+
+/* Universal Layout (Add this to the very end of your CSS) */
+.sidebar .compare-toggle-btn {
+    width: calc(100% - 20px) !important;
+    margin: 10px !important;
+    padding: 12px !important;
+    cursor: pointer !important;
+    border-radius: 12px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}

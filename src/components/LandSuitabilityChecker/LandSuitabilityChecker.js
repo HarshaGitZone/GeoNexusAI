@@ -1867,7 +1867,13 @@ export default function LandSuitabilityChecker() {
 
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      // if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+  const txt = await response.text();
+  console.error("Backend error body:", txt);
+  throw new Error(`HTTP ${response.status}: ${txt}`);
+}
+
 
       return await response.json();
 
@@ -2480,11 +2486,16 @@ export default function LandSuitabilityChecker() {
 
     // 1. Check if the new coordinates match a Saved Place
 
+    // const matched = savedPlaces.find(p =>
+
+    //   p.lat.toFixed(4) === currentLat && p.lng.toFixed(4) === currentLng
+
+    // );
     const matched = savedPlaces.find(p =>
+  parseFloat(p.lat).toFixed(4) === currentLat &&
+  parseFloat(p.lng).toFixed(4) === currentLng
+);
 
-      p.lat.toFixed(4) === currentLat && p.lng.toFixed(4) === currentLng
-
-    );
 
 
 
