@@ -16,7 +16,7 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
     
     // Override isDay with frontend calculation for accuracy
     if (lat && lng) {
-      console.log(`Site ${siteId} Using Passed Coordinates:`, { lat, lng });
+      // console.log(`Site ${siteId} Using Passed Coordinates:`, { lat, lng });
       
       // Calculate local time for this location
       const utcNow = new Date();
@@ -56,9 +56,9 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
       
       isDay = sunriseHour <= localHour && localHour < sunsetHour ? 1 : 0;
       
-      console.log(`Site ${siteId} Time Calculation: UTC=${utcNow.getUTCHours()}, Local=${localHour}, Sunrise=${sunriseHour.toFixed(1)}, Sunset=${sunsetHour.toFixed(1)}, isDay=${isDay}`);
+      // console.log(`Site ${siteId} Time Calculation: UTC=${utcNow.getUTCHours()}, Local=${localHour}, Sunrise=${sunriseHour.toFixed(1)}, Sunset=${sunsetHour.toFixed(1)}, isDay=${isDay}`);
     } else {
-      console.warn(`Site ${siteId}: No coordinates provided`);
+      // console.warn(`Site ${siteId}: No coordinates provided`);
     }
     
     // Check for day/night first
@@ -106,16 +106,16 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
     }
     
     // Debug logging
-    console.log(`Site ${siteId} Weather Effects Debug:`, { 
-      description, 
-      main, 
-      isDay, 
-      temperature,
-      isColdEnoughForSnow,
-      weatherType,
-      location: weather?.location || 'Unknown',
-      hour: new Date().getHours()
-    });
+    // console.log(`Site ${siteId} Weather Effects Debug:`, { 
+    //   description, 
+    //   main, 
+    //   isDay, 
+    //   temperature,
+    //   isColdEnoughForSnow,
+    //   weatherType,
+    //   location: weather?.location || 'Unknown',
+    //   hour: new Date().getHours()
+    // });
     
     return weatherType;
   };
@@ -127,7 +127,7 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
     if (adaptiveWeather && weather) {
       // Note: We no longer control global theme from weather effects
       // Each site should have independent weather effects without affecting global theme
-      console.log(`Site ${siteId} Weather: ${weatherType} (Theme control disabled for independence)`);
+      // console.log(`Site ${siteId} Weather: ${weatherType} (Theme control disabled for independence)`);
     }
   }, [weatherType, adaptiveWeather, weather, siteId]);
 
