@@ -1,0 +1,13 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://geoaibackend-6x9b.onrender.com https://unpkg.com https://cdnjs.cloudflare.com https://raw.githubusercontent.com https://api.maptiler.com https://*.tile.openstreetmap.org https://mt1.google.com https://tiles.maps.eox.at; img-src 'self' data: https: blob:; worker-src 'self' blob:;"
+        }
+      ]
+    }
+  ]
+}
