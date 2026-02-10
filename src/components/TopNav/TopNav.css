@@ -4454,3 +4454,134 @@
     padding: 12px 15px;
     font-family: 'Roboto Mono', monospace;
 }
+
+
+
+
+/* =========================================================
+   FORCE NAV HEIGHT TO EXPAND WHEN IT WRAPS INTO 2 ROWS
+   (Add this at the END of TopNav.css)
+========================================================= */
+
+/* When JS adds: needs-second-row */
+.geo-navbar.needs-second-row {
+  height: auto !important;
+  min-height: 120px !important; /* 2-row safe height */
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+/* Make the inner shell also expand */
+.geo-navbar.needs-second-row .nav-content-shell {
+  height: auto !important;
+  min-height: 120px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+/* Ensure groups can wrap cleanly */
+.geo-navbar.needs-second-row .nav-group {
+  flex-wrap: wrap !important;
+  height: auto !important;
+}
+
+
+/* Left goes top row */
+.geo-navbar.needs-second-row .nav-group.left {
+  order: 0;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* Right goes bottom row */
+.geo-navbar.needs-second-row .nav-group.right {
+  order: 2;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* Make separators not break layout in 2 rows */
+.geo-navbar.needs-second-row .nav-divider {
+  display: none !important;
+}
+
+/* Mobile extra safety */
+@media (max-width: 768px) {
+  .geo-navbar.needs-second-row {
+    min-height: 135px !important;
+  }
+
+  .geo-navbar.needs-second-row .nav-content-shell {
+    min-height: 135px !important;
+  }
+}
+/* =========================================================
+   TIGHTER 2-ROW NAV (LESS HEIGHT)
+   Add at END of TopNav.css
+========================================================= */
+
+.geo-navbar.needs-second-row {
+  height: auto !important;
+  min-height: unset !important;        /* remove big forced height */
+  padding-top: 6px !important;         /* tighter */
+  padding-bottom: 6px !important;
+}
+
+.geo-navbar.needs-second-row .nav-content-shell {
+  min-height: unset !important;
+  height: auto !important;
+  row-gap: 6px !important;             /* reduce vertical gap */
+  flex-wrap: wrap !important;
+}
+
+/* Make the 3 groups stack tighter */
+.geo-navbar.needs-second-row .nav-group.left,
+.geo-navbar.needs-second-row .nav-group.center,
+.geo-navbar.needs-second-row .nav-group.right {
+  width: 100% !important;
+  justify-content: center !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/* Remove separators in wrap mode */
+.geo-navbar.needs-second-row .nav-divider {
+  display: none !important;
+}
+
+/* OPTIONAL: shrink button sizes slightly in 2-row mode */
+.geo-navbar.needs-second-row .icon-btn,
+.geo-navbar.needs-second-row .team-btn,
+.geo-navbar.needs-second-row .mode-toggle {
+  transform: scale(0.92);
+}
+
+/* OPTIONAL: reduce shadow "spread" feeling */
+.geo-navbar.needs-second-row {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18) !important;
+}
+/* =========================================================
+   FORCE GEOAI LOGO CENTER (2-ROW MODE)
+========================================================= */
+
+.geo-navbar.needs-second-row .nav-group.center {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.geo-navbar.needs-second-row .brand-wrap {
+  width: fit-content !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.geo-navbar.needs-second-row .logo {
+  text-align: center !important;
+}
