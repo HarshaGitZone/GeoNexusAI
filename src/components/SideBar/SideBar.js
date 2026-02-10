@@ -615,12 +615,23 @@ const generateShareLink = () => {
       </div>
     </div>
 
-    <div className="header-wing">
+    {/* <div className="header-wing">
       <div className="live-status-container">
         <div className="live-pulse-dot-large"></div>
         <span className="status-text-prime">LIVE</span>
       </div>
+    </div> */}
+    <div className="header-wing right-wing">
+  <div className="live-status-container">
+    <div className="live-indicator-hub">
+      {/* The pulse ring is the expanding circle behind the dot */}
+      <div className="live-pulse-ring"></div>
+      {/* The dot itself */}
+      <div className="live-pulse-dot-large"></div>
     </div>
+    <span className="status-text-prime">LIVE</span>
+  </div>
+</div>
   </div>
 
   {/* ROW 2: Global Telemetry Dashboard */}

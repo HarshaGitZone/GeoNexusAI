@@ -3909,7 +3909,7 @@ html:root body .sidebar select.btn-save.mini:hover {
   flex-direction: column;
   padding: 10px;
   background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  /* border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
   gap: 8px;
 }
 
@@ -3999,16 +3999,16 @@ html:root body .sidebar select.btn-save.mini:hover {
 }
 
 .telemetry-pill {
-  background: rgba(255, 255, 255, 0.03);
+  /* background: rgba(255, 255, 255, 0.03); */
   padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* border: 1px solid rgba(255, 255, 255, 0.05); */
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-.telemetry-pill.highlight { border-color: rgba(168, 85, 247, 0.4); } /* Purple tint for Year */
+ /* Purple tint for Year */
 .telemetry-pill.solar { background: rgba(234, 179, 8, 0.05); } /* Gold tint for Sun */
 
 .pill-label {
@@ -4021,4 +4021,194 @@ html:root body .sidebar select.btn-save.mini:hover {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
   color: #fff;
+}
+
+
+
+/* LandSuitabilityChecker.css or SideBar.css */
+
+.sidebar-top-header.tactical-telemetry {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              box-shadow 0.3s ease, 
+              background-color 0.3s ease;
+  cursor: default;
+  z-index: 10; /* Ensures it stays above the dashed line when zooming */
+  transform-origin: center top; /* Zooms from the top down */
+}
+
+.sidebar-top-header.tactical-telemetry:hover {
+  /* Scale up by 5% */
+  transform: scale(1.05); 
+  
+  /* Add a subtle "glow" to match your suitability score cards */
+  background-color: rgba(255, 255, 255, 0.08); 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+              0 0 15px rgba(6, 182, 212, 0.2); /* Cyan glow to match GMT badge */
+}
+
+/* Optional: Make the pills slightly more reactive too */
+.sidebar-top-header.tactical-telemetry:hover .telemetry-pill {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+
+
+/* Active LIVE Status Styling */
+.live-status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.live-indicator-hub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+}
+
+/* The solid center dot */
+.live-pulse-dot-large {
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent-color); /* Success Green */
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 0 10px var(--accent-color);
+  animation: live-glow 2s ease-in-out infinite;
+}
+
+/* The expanding ripple ring */
+.live-pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  /* border: 2px solid #10b981; */
+  border: 2px solid var(--accent-color);
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 1;
+  animation: live-ripple 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+.status-text-prime {
+  font-size: 10px;
+  font-weight: 900;
+  /* color: #10b981; */
+  color:var(--accent-color);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Animations */
+@keyframes live-glow {
+  0% { transform: scale(1); box-shadow: 0 0 5px #10b981; }
+  50% { transform: scale(1.15); box-shadow: 0 0 15px #10b981; }
+  100% { transform: scale(1); box-shadow: 0 0 5px #10b981; }
+}
+
+@keyframes live-ripple {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+
+
+/* ============================================================
+   LIGHT THEME TELEMETRY ADAPTATION
+   ============================================================ */
+
+html:root body[data-theme="light"] .tactical-telemetry {
+    /* Brighter, more defined background for light mode */
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 242, 245, 0.8) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+html:root body[data-theme="light"] .datetime-date,
+html:root body[data-theme="light"] .datetime-time,
+html:root body[data-theme="light"] .pill-value {
+    color: #1e293b !important; /* Deep Slate for readability */
+    opacity: 1;
+}
+
+html:root body[data-theme="light"] .datetime-separator,
+html:root body[data-theme="light"] .ts-divider {
+    color: var(--accent-color);
+    opacity: 0.6;
+}
+
+html:root body[data-theme="light"] .pill-label {
+    color: #64748b; /* Muted slate for labels */
+    font-weight: 700;
+}
+
+html:root body[data-theme="light"] .telemetry-pill {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* GMT Badge in Light Mode */
+html:root body[data-theme="light"] .timezone-badge {
+    background: color-mix(in srgb, var(--accent-color), transparent 85%);
+    color: var(--accent-color);
+    border-color: color-mix(in srgb, var(--accent-color), transparent 70%);
+}
+
+/* LIVE Container in Light Mode */
+html:root body[data-theme="light"] .live-status-container {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Hover Zoom Adaptation */
+html:root body[data-theme="light"] .sidebar-top-header.tactical-telemetry:hover {
+    background-color: #ffffff;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1), 
+                0 0 10px color-mix(in srgb, var(--accent-color), transparent 80%);
+}
+
+/* Telemetry sub-row dashed divider */
+html:root body[data-theme="light"] .telemetry-row-sub {
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+/* Satellite Hub Icon for light mode visibility */
+html:root body[data-theme="light"] .telemetry-icon-large {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
+}
+
+/* Specific Target for the GMT Badge in Light Theme */
+html:root body[data-theme="light"] .timezone-badge {
+    /* Deep Navy Blue for professional contrast */
+    background: rgba(30, 58, 138, 0.1) !important; 
+    color: #1e3a8a !important; 
+    border: 1.5px solid #1e3a8a !important;
+    
+    /* Clean font weight for the numbers */
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Hover state for the badge in light mode */
+html:root body[data-theme="light"] .timezone-badge:hover {
+    background: #1e3a8a !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(30, 58, 138, 0.3);
+}
+
+/* Ensure the main container doesn't wash out the badge */
+html:root body[data-theme="light"] .tactical-telemetry {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }

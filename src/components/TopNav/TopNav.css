@@ -982,7 +982,7 @@
 }
 
 .history-table-container {
-  max-height: 400px;
+  /* max-height: 400px; */
   overflow-y: auto;
   margin-top: 15px;
 }
@@ -4584,4 +4584,117 @@
 
 .geo-navbar.needs-second-row .logo {
   text-align: center !important;
+}
+
+
+
+
+/* ============================================================
+   LIGHT THEME: HISTORY TABLE BOX RESET
+   ============================================================ */
+
+/* 1. Header Reset: Changing dark header to white/off-white */
+html:root body[data-theme="light"] .history-table thead th {
+    background-color: #ffffff !important;
+    color: #475569 !important; /* Slate gray for professional labels */
+    border-bottom: 2px solid #e2e8f0 !important; /* Subtle gray divider */
+}
+
+/* 2. Sidebar Reset: Changing the dark 'SITE' column to white */
+html:root body[data-theme="light"] .history-table td.site-name {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+/* 3. Site Text Color: Ensuring names are legible on white */
+html:root body[data-theme="light"] .history-table td.site-name span {
+    color: #0f172a !important; /* Deep navy for the primary site name */
+}
+
+/* 4. Comparison Row Tint: Softening the background for compared sites */
+html:root body[data-theme="light"] .history-row-comp {
+    background-color: #f8fafc !important; /* Very light gray to distinguish from white */
+}
+
+html:root body[data-theme="light"] .history-row-comp td.site-name {
+    background-color: #f8fafc !important;
+}
+
+/* 5. Header Title Alignment */
+html:root body[data-theme="light"] .modal-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid var(--accent-color) !important;
+}
+
+
+/* ============================================================
+   LIGHT THEME: HISTORY MODAL TOTAL BOX & TEXT RESET
+   ============================================================ */
+
+/* 1. Reset the Sidebar Column (SITE) and Top Header (thead) */
+html:root body[data-theme="light"] .history-table td.site-name,
+html:root body[data-theme="light"] .history-table thead th {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+}
+
+/* 2. FORCE TEXT TO BLACK: Targeting the main header and labels */
+html:root body[data-theme="light"] .modal-header h3,
+html:root body[data-theme="light"] .history-table thead th {
+    color: #000000 !important; /* Pure Black for maximum authority */
+    font-weight: 800 !important;
+}
+
+/* 3. SITE NAME & TEXT COLOR: Ensuring all text in boxes is black */
+html:root body[data-theme="light"] .history-table td.site-name span,
+html:root body[data-theme="light"] .history-table td {
+    color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* 4. COMPARISON ROW ADJUSTMENT: Very subtle gray to maintain visibility */
+html:root body[data-theme="light"] .history-row-comp,
+html:root body[data-theme="light"] .history-row-comp td.site-name {
+    background-color: #f9fafb !important;
+}
+
+/* 5. TABLE BORDERS: Clean dividers for the white boxes */
+html:root body[data-theme="light"] .history-table td,
+html:root body[data-theme="light"] .history-table th {
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+/* 6. MODAL OVERLAY & CARD: Ensuring the main container is pure white */
+html:root body[data-theme="light"] .history-table-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* 1. Main Card: Allow it to contain the scroll but don't hardcode height */
+.history-table-card {
+    height: auto !important;
+    max-height: 85vh !important; /* Limits height so it doesn't leave the screen */
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important; /* Keeps the rounded corners sharp */
+}
+
+/* 2. The Internal Container: THIS is where the scroll happens */
+.history-table-container {
+    flex: 1 1 auto !important;  /* 🚀 KEY: This forces the container to fill the card */
+    overflow-y: auto !important; /* Enables vertical scrolling */
+    overflow-x: auto !important; /* Keeps horizontal scrolling for mobile */
+    min-height: 0;               /* Critical for flex-scroll behavior */
+}
+
+/* 3. Sticky Header: Keep labels visible while scrolling (Professional Touch) */
+.history-table thead th {
+    position: sticky !important;
+    top: 0;
+    z-index: 10;
+    background: inherit; /* Matches your white/dark background logic */
 }
