@@ -15,8 +15,8 @@ Pillow>=9.0.0
 groq
 qrcode
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch
-torchvision
+# torch
+# torchvision
 pandas
 openai
 # AI Assistant Dependencies

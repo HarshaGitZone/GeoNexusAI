@@ -1,5 +1,40 @@
-import torch
-from torchvision import models, transforms
+# import torch
+# from torchvision import models, transforms
+# from PIL import Image
+# import requests
+# from io import BytesIO
+# import uuid
+# from flask import jsonify, request
+# from flask_cors import CORS
+# from typing import List
+# import traceback
+# import production_optimizations
+
+# from projects_db import init_db, save_project, load_project
+
+# # Initialize CNN Model (MobileNetV2 is best for web backends)
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# cnn_model = models.mobilenet_v2(weights="DEFAULT")
+# cnn_model.classifier[1] = torch.nn.Linear(cnn_model.last_channel, 5)
+# cnn_model.to(device)
+# cnn_model.eval()
+
+# # 2. Image Prep
+# preprocess = transforms.Compose([
+#     transforms.Resize(224),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+# ])
+
+# LAND_CLASSES = ["Urban", "Forest", "Agriculture", "Water", "Industrial"]
+import os
+import sys
+
+# --- RENDER DETECTION ---
+# Render sets 'RENDER' environment variable to 'true' automatically
+IS_RENDER = os.environ.get('RENDER', 'false').lower() == 'true'
+
+# Light Imports
 from PIL import Image
 import requests
 from io import BytesIO
@@ -8,23 +43,27 @@ from flask import jsonify, request
 from flask_cors import CORS
 from typing import List
 import traceback
-import production_optimizations
-
+# ADD THIS LINE HERE:
 from projects_db import init_db, save_project, load_project
+# 1. Conditional CNN Engine (This saves ~400MB RAM on Render)
+if not IS_RENDER:
+    import torch
+    from torchvision import models, transforms
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cnn_model = models.mobilenet_v2(weights="DEFAULT")
+    cnn_model.classifier[1] = torch.nn.Linear(cnn_model.last_channel, 5)
+    cnn_model.to(device)
+    cnn_model.eval()
 
-# Initialize CNN Model (MobileNetV2 is best for web backends)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-cnn_model = models.mobilenet_v2(weights="DEFAULT")
-cnn_model.classifier[1] = torch.nn.Linear(cnn_model.last_channel, 5)
-cnn_model.to(device)
-cnn_model.eval()
-
-# 2. Image Prep
-preprocess = transforms.Compose([
-    transforms.Resize(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
+    preprocess = transforms.Compose([
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    TORCH_AVAILABLE = True
+else:
+    TORCH_AVAILABLE = False
+    print(">>> PRODUCTION MODE: Torch/CNN engine skipped to fit 512MB RAM.")
 
 LAND_CLASSES = ["Urban", "Forest", "Agriculture", "Water", "Industrial"]
 
@@ -221,18 +260,37 @@ ML_FACTOR_ORDER = [
     # Risk & Resilience (4)
     "multi_hazard", "climate_change", "recovery", "habitability"
 ]
+# ML_MODELS = {}
+# for name in ("model_rf.pkl", "model_xgboost.pkl", "model_gbm.pkl", "model_et.pkl", "model_lgbm.pkl"):
+#     p = os.path.join(MODEL_PATH, name)
+#     if os.path.exists(p):
+#         try:
+#             with open(p, "rb") as f:
+#                 model = pickle.load(f)
+#                 # Force sklearn models to ignore feature names to avoid warnings
+#                 if hasattr(model, 'feature_names_in_'):
+#                     delattr(model, 'feature_names_in_')
+#                 ML_MODELS[name] = model
+#             print(f"Loaded optional ML model: {name}")
+#         except Exception as e:
+#             print(f"Optional ML model {name} skipped: {e}")
+# --- ML Model Optimization ---
 ML_MODELS = {}
-for name in ("model_rf.pkl", "model_xgboost.pkl", "model_gbm.pkl", "model_et.pkl", "model_lgbm.pkl"):
+
+# On Render, we only load XGBoost to stay under 512MB. 
+# Locally, we load the full ensemble for maximum accuracy.
+MODELS_TO_TRY = ["model_xgboost.pkl"] if IS_RENDER else ["model_rf.pkl", "model_xgboost.pkl", "model_gbm.pkl", "model_et.pkl", "model_lgbm.pkl"]
+
+for name in MODELS_TO_TRY:
     p = os.path.join(MODEL_PATH, name)
     if os.path.exists(p):
         try:
             with open(p, "rb") as f:
                 model = pickle.load(f)
-                # Force sklearn models to ignore feature names to avoid warnings
                 if hasattr(model, 'feature_names_in_'):
                     delattr(model, 'feature_names_in_')
                 ML_MODELS[name] = model
-            print(f"Loaded optional ML model: {name}")
+            print(f"Loaded ML model: {name}")
         except Exception as e:
             print(f"Optional ML model {name} skipped: {e}")
 
@@ -1025,6 +1083,18 @@ def _get_dominant_category(category_scores):
 
 
 def get_cnn_classification(lat, lng):
+    # ADD THIS START BLOCK:
+    if not TORCH_AVAILABLE:
+        return {
+            "class": "Satellite Analysis (Local Only)",
+            "confidence": 100,
+            "confidence_display": "N/A",
+            "image_sample": None,
+            "telemetry": {
+                "note": "Image classification disabled on Render to prevent memory crash.",
+                "model_status": "Standby"
+            }
+        }
     try:
         import math
 
