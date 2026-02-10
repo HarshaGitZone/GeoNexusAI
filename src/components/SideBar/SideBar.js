@@ -687,7 +687,7 @@ const generateShareLink = () => {
 </section>
 
         
-        <section
+        {/* <section
           className="control-group comparison-box compact"
           style={{ display: showLocationB ? "block" : "none" }}
         >
@@ -742,7 +742,7 @@ const generateShareLink = () => {
     />
   </div>
   
-  {/* Go and X are now inside the same flex row as inputs */}
+
   <button
     type="button"
     onClick={() => bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
@@ -751,42 +751,24 @@ const generateShareLink = () => {
     {compareLoading ? "..." : "Go"}
   </button>
   
-  {/* {isCompareMode && (
-    <button 
-      onClick={() => setIsCompareMode(false)} 
-      className="btn-cross"
-    >
-      ✕
-    </button>
-  )} */}
+ 
   {isCompareMode && (
   <button 
-    // onClick={() => {
-    //   setIsCompareMode(false);
-    //   setShowLocationB(false);      // Close comparison UI
-    //   setBLatInput("");
-    //   setBLngInput("");
-    //   setCompareResult(null);
-    //   setSnapshotDataB && setSnapshotDataB(null);
-    //   setLocationBName("Site B");
-    //   if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });  // Remove red pointer
-    //   localStorage.removeItem("geo_lat_b_analyzed");
-    //   localStorage.removeItem("geo_lng_b_analyzed");
-    // }} 
+  
     onClick={(e) => {
-  if (e) e.stopPropagation(); // Prevents triggering parent clicks
+  if (e) e.stopPropagation();
   setIsCompareMode(false);
-  setShowLocationB(false);      // Close comparison UI
+  setShowLocationB(false);     
   setBLatInput("");
   setBLngInput("");
-  setCompareResult(null);       // 🔥 TRIGGER: Kills Site B Audio
+  setCompareResult(null);     
   if (setSnapshotDataB) setSnapshotDataB(null);
   setLocationBName("Site B");
-  localStorage.removeItem("geo_name_b"); // Clear persisted name
-  if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });  // Remove red pointer
+  localStorage.removeItem("geo_name_b"); 
+  if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });  
   localStorage.removeItem("geo_lat_b_analyzed");
   localStorage.removeItem("geo_lng_b_analyzed");
-  localStorage.removeItem("geo_snapshot_data_b"); // Clear localStorage
+  localStorage.removeItem("geo_snapshot_data_b");
 }}
     className="btn-cross" 
     title="Exit Compare"
@@ -797,17 +779,7 @@ const generateShareLink = () => {
 </div>
 
           <div className="compact-row" style={{ marginTop: "6px", gap: "4px" }}>
-            {/* <button type="button" onClick={handleMyLocationB} className="btn-save" style={{ flex: 0.7, padding: '4px', fontSize: '10px' }}>📍</button>
-            <button type="button" onClick={handleSavePlaceB} disabled={isBFromSavedPlace} className="btn-save" style={{ flex: 0.7, padding: '4px', fontSize: '10px', opacity: isBFromSavedPlace ? 0.5 : 1 }}>⭐</button>
-            <button 
-              type="button" 
-              onClick={handleNearbyPlacesB} 
-              disabled={!analyzedCoordsB?.lat || nearbyLoadingB}
-              className="btn-analyze"
-              style={{ flex: 1, padding: '4px 6px', fontSize: '10px', background: 'linear-gradient(135deg, #8b5cf6, #d946ef)' }}
-            >
-              {nearbyLoadingB ? "..." : "🏘️"}
-            </button> */}
+           
             <div className="geo-tools-row-triple">
   <button 
     type="button" 
@@ -837,7 +809,127 @@ const generateShareLink = () => {
   </button>
 </div>
           </div>
-        </section>
+        </section> */}
+        {showLocationB && (
+  <section className="control-group comparison-box compact">
+    <h3>📍 Location B: {locationBName}</h3>
+    
+    <div className="compact-row">
+      <button
+        className="btn-save mini"
+        onClick={() => setIsSelectingB(!isSelectingB)}
+        style={{
+          flex: 1,
+          border: isSelectingB ? "1px solid #ef4444" : "",
+          padding: "4px 6px",
+          fontSize: "10px",
+        }}
+      >
+        {isSelectingB ? "Cancel" : "🗺️ Map"}
+      </button>
+      <select
+        className="btn-save mini"
+        style={{ flex: 1.5, padding: "4px 6px", fontSize: "10px" }}
+        onChange={(e) => {
+          const p = savedPlaces[e.target.value];
+          if (p && p.lat !== undefined) {
+            handleCompareSelect(p.lat, p.lng, p.name);
+          }
+        }}
+        value=""
+      >
+        <option value="" disabled>Saved Places...</option>
+        {savedPlaces.map((p, i) => (
+          <option key={i} value={i}>{p.name}</option>
+        ))}
+      </select>
+    </div>
+
+    <div className="geo-unified-logic-row">
+      <div className="field">
+        <label>Lat B</label>
+        <input
+          type="text"
+          value={bLatInput}
+          onChange={(e) => setBLatInput(e.target.value)}
+          className="highlighted-box"
+        />
+      </div>
+      <div className="field">
+        <label>Lng B</label>
+        <input
+          type="text"
+          value={bLngInput}
+          onChange={(e) => setBLngInput(e.target.value)}
+          className="highlighted-box"
+        />
+      </div>
+      
+      <button
+        type="button"
+        onClick={() => bLatInput && bLngInput && handleCompareSelect(bLatInput, bLngInput)}
+        className="btn-analyze"
+      >
+        {compareLoading ? "..." : "Go"}
+      </button>
+      
+      {isCompareMode && (
+        <button 
+          onClick={(e) => {
+            if (e) e.stopPropagation();
+            setIsCompareMode(false);
+            setShowLocationB(false); 
+            setBLatInput("");
+            setBLngInput("");
+            setCompareResult(null);
+            if (setSnapshotDataB) setSnapshotDataB(null);
+            setLocationBName("Site B");
+            localStorage.removeItem("geo_name_b");
+            if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });
+            localStorage.removeItem("geo_lat_b_analyzed");
+            localStorage.removeItem("geo_lng_b_analyzed");
+            localStorage.removeItem("geo_snapshot_data_b");
+          }}
+          className="btn-cross" 
+          title="Exit Compare"
+        >
+          ✕
+        </button>
+      )}
+    </div>
+
+    <div className="compact-row" style={{ marginTop: "6px", gap: "4px" }}>
+      <div className="geo-tools-row-triple">
+        <button 
+          type="button" 
+          onClick={handleMyLocationB} 
+          className="btn-mono-tool" 
+          title="My Location"
+        >
+          📍
+        </button>
+        <button 
+          type="button" 
+          onClick={handleSavePlaceB} 
+          disabled={isBFromSavedPlace} 
+          className="btn-mono-tool" 
+          title="Save Place"
+        >
+          ⭐
+        </button>
+        <button 
+          type="button" 
+          onClick={handleNearbyPlacesB} 
+          disabled={!analyzedCoordsB?.lat || nearbyLoadingB} 
+          className="btn-mono-tool" 
+          title="Nearby Places"
+        >
+          {nearbyLoadingB ? "..." : "🏘️"}
+        </button>
+      </div>
+    </div>
+  </section>
+)}
 
         {/* 🔄 TOGGLE BUTTON FOR LOCATION B */}
         {/* <button
@@ -880,7 +972,7 @@ const generateShareLink = () => {
         >
           {showLocationB ? "✕ Close Comparison" : "🔄 Compare with Location B"}
         </button> */}
-        <button
+        {/* <button
   onClick={() => {
     if (showLocationB) {
       setShowLocationB(false);
@@ -902,6 +994,27 @@ const generateShareLink = () => {
   className="compare-toggle-btn"
 >
   {showLocationB ? "✕ Close Comparison" : "🔄 Compare with Location B"}
+</button> */}
+{/* 🔄 TOGGLE BUTTON FOR LOCATION B */}
+<button
+  onClick={() => setShowLocationB(!showLocationB)} // Just toggle visibility
+  className="compare-toggle-btn"
+  style={{
+    width: "calc(100% - 20px)",
+    margin: "6px 10px",
+    padding: "4px",
+    background: showLocationB
+      ? "linear-gradient(135deg, #ef4444, #dc2626)"
+      : "linear-gradient(135deg, #ec4899, #f43f5e)",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "10px",
+    fontWeight: "bold",
+    cursor: "pointer",
+  }}
+>
+  {showLocationB ? "✕ Hide Comparison" : "🔄 Compare with Location B"}
 </button>
 
         {/* Saved Places Section */}
