@@ -1508,6 +1508,7 @@ export default function LandSuitabilityChecker() {
       setIsCompareMode(false);
       setCompareResult(null);
       setSnapshotDataB(null);
+      localStorage.removeItem("geo_snapshot_data_b"); // Clear localStorage
     }
   };
 
@@ -1757,9 +1758,26 @@ export default function LandSuitabilityChecker() {
 
   const [showNearbyB, setShowNearbyB] = useState(false);
 
-  const [snapshotData, setSnapshotData] = useState(null);
-  const [snapshotDataB, setSnapshotDataB] = useState(null);
+  const [snapshotData, setSnapshotData] = useState(() => JSON.parse(localStorage.getItem("geo_snapshot_data")) || null);
+  const [snapshotDataB, setSnapshotDataB] = useState(() => JSON.parse(localStorage.getItem("geo_snapshot_data_b")) || null);
   const [snapshotLoading, setSnapshotLoading] = useState(false);
+
+  // Persist snapshot data to localStorage
+  useEffect(() => {
+    if (snapshotData) {
+      localStorage.setItem("geo_snapshot_data", JSON.stringify(snapshotData));
+    } else {
+      localStorage.removeItem("geo_snapshot_data");
+    }
+  }, [snapshotData]);
+
+  useEffect(() => {
+    if (snapshotDataB) {
+      localStorage.setItem("geo_snapshot_data_b", JSON.stringify(snapshotDataB));
+    } else {
+      localStorage.removeItem("geo_snapshot_data_b");
+    }
+  }, [snapshotDataB]);
 
 
 
@@ -2053,25 +2071,6 @@ export default function LandSuitabilityChecker() {
       setAnalyzedCoords(coordsA);
       localStorage.setItem("geo_lat_analyzed", coordsA.lat);
       localStorage.setItem("geo_lng_analyzed", coordsA.lng);
-    }
-
-    // ---- Compare
-    const compareEnabled = Boolean(payload?.compare?.enabled);
-
-    if (!compareEnabled) {
-      setIsCompareMode(false);
-      setShowLocationB(false);
-      setCompareResult(null);
-      setSnapshotDataB(null);
-      localStorage.setItem("geo_is_compare", "false");
-      localStorage.setItem("geo_show_b", "false");
-      localStorage.removeItem("geo_last_compare_result");
-      return;
-    }
-
-    // Compare ON
-    setIsCompareMode(true);
-    setShowLocationB(true);
     localStorage.setItem("geo_is_compare", "true");
     localStorage.setItem("geo_show_b", "true");
 
@@ -2105,7 +2104,7 @@ export default function LandSuitabilityChecker() {
       localStorage.setItem("geo_lat_b_analyzed", coordsB.lat);
       localStorage.setItem("geo_lng_b_analyzed", coordsB.lng);
     }
-
+  }
   }, [
     setLat, setLng,
     setLocationAName,

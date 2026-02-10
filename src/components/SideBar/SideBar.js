@@ -193,6 +193,7 @@ const importProjectFile = async (file) => {
       if (setCompareResult) setCompareResult(null);
       if (setSnapshotDataB) setSnapshotDataB(null);
       if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });
+      localStorage.removeItem("geo_snapshot_data_b"); // Clear localStorage
     }
 
     setProjectName(payload.projectName || "");
@@ -783,6 +784,7 @@ const generateShareLink = () => {
   if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });  // Remove red pointer
   localStorage.removeItem("geo_lat_b_analyzed");
   localStorage.removeItem("geo_lng_b_analyzed");
+  localStorage.removeItem("geo_snapshot_data_b"); // Clear localStorage
 }}
     className="btn-cross" 
     title="Exit Compare"
@@ -889,6 +891,7 @@ const generateShareLink = () => {
       if (setAnalyzedCoordsB) setAnalyzedCoordsB({ lat: null, lng: null });
       localStorage.removeItem("geo_lat_b_analyzed");
       localStorage.removeItem("geo_lng_b_analyzed");
+      localStorage.removeItem("geo_snapshot_data_b"); // Clear localStorage
     } else {
       setShowLocationB(true);
     }
