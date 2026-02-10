@@ -14,6 +14,7 @@ import HazardsCard from '../HazardsCard/HazardsCard';
 import SnapshotGeo from '../SnapshotGeo/SnapshotGeo';
 import DigitalTwin from '../DigitalTwin/DigitalTwin';
 import WeatherEffects from '../WeatherEffects/WeatherEffects';
+import GlobalSyncDock from "../GlobalSyncDock.js/GlobalSyncDock";
 // import ReactMarkdown from 'react-markdown';
 // import remarkGfm from 'remark-gfm';
 import GeoGPT from '../GeoGPT/GeoGPT';
@@ -2150,6 +2151,7 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 //     hour: '2-digit', minute: '2-digit', second: '2-digit',
 //     hour12: false
 // });
+if (e && e.preventDefault) e.preventDefault();
   const now = new Date().toLocaleString('en-GB', {
           day: '2-digit',
           month: '2-digit',
@@ -2161,7 +2163,7 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
         });
     // Safe check for automatic calls from useEffect (where 'e' might be undefined)
 
-    if (e && e.preventDefault) e.preventDefault();
+    
 
 
 
@@ -2272,20 +2274,9 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
         setResult(analysisData);
         setAnalysisComplete(true);
-        // ⏱️ ADD THIS (TIME STAMP)
-        // const now = new Date().toLocaleString();
-        // const now = new Date().toLocaleString('en-GB', {
-        //   day: '2-digit',
-        //   month: '2-digit',
-        //   year: 'numeric',
-        //   hour: '2-digit',
-        //   minute: '2-digit',
-        //   second: '2-digit',
-        //   hour12: false
-        // });
-        // Set Site A Timestamp
+       setAnalysisTime(now);
     setSiteATime(now);
-    setAnalysisTime(now);
+    
     localStorage.setItem("geo_last_analysis_time_a", now);
     
     setAnalyzedCoords({ lat, lng });
@@ -5139,6 +5130,8 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
               <button onClick={handleZoomOut}>−</button>
 
             </div>
+            {/* 🚀 INSERT THE GLOBAL SYNC DOCK HERE */}
+  <GlobalSyncDock />
 
             {/* TACTICAL ENGINE TOGGLE */}
 
