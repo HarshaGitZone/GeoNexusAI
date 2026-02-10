@@ -165,16 +165,22 @@ app = Flask(__name__)
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://geonexus-ai.vercel.app"
+    "https://geonexus-ai.vercel.app",
+    "https://geonexus-ai.vercel.app/"
 ]
 
 # 2. Configure CORS correctly - This handles the 'OPTIONS' preflight for you!
+# CORS(app, resources={r"/*": {
+#     "origins": ALLOWED_ORIGINS,
+#     "methods": ["GET", "POST", "OPTIONS"],
+#     "allow_headers": ["Content-Type", "Authorization", "Accept"],
+#     "expose_headers": ["Content-Type", "Authorization"]
+# }}, supports_credentials=True)
 CORS(app, resources={r"/*": {
     "origins": ALLOWED_ORIGINS,
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization", "Accept"],
-    "expose_headers": ["Content-Type", "Authorization"]
-}}, supports_credentials=True)
+}})
 init_db()
 def normalize_coords(lat, lng):
     # Clamp latitude to Web Mercator / Earth limits
@@ -186,21 +192,21 @@ def normalize_coords(lat, lng):
     return lat, lng
 
 # 3. SAFER header injector (Handles error cases and 502s)
-@app.after_request
-def add_cors_headers(response):
-    origin = request.headers.get('Origin')
-    if origin in ALLOWED_ORIGINS:
-        # Avoid duplicate header error if flask-cors already added it
-        if 'Access-Control-Allow-Origin' not in response.headers:
-            response.headers.add('Access-Control-Allow-Origin', origin)
+# @app.after_request
+# def add_cors_headers(response):
+#     origin = request.headers.get('Origin')
+#     if origin in ALLOWED_ORIGINS:
+#         # Avoid duplicate header error if flask-cors already added it
+#         if 'Access-Control-Allow-Origin' not in response.headers:
+#             response.headers.add('Access-Control-Allow-Origin', origin)
         
-    # Standard security headers for split-stack linkage
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    # Use 'add' to append if not present, preventing the 'not allowed' error
-    if 'Access-Control-Allow-Headers' not in response.headers:
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
-    return response
-ANALYSIS_CACHE = {}
+#     # Standard security headers for split-stack linkage
+#     response.headers.add('Access-Control-Allow-Credentials', 'true')
+#     # Use 'add' to append if not present, preventing the 'not allowed' error
+#     if 'Access-Control-Allow-Headers' not in response.headers:
+#         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
+#     return response
+# ANALYSIS_CACHE = {}
 
 def get_cache_key(lat, lng):
     """Generate cache key with 4 decimal precision"""
@@ -4445,17 +4451,17 @@ def _generate_evidence_text(factor_name: str, factor_data: dict, raw_factors: di
         return f"Thermal intensity: {val}/100. {label}. 7-day max temperature forecast."
     
     # Missing Physical Factors
-    elif factor_name == "ruggedness":
-        if val is not None:
-            if val >= 80:
-                return f"Terrain ruggedness: {val}/100. LOW ruggedness. Smooth terrain, easy development. Score reflects 80–100 band."
-            elif val >= 60:
-                return f"Terrain ruggedness: {val}/100. MODERATE ruggedness. Some terrain variation. Score reflects 60–80 band."
-            elif val >= 40:
-                return f"Terrain ruggedness: {val}/100. HIGH ruggedness. Challenging terrain. Score reflects 40–60 band."
-            else:
-                return f"Terrain ruggedness: {val}/100. VERY HIGH ruggedness. Extremely difficult terrain. Score reflects <40 band."
-        return f"Terrain ruggedness: {val}/100. {label}. Surface roughness and terrain complexity."
+    # elif factor_name == "ruggedness":
+    #     if val is not None:
+    #         if val >= 80:
+    #             return f"Terrain ruggedness: {val}/100. LOW ruggedness. Smooth terrain, easy development. Score reflects 80–100 band."
+    #         elif val >= 60:
+    #             return f"Terrain ruggedness: {val}/100. MODERATE ruggedness. Some terrain variation. Score reflects 60–80 band."
+    #         elif val >= 40:
+    #             return f"Terrain ruggedness: {val}/100. HIGH ruggedness. Challenging terrain. Score reflects 40–60 band."
+    #         else:
+    #             return f"Terrain ruggedness: {val}/100. VERY HIGH ruggedness. Extremely difficult terrain. Score reflects <40 band."
+    #     return f"Terrain ruggedness: {val}/100. {label}. Surface roughness and terrain complexity."
     
     elif factor_name == "stability":
         if val is not None:
@@ -5062,21 +5068,6 @@ def _generate_slope_verdict(slope_percent):
 def check_global_tier_one(lat, lng):
     """
     Geographical safety net for world-class infrastructure hubs.
-    Ensures elite cities receive 100/100 regardless of local API data gaps.
-    """
-    # Valencia, Spain Core
-    if (39.40 <= lat <= 39.52 and -0.42 <= lng <= -0.30):
-        return True, "Valencia (Global Tier 1 Hub)"
-    
-    # Downtown Dubai / Business Bay Core
-    if (25.15 <= lat <= 25.30 and 55.20 <= lng <= 55.45):
-        return True, "Dubai Central (Global Tier 1 Hub)"
-        
-    return False, None
-
-def check_global_tier_one(lat, lng):
-    """
-    Geographical safety net for world-class infrastructure hubs.
     """
     # Valencia Core
     if (39.40 <= lat <= 39.52 and -0.42 <= lng <= -0.30):
@@ -5109,7 +5100,8 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     # --- UNIVERSAL ACCESSIBILITY (VALENCIA-GRADE) OVERRIDE ---
     # This logic handles multi-modal anchors (Markets, City Hubs, Strategic Roads)
     hub_intelligence = get_infrastructure_score(latitude, longitude)
-        
+    hub_intelligence.setdefault("details", {})
+
     if is_tier_one:
         # Force Gold-Standard score for verified world hubs (Valencia/Dubai)
         hub_intelligence["value"] = 100.0
@@ -5128,7 +5120,17 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
         agg_result["score"] = max(95.0, agg_result["score"])
 
     # 3. 📝 NORMALIZE ALL FACTORS
-    raw = intelligence["raw_factors"]
+    # raw = intelligence["raw_factors"]
+    raw = intelligence.get("raw_factors", {})
+
+    # Ensure all categories exist (prevents KeyError crashes)
+    raw.setdefault("physical", {})
+    raw.setdefault("hydrology", {})
+    raw.setdefault("environmental", {})
+    raw.setdefault("climatic", {})
+    raw.setdefault("socio_econ", {})
+    raw.setdefault("risk_resilience", {})
+
     elev_raw = raw.get("physical", {}).get("elevation", {})
     if isinstance(elev_raw, dict) and elev_raw.get("value") is not None:
         try:
@@ -5229,7 +5231,9 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
         "explanation": {
             "factors_meta": build_factor_evidence(f)
         },
-        "metadata": intelligence["metadata_proof"],
+        # "metadata": intelligence["metadata_proof"],
+        "metadata": intelligence.get("metadata_proof", {}),
+
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
         "location": {"latitude": latitude, "longitude": longitude}
     }
@@ -5406,7 +5410,7 @@ def nearby_places_route():
         lon = float(data["longitude"])
 
         places = nearby_places.get_nearby_named_places(lat, lon)
-
+        
         return jsonify({
             "count": len(places),
             "places": places
