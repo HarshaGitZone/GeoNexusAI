@@ -271,6 +271,112 @@
 // }
 
 
+// import React, { useState, useEffect } from 'react';
+// import './GlobalSyncDock.css';
+
+// const WORLD_HUBS = [
+//   { city: "San Francisco", tz: "PST", offset: -8, code: "SFO" },
+//   { city: "New Jersey", tz: "EST", offset: -5, code: "EWR" },
+//   { city: "Washington DC", tz: "EST", offset: -5, code: "IAD" },
+//   { city: "New York", tz: "EST", offset: -5, code: "JFK" },
+//   { city: "London", tz: "UTC", offset: 0, code: "LHR" },
+//   { city: "Paris", tz: "CET", offset: 1, code: "CDG" },
+//   { city: "Dubai", tz: "GST", offset: 4, code: "DXB" },
+//   { city: "Karachi", tz: "PKT", offset: 5, code: "KHI" },
+//   { city: "Kolkata", tz: "IST", offset: 5.5, code: "CCU" },
+//   { city: "Chennai", tz: "IST", offset: 5.5, code: "MAA" },
+//   { city: "Hyderabad", tz: "IST", offset: 5.5, code: "HYD" },
+//   { city: "Singapore", tz: "SGT", offset: 8, code: "SIN" },
+//   { city: "Kuala Lumpur", tz: "MYT", offset: 8, code: "KUL" },
+//   { city: "Beijing", tz: "CST", offset: 8, code: "PEK" },
+//   { city: "Seoul", tz: "KST", offset: 9, code: "ICN" },
+//   { city: "Tokyo", tz: "JST", offset: 9, code: "HND" },
+//   { city: "Sydney", tz: "AEDT", offset: 11, code: "SYD" }
+// ];
+
+// const AnalogGauge = ({ time, isNight }) => {
+//   const [h, m, s] = time.split(':').map(Number);
+//   const sDeg = (s / 60) * 360;
+//   const mDeg = (m / 60) * 360;
+//   const hDeg = ((h % 12) / 12) * 360 + (m / 60) * 30;
+
+//   return (
+//     <div className={`analog-gauge-face ${isNight ? 'is-night-gauge' : 'is-day-gauge'}`}>
+//       <div className="gauge-hand hour-hand" style={{ transform: `translateX(-50%) rotate(${hDeg}deg)` }} />
+//       <div className="gauge-hand min-hand" style={{ transform: `translateX(-50%) rotate(${mDeg}deg)` }} />
+//       <div className="gauge-hand sec-hand" style={{ transform: `translateX(-50%) rotate(${sDeg}deg)` }} />
+//       <div className="gauge-center-cap" />
+//       <div className="gauge-notch n-12"></div>
+//       <div className="gauge-notch n-3"></div>
+//       <div className="gauge-notch n-6"></div>
+//       <div className="gauge-notch n-9"></div>
+//     </div>
+//   );
+// };
+
+// export default function GlobalSyncDock() {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [now, setNow] = useState(new Date());
+
+//   useEffect(() => {
+//     const timer = setInterval(() => setNow(new Date()), 1000);
+//     return () => clearInterval(timer);
+//   }, []);
+
+//   const getCityTelemetry = (offset) => {
+//     const d = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (offset * 3600000));
+//     const timeStr = d.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+//     const isNight = d.getHours() >= 19 || d.getHours() < 6;
+//     return { timeStr, isNight };
+//   };
+
+//   return (
+//     <>
+//       <div className="telemetry-trigger-pulse" onClick={() => setIsOpen(true)}>
+//         <div className="pulse-core-icon">🌐</div>
+//         <div className="pulse-signal-ring"></div>
+//       </div>
+
+//       {isOpen && (
+//         <div className="global-command-overlay" onClick={() => setIsOpen(false)}>
+//           <div className="command-inner-container" onClick={e => e.stopPropagation()}>
+//             <div className="command-header-block">
+//               <div className="brand-stack">
+//                 <span className="geo-nexus-label">GEO NEXUS AI SERVER CLUSTER</span>
+//                 <h2>GLOBAL MISSION CONTROL</h2>
+//               </div>
+//               <button className="command-close-btn" onClick={() => setIsOpen(false)}>✕</button>
+//             </div>
+            
+//             <div className="hub-clock-grid">
+//               {WORLD_HUBS.map(hub => {
+//                 const { timeStr, isNight } = getCityTelemetry(hub.offset);
+//                 return (
+//                   <div key={hub.city} className={`hub-card ${isNight ? 'ops-night' : 'ops-day'}`}>
+//                     <div className="hub-card-header">
+//                       <span className="hub-badge code">{hub.code}</span>
+//                       <span className="hub-badge gmt">GMT {hub.offset >= 0 ? '+' : ''}{hub.offset}</span>
+//                     </div>
+
+//                     <AnalogGauge time={timeStr} isNight={isNight} />
+
+//                     <div className="hub-readout">
+//                       <div className="hub-digital-time">{timeStr}</div>
+//                       <div className="hub-location-name">{hub.city.toUpperCase()}</div>
+//                       <div className="hub-tz-subtext">{hub.tz} PROTOCOL</div>
+//                     </div>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </>
+//   );
+// }
+
+
 import React, { useState, useEffect } from 'react';
 import './GlobalSyncDock.css';
 
@@ -289,6 +395,7 @@ const WORLD_HUBS = [
   { city: "Singapore", tz: "SGT", offset: 8, code: "SIN" },
   { city: "Kuala Lumpur", tz: "MYT", offset: 8, code: "KUL" },
   { city: "Beijing", tz: "CST", offset: 8, code: "PEK" },
+  { city: "Shanghai", tz: "CST", offset: 8, code: "PVG" },
   { city: "Seoul", tz: "KST", offset: 9, code: "ICN" },
   { city: "Tokyo", tz: "JST", offset: 9, code: "HND" },
   { city: "Sydney", tz: "AEDT", offset: 11, code: "SYD" }
@@ -301,7 +408,7 @@ const AnalogGauge = ({ time, isNight }) => {
   const hDeg = ((h % 12) / 12) * 360 + (m / 60) * 30;
 
   return (
-    <div className={`analog-gauge-face ${isNight ? 'is-night-gauge' : 'is-day-gauge'}`}>
+    <div className={`analog-gauge-container ${isNight ? 'is-night-gauge' : 'is-day-gauge'}`}>
       <div className="gauge-hand hour-hand" style={{ transform: `translateX(-50%) rotate(${hDeg}deg)` }} />
       <div className="gauge-hand min-hand" style={{ transform: `translateX(-50%) rotate(${mDeg}deg)` }} />
       <div className="gauge-hand sec-hand" style={{ transform: `translateX(-50%) rotate(${sDeg}deg)` }} />
@@ -326,8 +433,7 @@ export default function GlobalSyncDock() {
   const getCityTelemetry = (offset) => {
     const d = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (offset * 3600000));
     const timeStr = d.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const isNight = d.getHours() >= 19 || d.getHours() < 6;
-    return { timeStr, isNight };
+    return { timeStr, isNight: d.getHours() >= 19 || d.getHours() < 6 };
   };
 
   return (
@@ -338,12 +444,20 @@ export default function GlobalSyncDock() {
       </div>
 
       {isOpen && (
-        <div className="global-command-overlay" onClick={() => setIsOpen(false)}>
-          <div className="command-inner-container" onClick={e => e.stopPropagation()}>
+        <div className="global-command-overlay">
+          <div className="command-inner-container">
+            
             <div className="command-header-block">
               <div className="brand-stack">
-                <span className="geo-nexus-label">GEO NEXUS AI SERVER CLUSTER</span>
-                <h2>GLOBAL MISSION CONTROL</h2>
+                <div className="header-badge-row">
+                  <span className="live-pulse"></span>
+                  {/* <span className="geo-nexus-label">GEO-NEXUS CENTRAL // STRATEGIC NODE CLUSTER</span> */}
+                </div>
+                <h2 className="command-title">GLOBAL SYNC DOCK</h2>
+                <div className="reliability-tag">
+                   <div className="header-divider-glow"></div>
+                   <span className="sync-status">TEMPORAL SYNC: STABLE</span>
+                </div>
               </div>
               <button className="command-close-btn" onClick={() => setIsOpen(false)}>✕</button>
             </div>
@@ -357,13 +471,11 @@ export default function GlobalSyncDock() {
                       <span className="hub-badge code">{hub.code}</span>
                       <span className="hub-badge gmt">GMT {hub.offset >= 0 ? '+' : ''}{hub.offset}</span>
                     </div>
-
                     <AnalogGauge time={timeStr} isNight={isNight} />
-
                     <div className="hub-readout">
                       <div className="hub-digital-time">{timeStr}</div>
                       <div className="hub-location-name">{hub.city.toUpperCase()}</div>
-                      <div className="hub-tz-subtext">{hub.tz} PROTOCOL</div>
+                      <div className="hub-protocol-tag">{hub.tz} PROTOCOL</div>
                     </div>
                   </div>
                 );
