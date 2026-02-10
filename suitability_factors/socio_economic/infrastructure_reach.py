@@ -346,8 +346,17 @@ def get_infrastructure_score(latitude: float, longitude: float) -> Dict:
         label = "Remote / Undeveloped"
 
     # 6. 📝 STEP 5: DYNAMIC REASONING ENGINE
-    # Sort proofs by proximity
-    top_proofs = sorted(list(set(anchor_proofs)), key=lambda x: float(x.split('at ')[1].replace('km','')))[:4]
+    # Sort proofs by proximity - safe parsing with fallback
+    def extract_distance(proof_str):
+        try:
+            if ' at ' in proof_str and 'km' in proof_str:
+                distance_part = proof_str.split(' at ')[1].replace('km', '')
+                return float(distance_part)
+        except (ValueError, IndexError):
+            pass
+        return float('inf')  # Put items without valid distance at the end
+    
+    top_proofs = sorted(list(set(anchor_proofs)), key=extract_distance)[:4]
     
     if final_score >= 85:
         label = "Tier 1 Strategic Hub"

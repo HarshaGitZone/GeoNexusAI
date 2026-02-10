@@ -7,6 +7,10 @@ import uuid
 from flask import jsonify, request
 from flask_cors import CORS
 from typing import List
+import traceback
+
+# Production optimizations
+import production_optimizations
 
 from projects_db import init_db, save_project, load_project
 
@@ -3704,6 +3708,195 @@ def calculate_historical_suitability(current_lat, current_lng, range_type):
 
     return multiplier * 100
 
+# @app.route('/suitability', methods=['POST'])
+# def suitability():
+#     try:
+#         data = request.json or {}
+#         latitude = float(data.get("latitude", 17.3850))
+#         longitude = float(data.get("longitude", 78.4867))
+
+#         # 1. CHECK CACHE & CNN (Preserved Logic)
+#         cache_key = get_cache_key(latitude, longitude)
+#         cnn_analysis = get_cnn_classification(latitude, longitude)
+        
+#         if cache_key in ANALYSIS_CACHE:
+#             result = ANALYSIS_CACHE[cache_key]
+#             result['cnn_analysis'] = cnn_analysis 
+#             return jsonify(result)
+
+#         # 2. 🚀 TRIGGER 23-FACTOR ANALYSIS (Integrated Logic)
+#         # Calls GeoDataService and Aggregator inside your master function
+#         result = _perform_suitability_analysis(latitude, longitude)
+
+#         # 3. INJECT CNN DATA (Preserved Logic)
+#         result['cnn_analysis'] = cnn_analysis
+
+       
+#         ff = result["factors"]
+
+#         # Extract values for classification logic
+#         # Note: We use .get() and ['value'] to ensure we hit the correct nested structure
+#         vegetation_score = ff["environmental"]["vegetation"]["value"]
+#         landuse_score     = ff["socio_econ"]["landuse"]["value"]
+#         infrastructure_score = ff["socio_econ"]["infrastructure"]["value"] # Renamed for clarity
+#         poll_score        = ff["environmental"]["pollution"]["value"]
+#         slope_score       = ff["physical"]["slope"]["value"]
+#         water_score       = ff["hydrology"]["water"]["value"]
+#         flood_score       = ff["hydrology"]["flood"]["value"]
+#         drainage_score    = ff["hydrology"]["drainage"]["value"]
+#         soil_score        = ff["environmental"]["soil"]["value"]
+#         rainfall_score    = ff["climatic"]["rainfall"]["value"]
+#         thermal_score     = ff["climatic"]["thermal"]["value"]
+#         pop_score         = ff["socio_econ"]["population"]["value"]
+
+        
+        
+#         inferred_class = "Mixed land use"
+#         base_conf = 65.0
+#         reasoning = []
+        
+        
+#         urban_index = (infrastructure_score * 0.4 + pop_score * 0.3 + (100 - vegetation_score) * 0.2 + poll_score * 0.1)
+#         rural_index = (vegetation_score * 0.4 + (100 - infrastructure_score) * 0.3 + (100 - pop_score) * 0.2 + water_score * 0.1)
+#         industrial_index = (poll_score * 0.5 + infrastructure_score * 0.3 + (100 - vegetation_score) * 0.2)
+        
+#         # 1️⃣ Urban/Commercial Detection
+#         if urban_index > 70:
+#             inferred_class = "Urban/Commercial"
+#             conf = min(95, base_conf + (urban_index - 70) * 0.8)
+#             reasoning.append(f"Urban index {urban_index:.1f}: Infrastructure {infrastructure_score:.0f} + Population {pop_score:.0f} - Vegetation {vegetation_score:.0f}")
+#             reasoning.append(f"Commercial viability: {(infrastructure_score + pop_score)/2:.0f}%")
+        
+#         # 2️⃣ Industrial Detection
+#         elif industrial_index > 65:
+#             inferred_class = "Industrial Zone"
+#             conf = min(92, base_conf + (industrial_index - 65) * 0.7)
+#             reasoning.append(f"Industrial index {industrial_index:.1f}: Pollution {poll_score:.0f} + Infrastructure {infrastructure_score:.0f} - Vegetation {vegetation_score:.0f}")
+#             reasoning.append(f"Environmental impact score: {poll_score + (100-vegetation_score):.0f}")
+        
+#         # 3️⃣ Agricultural Detection
+#         elif rural_index > 60 and soil_score > 60 and water_score > 50:
+#             inferred_class = "Agricultural"
+#             conf = min(88, base_conf + (rural_index - 60) * 0.6)
+#             reasoning.append(f"Agricultural index {rural_index:.1f}: Vegetation {vegetation_score:.0f} + Soil {soil_score:.0f} + Water {water_score:.0f}")
+#             reasoning.append(f"Farm suitability: {(vegetation_score + soil_score + water_score)/3:.0f}%")
+        
+#         # 4️⃣ Residential Detection (Maintained original thresholds)
+#         elif infrastructure_score > 50 and pop_score > 40 and pop_score < 80 and vegetation_score > 30:
+#             inferred_class = "Residential"
+#             conf = min(85, base_conf + ((infrastructure_score + pop_score + vegetation_score)/3 - 40) * 0.5)
+#             reasoning.append(f"Residential balance: Infra {infrastructure_score:.0f} + Pop {pop_score:.0f} + Env {vegetation_score:.0f}")
+#             reasoning.append(f"Livability index: {(infrastructure_score + pop_score + (100-poll_score))/3:.0f}%")
+        
+#         # 5️⃣ Forest/Natural Detection
+#         elif vegetation_score > 70 and pop_score < 30 and infrastructure_score < 40:
+#             inferred_class = "Forest/Natural"
+#             conf = min(90, base_conf + (vegetation_score - 70) * 0.4)
+#             reasoning.append(f"Natural index: Vegetation {vegetation_score:.0f} - Population {pop_score:.0f} - Infrastructure {infrastructure_score:.0f}")
+#             reasoning.append(f"Wilderness score: {(vegetation_score + (100-pop_score) + (100-infrastructure_score))/3:.0f}%")
+        
+#         # 6️⃣ Water/Wetland Detection
+#         elif water_score > 70 and drainage_score > 60:
+#             inferred_class = "Wetland/Water"
+#             conf = min(87, base_conf + (water_score - 70) * 0.5)
+#             reasoning.append(f"Hydrology index: Water {water_score:.0f} + Drainage {drainage_score:.0f}")
+#             reasoning.append(f"Water abundance: {(water_score + drainage_score)/2:.0f}%")
+        
+#         # 7️⃣ Default: Mixed Use
+#         else:
+#             conf = base_conf + abs(50 - ((infrastructure_score + vegetation_score + poll_score)/3)) * 0.3
+#             reasoning.append(f"Mixed characteristics: Infra {infrastructure_score:.0f} + Veg {vegetation_score:.0f} + Poll {poll_score:.0f}")
+#             reasoning.append(f"Development pressure: {(infrastructure_score + pop_score)/2:.0f}%")
+        
+#         # Final stress/complexity modifiers
+#         env_stress = max(0, (poll_score - 50) + (100 - vegetation_score) + abs(rainfall_score - 50))
+#         if env_stress > 30:
+#             conf = max(40, conf - env_stress * 0.2)
+#             reasoning.append(f"Environmental stress: {env_stress:.0f} points")
+        
+#         terrain_complex = abs(slope_score - 50) + abs(100 - soil_score)
+#         if terrain_complex > 60:
+#             conf = max(35, conf - terrain_complex * 0.1)
+#             reasoning.append(f"Terrain complexity: {terrain_complex:.0f} (reduces confidence)")
+        
+#         conf = max(25, min(95, conf))
+        
+#         # Update CNN object with enhanced geospatial context
+#         result['cnn_analysis']['class'] = inferred_class
+#         cnn_analysis = get_cnn_classification(latitude, longitude) or {}
+
+#         result['cnn_analysis']['confidence'] = round(conf, 1)
+#         result['cnn_analysis']['confidence_display'] = f"{round(conf, 1)}%"
+#         result['cnn_analysis']['note'] = f"Enhanced 23-factor geospatial analysis"
+#         result['cnn_analysis']['reasoning'] = reasoning
+        
+#         if result['cnn_analysis'].get('telemetry'):
+#             result['cnn_analysis']['telemetry']['verified_by'] = "Enhanced 23-factor geospatial cross-check"
+#             result['cnn_analysis']['telemetry']['inferred_from'] = f"veg={vegetation_score:.0f}, landuse={landuse_score:.0f}, infra={infrastructure_score:.0f}, poll={poll_score:.0f}, pop={pop_score:.0f}"
+#             result['cnn_analysis']['telemetry']['vegetation_score'] = round(vegetation_score, 1)
+#             result['cnn_analysis']['telemetry']['landuse_score'] = round(landuse_score, 1)
+#             result['cnn_analysis']['telemetry']['slope_suitability'] = round(slope_score, 1)
+#             result['cnn_analysis']['telemetry']['water_proximity'] = round(water_score, 1)
+#             result['cnn_analysis']['telemetry']['infrastructure_score'] = round(infrastructure_score, 1)
+#             result['cnn_analysis']['telemetry']['population_density'] = round(pop_score, 1)
+#             result['cnn_analysis']['telemetry']['pollution_level'] = round(poll_score, 1)
+#             result['cnn_analysis']['telemetry']['soil_quality'] = round(soil_score, 1)
+#             result['cnn_analysis']['telemetry']['rainfall_level'] = round(rainfall_score, 1)
+#             result['cnn_analysis']['telemetry']['thermal_intensity'] = round(thermal_score, 1)
+#             result['cnn_analysis']['telemetry']['flood_risk'] = round(flood_score, 1)
+#             result['cnn_analysis']['telemetry']['drainage_quality'] = round(drainage_score, 1)
+#             result['cnn_analysis']['telemetry']['classification_reasoning'] = reasoning
+
+#         # 5. FETCH NEARBY AMENITIES (Preserved Logic)
+#         nearby_list = get_nearby_named_places(latitude, longitude)
+#         result['nearby'] = {"places": nearby_list}
+
+       
+#         # 6. STRATEGIC INTELLIGENCE (The Main Update)
+#         # We must create a dictionary that matches the 23-factor expectations exactly
+#         flat_factors_for_intel = {
+#             "slope": slope_score,
+#             "elevation": ff["physical"]["elevation"]["value"],
+#             "flood": flood_score,
+#             "water": water_score,
+#             "drainage": drainage_score,
+#             "vegetation": vegetation_score,
+#             "pollution": poll_score,
+#             "soil": soil_score,
+#             "rainfall": rainfall_score,
+#             "thermal": thermal_score,
+#             "intensity": ff["climatic"]["intensity"]["value"],
+#             "landuse": landuse_score,
+#             "infrastructure": infrastructure_score, # Key must be 'infrastructure'
+#             "population": pop_score
+#         }
+        
+#         # Now pass the clean flat dictionary to the strategic engine
+#         result['strategic_intelligence'] = generate_strategic_intelligence(
+#             flat_factors_for_intel,
+#             result['suitability_score'],
+#             nearby_list
+#         )
+
+#         # 6b. Expose these for the frontend "Strategic Utility" tab
+#         result['flat_factors'] = flat_factors_for_intel
+
+#         # 7. WEATHER & CACHING
+#         result['weather'] = get_live_weather(latitude, longitude)
+#         ANALYSIS_CACHE[cache_key] = result        
+#         return jsonify(result)
+
+#     # except Exception as e:
+#     #     logger.exception(f"Critical Suitability Error: {e}")
+#     #     return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         logger.exception("Critical Suitability Error")
+#         return jsonify({
+#             "error": "Suitability failed",
+#             "details": str(e)
+#         }), 500
+
+    
 @app.route('/suitability', methods=['POST'])
 def suitability():
     try:
@@ -3713,11 +3906,11 @@ def suitability():
 
         # 1. CHECK CACHE & CNN (Preserved Logic)
         cache_key = get_cache_key(latitude, longitude)
-        cnn_analysis = get_cnn_classification(latitude, longitude)
-        
+        cnn_analysis = get_cnn_classification(latitude, longitude) or {}
+
         if cache_key in ANALYSIS_CACHE:
             result = ANALYSIS_CACHE[cache_key]
-            result['cnn_analysis'] = cnn_analysis 
+            result['cnn_analysis'] = cnn_analysis
             return jsonify(result)
 
         # 2. 🚀 TRIGGER 23-FACTOR ANALYSIS (Integrated Logic)
@@ -3727,14 +3920,13 @@ def suitability():
         # 3. INJECT CNN DATA (Preserved Logic)
         result['cnn_analysis'] = cnn_analysis
 
-       
         ff = result["factors"]
 
         # Extract values for classification logic
         # Note: We use .get() and ['value'] to ensure we hit the correct nested structure
         vegetation_score = ff["environmental"]["vegetation"]["value"]
         landuse_score     = ff["socio_econ"]["landuse"]["value"]
-        infrastructure_score = ff["socio_econ"]["infrastructure"]["value"] # Renamed for clarity
+        infrastructure_score = ff["socio_econ"]["infrastructure"]["value"]  # Renamed for clarity
         poll_score        = ff["environmental"]["pollution"]["value"]
         slope_score       = ff["physical"]["slope"]["value"]
         water_score       = ff["hydrology"]["water"]["value"]
@@ -3745,88 +3937,118 @@ def suitability():
         thermal_score     = ff["climatic"]["thermal"]["value"]
         pop_score         = ff["socio_econ"]["population"]["value"]
 
-        
-        
         inferred_class = "Mixed land use"
         base_conf = 65.0
         reasoning = []
-        
-        
-        urban_index = (infrastructure_score * 0.4 + pop_score * 0.3 + (100 - vegetation_score) * 0.2 + poll_score * 0.1)
-        rural_index = (vegetation_score * 0.4 + (100 - infrastructure_score) * 0.3 + (100 - pop_score) * 0.2 + water_score * 0.1)
-        industrial_index = (poll_score * 0.5 + infrastructure_score * 0.3 + (100 - vegetation_score) * 0.2)
-        
+
+        urban_index = (
+            infrastructure_score * 0.4
+            + pop_score * 0.3
+            + (100 - vegetation_score) * 0.2
+            + poll_score * 0.1
+        )
+
+        rural_index = (
+            vegetation_score * 0.4
+            + (100 - infrastructure_score) * 0.3
+            + (100 - pop_score) * 0.2
+            + water_score * 0.1
+        )
+
+        industrial_index = (
+            poll_score * 0.5
+            + infrastructure_score * 0.3
+            + (100 - vegetation_score) * 0.2
+        )
+
         # 1️⃣ Urban/Commercial Detection
         if urban_index > 70:
             inferred_class = "Urban/Commercial"
             conf = min(95, base_conf + (urban_index - 70) * 0.8)
-            reasoning.append(f"Urban index {urban_index:.1f}: Infrastructure {infrastructure_score:.0f} + Population {pop_score:.0f} - Vegetation {vegetation_score:.0f}")
+            reasoning.append(
+                f"Urban index {urban_index:.1f}: Infrastructure {infrastructure_score:.0f} + Population {pop_score:.0f} - Vegetation {vegetation_score:.0f}"
+            )
             reasoning.append(f"Commercial viability: {(infrastructure_score + pop_score)/2:.0f}%")
-        
+
         # 2️⃣ Industrial Detection
         elif industrial_index > 65:
             inferred_class = "Industrial Zone"
             conf = min(92, base_conf + (industrial_index - 65) * 0.7)
-            reasoning.append(f"Industrial index {industrial_index:.1f}: Pollution {poll_score:.0f} + Infrastructure {infrastructure_score:.0f} - Vegetation {vegetation_score:.0f}")
+            reasoning.append(
+                f"Industrial index {industrial_index:.1f}: Pollution {poll_score:.0f} + Infrastructure {infrastructure_score:.0f} - Vegetation {vegetation_score:.0f}"
+            )
             reasoning.append(f"Environmental impact score: {poll_score + (100-vegetation_score):.0f}")
-        
+
         # 3️⃣ Agricultural Detection
         elif rural_index > 60 and soil_score > 60 and water_score > 50:
             inferred_class = "Agricultural"
             conf = min(88, base_conf + (rural_index - 60) * 0.6)
-            reasoning.append(f"Agricultural index {rural_index:.1f}: Vegetation {vegetation_score:.0f} + Soil {soil_score:.0f} + Water {water_score:.0f}")
+            reasoning.append(
+                f"Agricultural index {rural_index:.1f}: Vegetation {vegetation_score:.0f} + Soil {soil_score:.0f} + Water {water_score:.0f}"
+            )
             reasoning.append(f"Farm suitability: {(vegetation_score + soil_score + water_score)/3:.0f}%")
-        
+
         # 4️⃣ Residential Detection (Maintained original thresholds)
         elif infrastructure_score > 50 and pop_score > 40 and pop_score < 80 and vegetation_score > 30:
             inferred_class = "Residential"
             conf = min(85, base_conf + ((infrastructure_score + pop_score + vegetation_score)/3 - 40) * 0.5)
-            reasoning.append(f"Residential balance: Infra {infrastructure_score:.0f} + Pop {pop_score:.0f} + Env {vegetation_score:.0f}")
+            reasoning.append(
+                f"Residential balance: Infra {infrastructure_score:.0f} + Pop {pop_score:.0f} + Env {vegetation_score:.0f}"
+            )
             reasoning.append(f"Livability index: {(infrastructure_score + pop_score + (100-poll_score))/3:.0f}%")
-        
+
         # 5️⃣ Forest/Natural Detection
         elif vegetation_score > 70 and pop_score < 30 and infrastructure_score < 40:
             inferred_class = "Forest/Natural"
             conf = min(90, base_conf + (vegetation_score - 70) * 0.4)
-            reasoning.append(f"Natural index: Vegetation {vegetation_score:.0f} - Population {pop_score:.0f} - Infrastructure {infrastructure_score:.0f}")
-            reasoning.append(f"Wilderness score: {(vegetation_score + (100-pop_score) + (100-infrastructure_score))/3:.0f}%")
-        
+            reasoning.append(
+                f"Natural index: Vegetation {vegetation_score:.0f} - Population {pop_score:.0f} - Infrastructure {infrastructure_score:.0f}"
+            )
+            reasoning.append(
+                f"Wilderness score: {(vegetation_score + (100-pop_score) + (100-infrastructure_score))/3:.0f}%"
+            )
+
         # 6️⃣ Water/Wetland Detection
         elif water_score > 70 and drainage_score > 60:
             inferred_class = "Wetland/Water"
             conf = min(87, base_conf + (water_score - 70) * 0.5)
             reasoning.append(f"Hydrology index: Water {water_score:.0f} + Drainage {drainage_score:.0f}")
             reasoning.append(f"Water abundance: {(water_score + drainage_score)/2:.0f}%")
-        
+
         # 7️⃣ Default: Mixed Use
         else:
             conf = base_conf + abs(50 - ((infrastructure_score + vegetation_score + poll_score)/3)) * 0.3
-            reasoning.append(f"Mixed characteristics: Infra {infrastructure_score:.0f} + Veg {vegetation_score:.0f} + Poll {poll_score:.0f}")
+            reasoning.append(
+                f"Mixed characteristics: Infra {infrastructure_score:.0f} + Veg {vegetation_score:.0f} + Poll {poll_score:.0f}"
+            )
             reasoning.append(f"Development pressure: {(infrastructure_score + pop_score)/2:.0f}%")
-        
+
         # Final stress/complexity modifiers
         env_stress = max(0, (poll_score - 50) + (100 - vegetation_score) + abs(rainfall_score - 50))
         if env_stress > 30:
             conf = max(40, conf - env_stress * 0.2)
             reasoning.append(f"Environmental stress: {env_stress:.0f} points")
-        
+
         terrain_complex = abs(slope_score - 50) + abs(100 - soil_score)
         if terrain_complex > 60:
             conf = max(35, conf - terrain_complex * 0.1)
             reasoning.append(f"Terrain complexity: {terrain_complex:.0f} (reduces confidence)")
-        
+
         conf = max(25, min(95, conf))
-        
+
         # Update CNN object with enhanced geospatial context
         result['cnn_analysis']['class'] = inferred_class
         result['cnn_analysis']['confidence'] = round(conf, 1)
         result['cnn_analysis']['confidence_display'] = f"{round(conf, 1)}%"
         result['cnn_analysis']['note'] = f"Enhanced 23-factor geospatial analysis"
         result['cnn_analysis']['reasoning'] = reasoning
-        
+
         if result['cnn_analysis'].get('telemetry'):
             result['cnn_analysis']['telemetry']['verified_by'] = "Enhanced 23-factor geospatial cross-check"
-            result['cnn_analysis']['telemetry']['inferred_from'] = f"veg={vegetation_score:.0f}, landuse={landuse_score:.0f}, infra={infrastructure_score:.0f}, poll={poll_score:.0f}, pop={pop_score:.0f}"
+            result['cnn_analysis']['telemetry']['inferred_from'] = (
+                f"veg={vegetation_score:.0f}, landuse={landuse_score:.0f}, "
+                f"infra={infrastructure_score:.0f}, poll={poll_score:.0f}, pop={pop_score:.0f}"
+            )
             result['cnn_analysis']['telemetry']['vegetation_score'] = round(vegetation_score, 1)
             result['cnn_analysis']['telemetry']['landuse_score'] = round(landuse_score, 1)
             result['cnn_analysis']['telemetry']['slope_suitability'] = round(slope_score, 1)
@@ -3845,7 +4067,6 @@ def suitability():
         nearby_list = get_nearby_named_places(latitude, longitude)
         result['nearby'] = {"places": nearby_list}
 
-       
         # 6. STRATEGIC INTELLIGENCE (The Main Update)
         # We must create a dictionary that matches the 23-factor expectations exactly
         flat_factors_for_intel = {
@@ -3861,10 +4082,10 @@ def suitability():
             "thermal": thermal_score,
             "intensity": ff["climatic"]["intensity"]["value"],
             "landuse": landuse_score,
-            "infrastructure": infrastructure_score, # Key must be 'infrastructure'
+            "infrastructure": infrastructure_score,  # Key must be 'infrastructure'
             "population": pop_score
         }
-        
+
         # Now pass the clean flat dictionary to the strategic engine
         result['strategic_intelligence'] = generate_strategic_intelligence(
             flat_factors_for_intel,
@@ -3877,20 +4098,14 @@ def suitability():
 
         # 7. WEATHER & CACHING
         result['weather'] = get_live_weather(latitude, longitude)
-        ANALYSIS_CACHE[cache_key] = result        
+        ANALYSIS_CACHE[cache_key] = result
         return jsonify(result)
 
-    # except Exception as e:
-    #     logger.exception(f"Critical Suitability Error: {e}")
-    #     return jsonify({"error": str(e)}), 500
     except Exception as e:
         logger.exception("Critical Suitability Error")
-        return jsonify({
-            "error": "Suitability failed",
-            "details": str(e)
-        }), 500
+        error_response = production_optimizations.handle_production_error(e, "Suitability Analysis")
+        return jsonify(error_response), 500
 
-    
 
 def build_factor_evidence(f):
     return {
