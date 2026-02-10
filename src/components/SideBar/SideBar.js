@@ -206,7 +206,44 @@ const importProjectFile = async (file) => {
   }
 };
 
+ // --- HIGH-TECH TELEMETRY CALCULATIONS ---
+  const getGeospatialTelemetry = () => {
+    const now = currentTime;
+    
+    // 1. UTC / Zulu Time
+    const utcTime = now.toISOString().split('T')[1].split('.')[0] + " Z";
+    
+    // 2. GMT Offset (e.g., +05:30)
+    const offsetMinutes = -now.getTimezoneOffset(); // Reverse sign for ISO standard
+    const sign = offsetMinutes >= 0 ? "+" : "-";
+    const hours = Math.floor(Math.abs(offsetMinutes) / 60).toString().padStart(2, '0');
+    const minutes = (Math.abs(offsetMinutes) % 60).toString().padStart(2, '0');
+    const gmtStr = `GMT ${sign}${hours}:${minutes}`;
+    
+    // 3. Unix Epoch
+    const epoch = Math.floor(now.getTime() / 1000);
+    
+    // 4. Day of Year (DOY)
+    const start = new Date(now.getFullYear(), 0, 0);
+    const doy = Math.floor((now - start) / (1000 * 60 * 60 * 24)).toString().padStart(3, '0');
+    
+    // 5. Year Percentage (Dynamic to 4 decimals for "live" feel)
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const yearEnd = new Date(now.getFullYear() + 1, 0, 1);
+    const progress = ((now - yearStart) / (yearEnd - yearStart)) * 100;
+    
+    // 6. Solar Phase (Based on Local Hour)
+    const hour = now.getHours();
+    let solarPhase = "DAY PHASE";
+    let solarIcon = "☀️";
+    if (hour >= 20 || hour < 5) { solarPhase = "NIGHT PHASE"; solarIcon = "🌙"; }
+    else if (hour >= 5 && hour < 7) { solarPhase = "DAWN / GOLDEN"; solarIcon = "🌅"; }
+    else if (hour >= 18 && hour < 20) { solarPhase = "DUSK / TWILIGHT"; solarIcon = "🌇"; }
 
+    return { utcTime, gmtStr, epoch, doy, progress: progress.toFixed(4), solarPhase, solarIcon };
+  };
+
+  const telemetry = getGeospatialTelemetry();
 
   const handleSearch = async (val) => {
     console.log('Search triggered with value:', val);
@@ -511,8 +548,8 @@ const generateShareLink = () => {
   </div>
 </div> */}
 {/* Centered Tactical Datetime Badge */}
-<div className="sidebar-top-header">
-  {/* Left Wing: System Connectivity */}
+{/* <div className="sidebar-top-header">
+  
   <div className="header-wing left-wing">
     <div className="satellite-hub">
       <span className="telemetry-icon-large" title="">📡</span>
@@ -524,7 +561,7 @@ const generateShareLink = () => {
    
   </div>
 
-  {/* Your Center Badge (Existing) */}
+  
   <div className="sidebar-datetime-display">
      <div className="datetime-content">
       <span className="datetime-date">
@@ -546,12 +583,7 @@ const generateShareLink = () => {
     </div>
   </div>
 
-  {/* Right Wing: User/Project shorthand */}
-  {/* <div className="header-wing right-wing">
-    <span className="user-badge">LIVE</span> 
-    <div className="live-pulse-dot"></div>
-  </div> */}
-  {/* Right Wing: High-Visibility LIVE Status */}
+
 <div className="header-wing right-wing">
   <div className="live-status-container">
     <div className="live-indicator-hub">
@@ -561,6 +593,59 @@ const generateShareLink = () => {
     <span className="status-text-prime">LIVE</span>
   </div>
 </div>
+</div> */}
+<div className="sidebar-top-header tactical-telemetry">
+  {/* ROW 1: System Status & Local Time */}
+  <div className="telemetry-row-primary">
+    <div className="satellite-hub">
+      <span className="telemetry-icon-large">📡</span>
+      <div className="signal-waves"><span></span><span></span></div>
+    </div>
+    
+    <div className="main-datetime-display">
+      <div className="datetime-content">
+        <span className="datetime-date">
+          {currentTime.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
+        </span>
+        <span className="datetime-separator">|</span>
+        <span className="datetime-time">
+          {currentTime.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
+        <span className="timezone-badge">{telemetry.gmtStr}</span>
+      </div>
+    </div>
+
+    <div className="header-wing">
+      <div className="live-status-container">
+        <div className="live-pulse-dot-large"></div>
+        <span className="status-text-prime">LIVE</span>
+      </div>
+    </div>
+  </div>
+
+  {/* ROW 2: Global Telemetry Dashboard */}
+  <div className="telemetry-row-sub">
+    <div className="telemetry-pill">
+      <span className="pill-label">UTC</span>
+      <span className="pill-value">{telemetry.utcTime}</span>
+    </div>
+    <div className="telemetry-pill">
+      <span className="pill-label">EPOCH</span>
+      <span className="pill-value">{telemetry.epoch}</span>
+    </div>
+    <div className="telemetry-pill">
+      <span className="pill-label">DOY</span>
+      <span className="pill-value">{telemetry.doy}</span>
+    </div>
+    <div className="telemetry-pill highlight">
+      <span className="pill-label">YEAR</span>
+      <span className="pill-value">{telemetry.progress}%</span>
+    </div>
+    <div className="telemetry-pill solar">
+      <span className="pill-label">{telemetry.solarIcon}</span>
+      <span className="pill-value">{telemetry.solarPhase}</span>
+    </div>
+  </div>
 </div>
 
 
