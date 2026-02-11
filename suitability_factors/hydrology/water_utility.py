@@ -1,38 +1,3 @@
-# import requests
-
-# def get_water_utility(lat: float, lng: float):
-#     """
-#     Measures Hydrological Utility based on proximity to surface water 
-#     for irrigation and consumption.
-#     """
-#     query = f"""
-#     [out:json][timeout:15];
-#     (
-#       node["waterway"](around:3000,{lat},{lng});
-#       way["waterway"](around:3000,{lat},{lng});
-#       node["natural"="water"](around:3000,{lat},{lng});
-#     );
-#     out body;
-#     """
-#     try:
-#         resp = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
-#         data = resp.json()
-        
-#         # Calculate distance to nearest (simplified for 0-100 score)
-#         # 100 = Right next to water, 0 = No water within 3km
-#         utility_score = 0.0
-#         if data.get("elements"):
-#             utility_score = 85.0 # High access detected
-            
-#         return {
-#             "value": utility_score,
-#             "source": "OpenStreetMap Vector Water Layers",
-#             "link": "https://wiki.openstreetmap.org/wiki/Key:waterway",
-#             "resolution": "Vector/Real-time",
-#             "provenance_note": "Utility represents physical accessibility to permanent water infrastructure."
-#         }
-#     except Exception:
-#         return {"value": 50.0, "source": "OSM Fallback"}
 import requests
 from math import radians, sin, cos, sqrt, atan2
 from typing import Optional, Tuple, Dict

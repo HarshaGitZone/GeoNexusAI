@@ -75,7 +75,7 @@ import requests
 import numpy as np
 import pandas as pd
 import pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -602,51 +602,114 @@ def calculate_weather_severity(weather_code, wind_speed, visibility):
 
 
 def get_air_quality_data(lat, lng):
-    """Get air quality data using OpenAQ API"""
+    """Get air quality data using OpenAQ API v3"""
     try:
-        # OpenAQ API for air quality data
-        url = "https://api.openaq.org/v2/measurements"
-        params = {
+        # OpenAQ API v3 for air quality data
+        base_url = "https://api.openaq.org/v3"
+        
+        # Step 1: Find locations near the coordinates
+        locations_url = f"{base_url}/locations"
+        locations_params = {
             "coordinates": f"{lat},{lng}",
-            "radius": 10000,  # 10km radius
-            "order_by": "datetime",
-            "sort": "desc",
-            "limit": 1,
-            "parameter": ["pm25", "pm10", "no2", "o3", "so2", "co"]
+            "radius": 25000,  # 25km radius (max allowed)
+            "limit": 5  # Get up to 5 nearby locations
         }
         
-        response = retry_request(url, params=params, timeout=15)
+        locations_response = retry_request(locations_url, params=locations_params, timeout=15)
         
-        if response.status_code == 200:
-            data = response.json()
-            results = data.get("results", [])
+        if locations_response.status_code != 200:
+            raise Exception(f"Locations API returned {locations_response.status_code}")
+        
+        locations_data = locations_response.json()
+        locations = locations_data.get("results", [])
+        
+        if not locations:
+            raise Exception("No monitoring locations found nearby")
+        
+        # Step 2: Get sensors for the closest location
+        closest_location = locations[0]
+        location_id = closest_location.get("id")
+        
+        sensors_url = f"{base_url}/locations/{location_id}/sensors"
+        sensors_response = retry_request(sensors_url, timeout=15)
+        
+        if sensors_response.status_code != 200:
+            raise Exception(f"Sensors API returned {sensors_response.status_code}")
+        
+        sensors_data = sensors_response.json()
+        sensors = sensors_data.get("results", [])
+        
+        if not sensors:
+            raise Exception("No sensors found for location")
+        
+        # Step 3: Find sensors for the pollutants we want (PM2.5, PM10, NO2, O3, SO2, CO)
+        pollutant_sensors = {}
+        for sensor in sensors:
+            parameter = sensor.get("parameter", {}).get("name", "").lower()
+            if any(pollutant in parameter for pollutant in ["pm25", "pm2.5", "pm10", "no2", "o3", "so2", "co"]):
+                pollutant_sensors[parameter] = sensor
+        
+        # Step 4: Get latest measurements from the sensors
+        measurements = {}
+        for param_name, sensor in pollutant_sensors.items():
+            sensor_id = sensor.get("id")
+            measurements_url = f"{base_url}/sensors/{sensor_id}/measurements"
+            measurements_params = {
+                "limit": 1,  # Get just the latest measurement
+                "datetime_from": (datetime.now() - timedelta(days=1)).isoformat()  # Last 24 hours
+            }
             
-            if results:
-                latest = results[0]
-                parameter = latest.get("parameter", "")
-                value = latest.get("value", 0)
-                unit = latest.get("unit", "")
+            measurements_response = retry_request(measurements_url, params=measurements_params, timeout=15)
+            
+            if measurements_response.status_code == 200:
+                measurements_data = measurements_response.json()
+                results = measurements_data.get("results", [])
+                if results:
+                    latest = results[0]
+                    measurements[param_name] = {
+                        "value": latest.get("value"),
+                        "unit": latest.get("parameter", {}).get("units", "µg/m³"),
+                        "datetime": latest.get("period", {}).get("datetimeFrom", {})
+                    }
+        
+        # Step 5: Process the measurements to get the most relevant data
+        if measurements:
+            # Prioritize PM2.5, then PM10, then others
+            priority_order = ["pm25", "pm2.5", "pm10", "no2", "o3", "so2", "co"]
+            selected_measurement = None
+            selected_parameter = None
+            
+            for param in priority_order:
+                if param in measurements:
+                    selected_measurement = measurements[param]
+                    selected_parameter = param
+                    break
+            
+            if selected_measurement:
+                value = selected_measurement.get("value", 0)
+                unit = selected_measurement.get("unit", "µg/m³")
                 
                 # Calculate AQI based on parameter
-                aqi_value = calculate_aqi_from_parameter(parameter, value)
+                aqi_value = calculate_aqi_from_parameter(selected_parameter, value)
                 
                 return {
                     "aqi": aqi_value,
-                    "pm25": value if parameter == "pm25" else None,  # Include PM2.5 value if available
-                    "dominant_pollutant": parameter.upper(),  # The parameter with highest value
-                    "pollutant_level": get_aqi_level(aqi_value),  # Level description
-                    "parameter": parameter,
+                    "pm25": value if selected_parameter in ["pm25", "pm2.5"] else None,
+                    "dominant_pollutant": selected_parameter.upper(),
+                    "pollutant_level": get_aqi_level(aqi_value),
+                    "parameter": selected_parameter,
                     "value": value,
                     "unit": unit,
                     "level": get_aqi_level(aqi_value),
-                    "description": get_aqi_description(aqi_value)
+                    "description": get_aqi_description(aqi_value),
+                    "location": closest_location.get("name", "Unknown"),
+                    "sensor_count": len(sensors)
                 }
     
     except Exception as e:
         logger.error(f"Air Quality Fetch Error: {e}")
     
-    # Fallback to location-based estimated values
-    # Use latitude to estimate air quality patterns
+    # Fallback to location-based estimated values (same as before)
     lat = float(lat)
     
     # Base AQI by latitude (general air quality patterns)
