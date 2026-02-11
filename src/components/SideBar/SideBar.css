@@ -3872,6 +3872,7 @@ html:root body .sidebar select.btn-save.mini {
     /* Max-Glass Slab Construction */
     background: none !important;
     background-color: color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    /* background-color: var(--accent-color)!important; */
     backdrop-filter: blur(15px) saturate(180%) !important;
     
     /* Removing the default browser arrow permanently */
@@ -4211,4 +4212,261 @@ html:root body[data-theme="light"] .timezone-badge:hover {
 html:root body[data-theme="light"] .tactical-telemetry {
     background: rgba(255, 255, 255, 0.95) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+
+
+
+
+
+
+
+/* --- PRIMARY ACTION BUTTONS: SOLID PALETTE FILL --- */
+.btn-save, 
+.control-group.compact-group .btn-save {
+    /* 🎨 SOLID FILL: Uses your palette accent for a professional, bold look */
+    background: var(--accent-color) !important;
+    
+    /* 🌑 HIGH CONTRAST: Pure black text for maximum readability on solid backgrounds */
+    color: #000000 !important; 
+    
+    /* 🏗️ GEOMETRIC RIGOR: Matches the rectangular authority of the Analyze button */
+    border: none !important;
+    border-radius: 6px !important;
+    
+    font-weight: 800 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 10px 12px !important;
+    
+    /* 🛡️ DEPTH: Subtle shadow to lift the button off the dark sidebar */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* --- INTERACTIVE STATES --- */
+.btn-save:hover:not(:disabled) {
+    /* 🚀 PREMIUM GLOW: Syncs with your theme's glow variable */
+    filter: brightness(1.15) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px var(--accent-glow) !important;
+}
+
+.btn-save:active:not(:disabled) {
+    transform: translateY(1px) !important;
+    filter: brightness(0.9) !important;
+}
+
+/* --- DISABLED STATE (Awaiting Analysis) --- */
+.btn-save:disabled {
+    background: #1e293b !important; /* Muted slate gray */
+    color: #475569 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    opacity: 0.6 !important;
+}
+
+/* --- LOADER STYLE REFINEMENT --- */
+.pdf-loader-text {
+    font-weight: 900 !important;
+    letter-spacing: 0.5px !important;
+}
+
+
+/* --- 1. THE MAP BUTTON: SOLID BLUE FILL --- */
+.btn-save.mini,
+.comparison-box .btn-save.mini {
+    /* 🎨 SOLID BLUE: Matches your current high-visibility blue */
+    background: #3b82f6 !important; 
+    
+    /* 🌑 HIGH CONTRAST: Crisp white text on deep blue */
+    color: #ffffff !important;
+    
+    /* 🏗️ GEOMETRIC RIGOR: Professional 6px corners */
+    border: none !important;
+    border-radius: 6px !important;
+    
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 8px 10px !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-save.mini:hover {
+    filter: brightness(1.2) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* 🚨 CANCEL STATE: Solid Red for clear warning */
+.btn-save.mini[style*="border: 1px solid #ef4444"],
+.btn-save.mini:contains("Cancel") {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+
+
+
+
+
+
+/* ============================================================
+   MISSION CONTROL: SOLID PALETTE SAVED PLACES DROPDOWN
+   ============================================================ */
+
+/* 1. PRIMARY SOLID TRIGGER: Forcing background and removing glass */
+html:root body .sidebar select.btn-save.mini,
+html:root body .sidebar .comparison-box select.btn-save.mini {
+    /* 🎨 SOLID FILL: Opaque background using your palette accent */
+    background: var(--accent-color) !important;
+    background-color: var(--accent-color) !important;
+    
+    /* 🏗️ GEOMETRIC PRECISION: Sharp, technical corners */
+    border: none !important;
+    border-radius: 4px !important;
+    
+    /* 🌑 HIGH CONTRAST: Deep black text for surgical readability on solid color */
+    /* color: #000000 !important; */
+    color:white !important;
+    
+    /* 🔽 INTEGRATED ARROW: Hard-coded SVG to match text color exactly */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    
+    /* Technical Typography */
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 900 !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    
+    /* Force layout sizing */
+    height: 32px !important;
+    padding: 0 30px 0 12px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. INTERACTIVE STATES: Providing mechanical feedback */
+html:root body .sidebar select.btn-save.mini:hover {
+    filter: brightness(1.15) !important;
+    box-shadow: 0 6px 20px var(--accent-glow) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 3. THE DROPDOWN OPTIONS LIST: Clean Slate Contrast */
+html:root body .sidebar select.btn-save.mini option {
+    /* background-color: #0f172a !important; Professional true-black/dark-blue background */
+    background-color: var(--accent-color)!important;
+    color: #ffffff !important;
+    padding: 12px !important;
+    font-weight: 500 !important;
+}
+
+/* 4. CLEANUP: Removing old "Arrow Wrapper" pseudo-elements if they exist */
+.sidebar .saved-places-wrapper::after {
+    display: none !important;
+    color:white!important;
+}
+
+/* 5. FIX: Ensure parent container doesn't force transparency */
+html:root body .sidebar .compact-row:has(select) {
+    background: none !important;
+    border: none !important;
+}
+
+
+/* ============================================================
+   DROPDOWN VISIBILITY: PERMANENT WHITE TEXT & ARROW
+   ============================================================ */
+
+/* 1. FORCE WHITE TEXT: Applies to both themes */
+html:root body .sidebar select.btn-save.mini,
+html:root body .sidebar .comparison-box select.btn-save.mini {
+    /* ⚪️ PERMANENT WHITE: Ensures visibility on dark or intense palette colors */
+    color: #ffffff !important;
+    
+    /* 🎨 SOLID FILL */
+    background-color: var(--accent-color) !important;
+    border: none !important;
+    
+    /* 🔽 WHITE SVG ARROW: stroke='white' is hard-coded into the background image */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+
+    /* Technical Polish */
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 900 !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 8px 30px 8px 12px !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* ============================================================
+   STRICT SIDEBAR ACTIONS: WHITE TEXT + SOLID FILL
+   ============================================================ */
+
+/* Targets ONLY the three primary action buttons within the sidebar */
+aside.sidebar .btn-save,
+aside.sidebar .control-group.compact-group .btn-save {
+    /* ⚪️ FORCE PURE WHITE */
+    color: #ffffff !important;
+    
+    /* 🎨 SOLID PALETTE FILL */
+    background-color: var(--accent-color) !important;
+    background-image: none !important; /* Removes any accidental map gradients */
+    
+    /* 🏗️ GEOMETRIC RIGOR */
+    border: none !important;
+    border-radius: 6px !important;
+    
+    /* Technical Polish */
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 🚀 HOVER STATE: Stays white */
+aside.sidebar .btn-save:hover:not(:disabled) {
+    filter: brightness(1.1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px var(--accent-glow) !important;
+    color: #ffffff !important; 
+}
+
+/* 🔒 DISABLED STATE */
+aside.sidebar .btn-save:disabled {
+    background: #2d3748 !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: none !important;
+}
+
+/* ============================================================
+   MAP PROTECTION LAYER
+   ============================================================ */
+/* Explicitly prevents sidebar button styles from leaking into the map viewport */
+.map-container .btn-save,
+.map-viewport button,
+.leaflet-container button {
+    all: revert !important; 
 }
