@@ -219,9 +219,10 @@ const importProjectFile = async (file) => {
     const hours = Math.floor(Math.abs(offsetMinutes) / 60).toString().padStart(2, '0');
     const minutes = (Math.abs(offsetMinutes) % 60).toString().padStart(2, '0');
     const gmtStr = `GMT ${sign}${hours}:${minutes}`;
-    
-    // 3. Unix Epoch
-    const epoch = Math.floor(now.getTime() / 1000);
+    // This creates the "GMT +05:30" string
+    const localGMT = `${sign}${hours}:${minutes}`;
+    // // 3. Unix Epoch
+    // const epoch = Math.floor(now.getTime() / 1000);
     
     // 4. Day of Year (DOY)
     const start = new Date(now.getFullYear(), 0, 0);
@@ -234,13 +235,13 @@ const importProjectFile = async (file) => {
     
     // 6. Solar Phase (Based on Local Hour)
     const hour = now.getHours();
-    let solarPhase = "DAY PHASE";
+    let solarPhase = "DAY";
     let solarIcon = "☀️";
     if (hour >= 20 || hour < 5) { solarPhase = "NIGHT"; solarIcon = "🌙"; }
     else if (hour >= 5 && hour < 7) { solarPhase = "DAWN"; solarIcon = "🌅"; }
     else if (hour >= 18 && hour < 20) { solarPhase = "DUSK / TWILIGHT"; solarIcon = "🌇"; }
 
-    return { utcTime, gmtStr, epoch, doy, progress: progress.toFixed(4), solarPhase, solarIcon };
+    return { utcTime, gmtStr,localGMT,  doy, progress: progress.toFixed(1), solarPhase, solarIcon };
   };
 
   const telemetry = getGeospatialTelemetry();
@@ -611,7 +612,7 @@ const generateShareLink = () => {
         <span className="datetime-time">
           {currentTime.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
-        <span className="timezone-badge">{telemetry.gmtStr}</span>
+        {/* <span className="timezone-badge">{telemetry.gmtStr}</span> */}
       </div>
     </div>
 
@@ -640,9 +641,14 @@ const generateShareLink = () => {
       <span className="pill-label">UTC</span>
       <span className="pill-value">{telemetry.utcTime}</span>
     </div>
-    <div className="telemetry-pill">
+    {/* <div className="telemetry-pill">
       <span className="pill-label">EPOCH</span>
       <span className="pill-value">{telemetry.epoch}</span>
+    </div> */}
+    {/* REPLACED EPOCH WITH LOCAL GMT OFFSET */}
+    <div className="telemetry-pill">
+      <span className="pill-label">GMT</span>
+      <span className="pill-value">{telemetry.localGMT}</span>
     </div>
     <div className="telemetry-pill">
       <span className="pill-label">DOY</span>
