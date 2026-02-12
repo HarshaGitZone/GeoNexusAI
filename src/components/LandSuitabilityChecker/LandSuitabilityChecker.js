@@ -5217,77 +5217,36 @@ useEffect(() => {
               ) : (
 
                 <select value={active3DStyle} onChange={(e) => setActive3DStyle(e.target.value)} className="variety-select">
-
                   <option value="satellite">🛰️ 3D Satellite</option>
-
                   <option value="topo">🏔️ 3D Topographic</option>
-
                   <option value="dark">🕶️ 3D Stealth</option>
-
                   <option value="nature">🌱 3D Nature</option>
-
                   <option value="streets">🏙️ 3D Urban (Buildings)</option> {/* New */}
-
                   <option value="outdoor">⛅ 3D Atmospheric</option>
-
                 </select>
-
               )}
-
             </div>
-
-
-
-
-
             <div className="tactical-mode-toggle-container">
-
-
-
-              {/* Wrap the top part in a row-content div */}
-
               <div className="toggle-row-content">
-
                 <span className="toggle-label">Geo-Triad</span>
-
                 <label className="switch-attractive">
-
                   <input
-
                     type="checkbox"
-
                     checked={isTacticalMode}
-
                     onChange={() => setIsTacticalMode(!isTacticalMode)}
-
                   />
-
                   <span className="slider-attractive"></span>
-
                 </label>
-
               </div>
 
               {isTacticalMode && (
-
                 <div className="tactical-snap-controls animate-slide-in">
-
                   <button className="snap-btn btn-a" onClick={() => window.snapToA?.()}>A</button>
-
                   <button className="snap-btn btn-b" onClick={() => window.snapToB?.()}>B</button>
-
                   <button className="snap-btn btn-live" onClick={() => window.snapToLive?.()}>📍</button>
-
                 </div>
-
               )}
-
             </div>
-
-
-
-
-
             {mapMode === "2D" ? (
 
 

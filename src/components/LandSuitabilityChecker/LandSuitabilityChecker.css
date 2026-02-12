@@ -13468,27 +13468,7 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
 }
 
 
-/* Snap buttons (A / B / Live) */
-[data-theme="light"] .tactical-mode-toggle-container .snap-btn {
-  background: rgba(15, 23, 42, 0.05) !important;
-  border: 1px solid rgba(15, 23, 42, 0.12) !important;
-  color: #0f172a !important;
-}
 
-[data-theme="light"] .tactical-mode-toggle-container .snap-btn:hover {
-  background: rgba(15, 23, 42, 0.10) !important;
-}
-
-
-
-/* If your slider uses pseudo elements, this ensures it doesn't look washed out */
-[data-theme="light"] .tactical-mode-toggle-container .slider-attractive {
-  background: rgba(15, 23, 42, 0.18) !important;
-}
-
-[data-theme="light"] .tactical-mode-toggle-container input:checked + .slider-attractive {
-  background: rgba(var(--accent-color, 16, 185, 129), 0.55) !important;
-}
 
 
 /* ---------------------------
