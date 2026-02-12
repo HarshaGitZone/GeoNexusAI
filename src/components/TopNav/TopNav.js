@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./TopNav.css";
 import QRCode from "react-qr-code";
 
@@ -33,15 +33,14 @@ export default function TopNav({
   const [showHistoryTable, setShowHistoryTable] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
-  const [needsSecondRow, setNeedsSecondRow] = useState(false);
+  const [isCompactLayout, setIsCompactLayout] = useState(false);
   const navHideTimeoutRef = useRef(null);
   const [expandedQR, setExpandedQR] = useState(null);
   const navContentRef = useRef(null);
+  const hideTimeoutRef = useRef(null);
 
   const handleNavMouseEnter = () => {
-    if (navHideTimeoutRef.current) {
-      clearTimeout(navHideTimeoutRef.current);
-    }
+    if (navHideTimeoutRef.current) clearTimeout(navHideTimeoutRef.current);
     setIsVisible(true);
   };
 
@@ -52,10 +51,7 @@ export default function TopNav({
     }, 2000);
   };
 
-  const hideTimeoutRef = useRef(null);
-
   const themes = [
-    // Dark Unique Colors (8)
     { name: "Obsidian", color: "#303030" },
     { name: "Deep Violet", color: "#4B0082" },
     { name: "Midnight Teal", color: "#005555" },
@@ -64,7 +60,6 @@ export default function TopNav({
     { name: "Royal Indigo", color: "#4B5320" },
     { name: "Charcoal Gray", color: "#36454F" },
     { name: "Bronze Age", color: "#CD7F32" },
-    // Light Unique Colors (8)
     { name: "Mint Julep", color: "#F0FFF0" },
     { name: "Peach Fuzz", color: "#FFE5B4" },
     { name: "Sky Blue", color: "#87CEEB" },
@@ -78,8 +73,8 @@ export default function TopNav({
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
     }
   };
 
@@ -87,31 +82,23 @@ export default function TopNav({
     document.documentElement.style.setProperty('--accent-color', color);
     document.documentElement.style.setProperty('--accent-glow', `${color}44`);
   };
-  const NavSeparator = () => (
-  <span className="nav-divider" aria-hidden="true" />
-);
+
+  const NavSeparator = () => <span className="nav-divider" aria-hidden="true" />;
+
   const handleMouseEnterPalette = () => {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-    // Remove hover behavior - only show on click
-    // setShowPalette(true);
   };
 
   const handleMouseLeavePalette = () => {
-    hideTimeoutRef.current = setTimeout(() => {
-      setShowPalette(false);
-    }, 3000);
+    hideTimeoutRef.current = setTimeout(() => setShowPalette(false), 3000);
   };
 
   const handlePaletteIconClick = (e) => {
     e.stopPropagation();
-    if (showPalette) {
-      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-      setShowPalette(false);
-    } else {
-      setShowPalette(true);
-    }
+    setShowPalette(!showPalette);
   };
-   // ✅ If master audio is turned off → force both sites muted
+
+  // ✅ Force mute logic
   useEffect(() => {
     if (!isAudioEnabled) {
       setSiteAPlaying(false);
@@ -119,47 +106,36 @@ export default function TopNav({
     }
   }, [isAudioEnabled, setSiteAPlaying, setSiteBPlaying]);
 
-  // Check for second row when relevant dependencies change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      checkIfNeedsSecondRow();
-    }, 100); // Small delay to ensure DOM is rendered
-    
-    return () => clearTimeout(timer);
-  }, [isAudioEnabled, isCompareMode, result, compareResult, showTeam, showPalette]);
-
-  const checkIfNeedsSecondRow = () => {
-    // eslint-disable-next-line no-unused-vars
+  // ✅ STABLE LOGIC: Compact Layout Toggle
+  const checkIfNeedsCompactLayout = useCallback(() => {
     if (!navContentRef.current) return;
-    
     const screenWidth = window.innerWidth;
-    
-    // Force two-row layout for all screens smaller than 1200px
-    const shouldWrap = screenWidth < 400;
-    
-    setNeedsSecondRow(shouldWrap);
-  };
+    // const hasExtraTools = isCompareMode && !!compareResult;
+    // Two-row trigger for small screens or active comparison
+    const shouldBeCompact = screenWidth <= 600 
+    setIsCompactLayout(shouldBeCompact);
+  }, []);
 
+ // ✅ Combined Resize & Layout Effect
   useEffect(() => {
     const handleResize = () => {
       const small = window.innerWidth < 768;
       setIsSmallScreen(small);
       if (small) setIsVisible(true);
-      checkIfNeedsSecondRow();
+      
+      // Fires the layout check
+      checkIfNeedsCompactLayout();
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize();
+    handleResize(); // Initial check
 
     return () => {
-      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-      if (navHideTimeoutRef.current) clearTimeout(navHideTimeoutRef.current);
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [checkIfNeedsCompactLayout]);
 
-   // Compare B speaker should only appear when compare is valid
-     const showBSpeaker = isAudioEnabled && isCompareMode && !!compareResult;
+  const showBSpeaker = isAudioEnabled && isCompareMode && !!compareResult;
 
   return (
     <>
@@ -169,10 +145,17 @@ export default function TopNav({
         <div className="nav-trigger-zone" onMouseEnter={() => setIsVisible(true)} />
       )}
 
-      <nav className={`geo-navbar ${isVisible ? "is-visible" : ""} ${isSmallScreen ? "is-mobile" : "is-floating"} ${needsSecondRow ? "needs-second-row" : ""}`}
+      {/* <nav className={`geo-navbar ${isVisible ? "is-visible" : ""} ${isSmallScreen ? "is-mobile" : "is-floating"} ${needsSecondRow ? "needs-second-row" : ""}`}
         onMouseEnter={handleNavMouseEnter}
         onMouseLeave={handleNavMouseLeave}
-      >
+      > */}
+      <nav className={`geo-navbar 
+    ${isVisible ? "is-visible" : ""} 
+    ${isCompactLayout ? "is-compact" : ""} 
+    ${isSmallScreen ? "is-mobile" : "is-floating"}`}
+    onMouseEnter={handleNavMouseEnter}
+    onMouseLeave={handleNavMouseLeave}
+  >
         <div className="nav-content-shell" ref={navContentRef}>
           <div className="nav-group left">
               <button className={`icon-btn ${showHistoryTable ? "active" : ""}`} onClick={() => setShowHistoryTable(true)}>🕒</button>
