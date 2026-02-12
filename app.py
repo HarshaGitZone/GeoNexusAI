@@ -138,12 +138,15 @@ MODEL_PATH = os.path.join(BASE_DIR, "ml", "models")
 GROQ_KEY = os.getenv("GROQ_API_KEY")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY")
 
 # Debug: Print environment variables (without exposing keys)
 print(f"DEBUG: GROQ_API_KEY exists: {'Yes' if GROQ_KEY else 'No'}")
 print(f"DEBUG: GROQ_API_KEY length: {len(GROQ_KEY) if GROQ_KEY else 0}")
 print(f"DEBUG: OPENAI_API_KEY exists: {'Yes' if OPENAI_KEY else 'No'}")
 print(f"DEBUG: OPENAI_API_KEY length: {len(OPENAI_KEY) if OPENAI_KEY else 0}")
+print(f"DEBUG: OPENAQ_API_KEY exists: {'Yes' if OPENAQ_API_KEY else 'No'}")
+print(f"DEBUG: OPENAQ_API_KEY length: {len(OPENAQ_API_KEY) if OPENAQ_API_KEY else 0}")
 print(f"DEBUG: .env file loaded: {'Yes' if os.path.exists('.env') else 'No'}")
 
 # --- Groq (Primary) and OpenAI (Secondary backup) for GeoGPT ---
@@ -615,7 +618,12 @@ def get_air_quality_data(lat, lng):
             "limit": 5  # Get up to 5 nearby locations
         }
         
-        locations_response = retry_request(locations_url, params=locations_params, timeout=15)
+        # Add API key header if available
+        headers = {}
+        if OPENAQ_API_KEY and OPENAQ_API_KEY.strip():
+            headers["X-API-Key"] = OPENAQ_API_KEY.strip()
+        
+        locations_response = retry_request(locations_url, params=locations_params, timeout=15, headers=headers)
         
         if locations_response.status_code != 200:
             raise Exception(f"Locations API returned {locations_response.status_code}")
@@ -631,7 +639,13 @@ def get_air_quality_data(lat, lng):
         location_id = closest_location.get("id")
         
         sensors_url = f"{base_url}/locations/{location_id}/sensors"
-        sensors_response = retry_request(sensors_url, timeout=15)
+        
+        # Add API key header if available
+        headers = {}
+        if OPENAQ_API_KEY and OPENAQ_API_KEY.strip():
+            headers["X-API-Key"] = OPENAQ_API_KEY.strip()
+        
+        sensors_response = retry_request(sensors_url, timeout=15, headers=headers)
         
         if sensors_response.status_code != 200:
             raise Exception(f"Sensors API returned {sensors_response.status_code}")
@@ -659,7 +673,12 @@ def get_air_quality_data(lat, lng):
                 "datetime_from": (datetime.now() - timedelta(days=1)).isoformat()  # Last 24 hours
             }
             
-            measurements_response = retry_request(measurements_url, params=measurements_params, timeout=15)
+            # Add API key header if available
+            headers = {}
+            if OPENAQ_API_KEY and OPENAQ_API_KEY.strip():
+                headers["X-API-Key"] = OPENAQ_API_KEY.strip()
+            
+            measurements_response = retry_request(measurements_url, params=measurements_params, timeout=15, headers=headers)
             
             if measurements_response.status_code == 200:
                 measurements_data = measurements_response.json()
