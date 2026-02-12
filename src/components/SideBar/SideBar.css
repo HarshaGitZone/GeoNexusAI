@@ -4469,3 +4469,181 @@ html:root body[data-theme="light"] .sidebar .btn-mono-tool {
     color: #000000 !important;
     text-shadow: none !important;
 }
+
+
+
+
+
+
+/* ============================================================
+   TACTICAL BLACK: PRIMARY ACTION TEXT & DROPDOWN ARROW
+   ============================================================ */
+
+/* 1. FORCE BLACK TEXT: Generate Report, Share, Project Manager, and Dropdown */
+aside.sidebar .btn-save,
+aside.sidebar .control-group.compact-group .btn-save,
+aside.sidebar select.btn-save.mini {
+    /* ⚫️ PERMANENT BLACK: Maximum legibility on solid palette colors */
+    color: #000000 !important;
+    
+    /* 🎨 SOLID PALETTE FILL */
+    background-color: var(--accent-color) !important;
+    background-image: none !important;
+    border: none !important;
+    
+    /* Technical Polish */
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    text-shadow: none !important; /* Removes glow for a cleaner enterprise look */
+    
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. BLACK DROPDOWN ARROW: Hard-coded SVG for the Saved Places trigger */
+aside.sidebar select.btn-save.mini {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    /* 🔽 BLACK SVG ARROW: stroke='black' ensures it matches the text */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    padding-right: 35px !important;
+}
+
+/* 🚀 HOVER STATE: Stays Black */
+aside.sidebar .btn-save:hover:not(:disabled),
+aside.sidebar select.btn-save.mini:hover {
+    filter: brightness(1.1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px var(--accent-glow) !important;
+    color: #000000 !important; /* Forces black to persist on hover */
+}
+
+/* 🔒 DISABLED STATE */
+aside.sidebar .btn-save:disabled {
+    background: #1e293b !important;
+    color: rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   AUTHORITY OVERRIDE: BLACK TEXT & ARROW IN DARK THEME
+   ============================================================ */
+
+/* 1. PRIMARY ACTIONS: High-Hierarchy Black Text */
+
+
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini {
+    /* ⚫️ FORCED SOLID BLACK: Dominates all white/glass styles */
+    color: #000000 !important;
+    
+    /* 🎨 SOLID PALETTE FILL */
+    background-color: var(--accent-color) !important;
+    background-image: none !important;
+    
+    /* Technical Polish */
+    font-weight: 900 !important;
+    text-shadow: none !important; /* Removes glow for surgical clarity */
+    letter-spacing: 1px !important;
+}
+
+/* 2. BLACK DROPDOWN ARROW: Specific Dark Theme Override */
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    /* 🔽 FORCED BLACK SVG: Replaces any white arrows */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+}
+
+/* 🚀 DARK THEME HOVER: Maintaining Black Contrast */
+html:root body[data-theme="dark"] aside.sidebar .btn-save:hover:not(:disabled),
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini:hover {
+    color: #000000 !important; /* Keeps text black during hover animation */
+    filter: brightness(1.15) !important;
+    box-shadow: 0 8px 25px var(--accent-glow) !important;
+}
+
+/* 🔒 DARK THEME DISABLED: Muted Contrast */
+html:root body[data-theme="dark"] aside.sidebar .btn-save:disabled {
+    background: #1e293b !important;
+    color: rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* ============================================================
+   DROPDOWN LIST AUTHORITY: BLACK TEXT FOR OPENED OPTIONS
+   ============================================================ */
+
+/* 1. THE OPENED LIST (Options): Dark Theme Specific */
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini option {
+    /* ⚫️ FORCED BLACK TEXT: Ensures "Wood" and other names are visible */
+    color: #000000 !important;
+   
+    /* Technical Precision */
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 700 !important;
+    padding: 12px !important;
+}
+
+/* 2. HOVER/SELECTION STATE */
+/* Note: OS-level styling often dictates the blue highlight, but this 
+   sets the base visibility for the list */
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini option:hover,
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini option:checked {
+    background-color: var(--accent-color) !important;
+    color: #000000 !important;
+}
+
+/* 3. SYNC WITH TRIGGER: Ensuring the closed state also stays black */
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini {
+    color: #000000 !important;
+    background-color: var(--accent-color) !important;
+    /* Black SVG Arrow */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+
+/* ============================================================
+   THEME-SENSITIVE AUTHORITY: ACTION BUTTON TEXT
+   ============================================================ */
+
+
+html:root body[data-theme="light"] aside.sidebar .control-group.compact-group .btn-save {
+    /* Pure White for maximum pop in light mode */
+    color: #ffffff !important; 
+    
+    /* Ensure background is solid palette color */
+    background-color: var(--accent-color) !important;
+    
+    /* Subtle shadow for white-on-light legibility */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+html:root body[data-theme="dark"] aside.sidebar .control-group.compact-group .btn-save,
+html:root body[data-theme="dark"] aside.sidebar select.btn-save.mini {
+    /* Tactical Black for surgical clarity in dark mode */
+    color: #000000 !important; 
+    
+    background-color: var(--accent-color) !important;
+    text-shadow: none !important;
+}
+
+/* 🚀 SHARED HOVER LOGIC */
+aside.sidebar .btn-save:hover:not(:disabled) {
+    filter: brightness(1.1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px var(--accent-glow) !important;
+}
+
+/* Ensure the text color PERSISTS during hover based on the theme */
+html:root body[data-theme="light"] aside.sidebar .btn-save:hover { color: #ffffff !important; }
+html:root body[data-theme="dark"] aside.sidebar .btn-save:hover { color: #000000 !important; }
+
+
