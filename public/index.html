@@ -32,6 +32,36 @@ content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: http://loc
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
+    
+    <!-- Prevent color flash - set accent color immediately -->
+    <script>
+      (function() {
+        console.log('Color script running...');
+        
+        // Always use theme defaults for fresh browser session
+        const isDarkMode = localStorage.getItem('geo_theme') === 'true' || localStorage.getItem('geo_theme') === null;
+        const defaultColor = isDarkMode ? '#E6E6FA' : '#36454F';
+        
+        console.log('Theme:', isDarkMode ? 'dark' : 'light');
+        console.log('Default color:', defaultColor);
+        
+        // Apply theme defaults immediately
+        document.documentElement.style.setProperty('--accent-color', defaultColor);
+        document.documentElement.style.setProperty('--accent-glow', defaultColor + '44');
+        
+        // Only use session-stored color after page has fully loaded
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            const sessionColor = sessionStorage.getItem('geo_accent_color_session');
+            if (sessionColor) {
+              console.log('Applying session color:', sessionColor);
+              document.documentElement.style.setProperty('--accent-color', sessionColor);
+              document.documentElement.style.setProperty('--accent-glow', sessionColor + '44');
+            }
+          }, 100);
+        });
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

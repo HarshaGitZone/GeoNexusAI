@@ -1320,7 +1320,7 @@
 
 
 :root {
-  --accent-color: #8b5cf6; /* Default Purple */
+  --accent-color: initial; /* Will be set by JavaScript */
   --nav-bg-dark: rgba(15, 23, 42, 0.85);
   --nav-bg-light: rgba(255, 255, 255, 0.9);
 }
@@ -1498,8 +1498,8 @@
 
 
 :root {
-  --accent-color: #8b5cf6;
-  --accent-glow: rgba(139, 92, 246, 0.3);
+  --accent-color: initial; /* Will be set by JavaScript */
+  --accent-glow: initial; /* Will be set by JavaScript */
   --nav-bg: rgba(15, 23, 42, 0.85);
   --nav-height: 64px;
 }

@@ -81,6 +81,8 @@ export default function TopNav({
   const changeThemeColor = (color) => {
     document.documentElement.style.setProperty('--accent-color', color);
     document.documentElement.style.setProperty('--accent-glow', `${color}44`);
+    // Persist to sessionStorage (not localStorage) - only lasts for current session
+    sessionStorage.setItem('geo_accent_color_session', color);
   };
 
   const NavSeparator = () => <span className="nav-divider" aria-hidden="true" />;
@@ -97,6 +99,24 @@ export default function TopNav({
     e.stopPropagation();
     setShowPalette(!showPalette);
   };
+
+  // ✅ Load persisted accent color on mount
+  useEffect(() => {
+    // Always start with theme defaults
+    const defaultColor = isDarkMode ? "#E6E6FA" : "#36454F"; // Lavender Mist for dark, Charcoal Gray for light
+    document.documentElement.style.setProperty('--accent-color', defaultColor);
+    document.documentElement.style.setProperty('--accent-glow', `${defaultColor}44`);
+    
+    // Check for session-stored color after component mounts
+    const sessionColor = sessionStorage.getItem('geo_accent_color_session');
+    if (sessionColor) {
+      // Apply session color with a slight delay to show defaults first
+      setTimeout(() => {
+        document.documentElement.style.setProperty('--accent-color', sessionColor);
+        document.documentElement.style.setProperty('--accent-glow', `${sessionColor}44`);
+      }, 200);
+    }
+  }, [isDarkMode]);
 
   // ✅ Force mute logic
   useEffect(() => {
