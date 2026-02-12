@@ -806,53 +806,7 @@ const FactorsSection = memo(({
 
   };
 
-  // const FactorCard = (
 
-  //   <div className="card factors-card">
-
-  //     <div className="factors-header">
-
-  //       <h3>Terrain Factors</h3>
-
-  //       <button className="view-toggle" onClick={() => setViewMode(viewMode === "bars" ? "radar" : "bars")}>
-
-  //           {viewMode === "bars" ? "🕸️ Radar View" : "📊 Bar View"}
-
-  //       </button>
-
-  //     </div>
-
-
-
-  //     {viewMode === "bars" ? (
-
-  //       <div className="bars-container">
-
-  //         {['rainfall', 'flood', 'landslide', 'soil', 'proximity', 'water', 'pollution', 'landuse'].map(f => (
-
-  //           <FactorBar key={f} label={f.charAt(0).toUpperCase() + f.slice(1)} value={data.factors[f] ?? 0} />
-
-  //         ))}
-
-  //       </div>
-
-  //     ) : (
-
-  //       <div className="radar-container" style={{ height: '300px', width: '100%', position: 'relative' }}>
-
-  //           <RadarChart key={`radar-${nLat}-${nLng}`} data={data.factors} isDarkMode={isDarkMode} />
-
-  //       </div>
-
-  //     )}
-
-  //   </div>
-
-  // );
-
-
-
-  // --- UPDATED CATEGORIZED FACTOR CARD ---
 
   const FactorCard = (
 
@@ -1162,7 +1116,7 @@ const FactorsSection = memo(({
     <div className="tactical-timestamp-box">
         <div className="ts-indicator">
             <span className="ts-pulse"></span>
-            <span className="ts-label">LAST ANALYZED</span>
+            <span className="ts-label">ANALYZED AT:</span>
         </div>
         <div className="ts-value-wrapper">
             <span className="ts-date">{lastAnalyzedTime.split(',')[0]}</span>
@@ -1674,9 +1628,9 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
     }
   }, [closeSiteA]);
 
-  const [analysisTime, setAnalysisTime] = useState(() => {
-    return localStorage.getItem("geo_last_analysis_time");
-  });
+  // const [analysisTime, setAnalysisTime] = useState(() => {
+  //   return localStorage.getItem("geo_last_analysis_time");
+  // });
 
   const [compareResult, setCompareResult] = useState(() => JSON.parse(localStorage.getItem("geo_last_compare_result")) || null);
 
@@ -1996,12 +1950,15 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
     setIsCompareMode(true);
 
     setCompareResult(null);
+    
 
 
 
     try {
 
       // FIXED: Parallel fetch for both suitability and snapshot identity for Site B
+   
+
 
       const [suitResult, snapData] = await Promise.all([
 
@@ -2014,6 +1971,19 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
 
       setCompareResult(suitResult);
+      const nowB = new Date().toLocaleString("en-GB", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+});
+
+setSiteBTime(nowB);
+localStorage.setItem("geo_last_analysis_time_b", nowB);
+
 
       setSnapshotDataB(snapData); // Now snapData is correctly defined from the fetch
 
@@ -2201,7 +2171,7 @@ if (e && e.preventDefault) e.preventDefault();
     setResult(null);
 
     setCompareResult(null);
-    setAnalysisTime(null);
+    // setAnalysisTime(null);
     localStorage.removeItem("geo_last_analysis_time");
 
 
@@ -2274,14 +2244,14 @@ if (e && e.preventDefault) e.preventDefault();
 
         setResult(analysisData);
         setAnalysisComplete(true);
-       setAnalysisTime(now);
+      //  setAnalysisTime(now);
     setSiteATime(now);
     
     localStorage.setItem("geo_last_analysis_time_a", now);
     
     setAnalyzedCoords({ lat, lng });
 
-        setAnalysisTime(now);
+        // setAnalysisTime(now);
         localStorage.setItem("geo_last_analysis_time", now);
         // const coordsA = { lat, lng };
 
@@ -2434,7 +2404,7 @@ if (e && e.preventDefault) e.preventDefault();
     analyzedCoords.lat,
 
     analyzedCoords.lng,
-    setSiteATime, setSiteBTime, setAnalysisTime
+    setSiteATime, setSiteBTime
 
   ]);
 
@@ -2562,6 +2532,12 @@ if (e && e.preventDefault) e.preventDefault();
       initialAnalysisRef.current = true;
 
       restoreFromProjectPayload(payload);
+//       const aTime = localStorage.getItem("geo_last_analysis_time_a");
+// const bTime = localStorage.getItem("geo_last_analysis_time_b");
+
+// if (aTime) setSiteATime(aTime);
+// if (bTime) setSiteBTime(bTime);
+
 
       // Optional: mark analysis complete so AudioLandscape behaves correctly
       setAnalysisComplete(true);
@@ -2575,7 +2551,16 @@ if (e && e.preventDefault) e.preventDefault();
       // Clean URL if it has old query params
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [restoreFromProjectPayload]);
+  // }, [restoreFromProjectPayload]);
+  }, [restoreFromProjectPayload, setSiteATime, setSiteBTime]);
+
+useEffect(() => {
+  const aTime = localStorage.getItem("geo_last_analysis_time_a");
+  const bTime = localStorage.getItem("geo_last_analysis_time_b");
+
+  if (aTime) setSiteATime(aTime);
+  if (bTime) setSiteBTime(bTime);
+}, []);
 
 
   useEffect(() => {
@@ -3647,9 +3632,13 @@ if (e && e.preventDefault) e.preventDefault();
   //     );
 
   //   }
-  const renderTabContent = (data, coords, name, isFullWidth) => {
+  // const renderTabContent = (data, coords, name, isFullWidth) => {
+    const renderTabContent = (data, coords, name, isFullWidth, siteId = "A") => {
+
     const containerClass = isFullWidth ? "results-grid" : "column-stack";
-    const currentSnapshot = name === locationAName ? snapshotData : snapshotDataB;
+    // const currentSnapshot = name === locationAName ? snapshotData : snapshotDataB;
+    const currentSnapshot = siteId === "A" ? snapshotData : snapshotDataB;
+
 
     if (activeTab === "suitability") {
       return (
@@ -3681,7 +3670,9 @@ if (e && e.preventDefault) e.preventDefault();
               onZoomOut={handleZoomOut}
               isSelectingB={isSelectingB}
               handleCompareSelect={handleCompareSelect}
-              lastAnalyzedTime={name === locationAName ? siteATime : siteBTime}
+              // lastAnalyzedTime={name === locationAName ? siteATime : siteBTime}
+               lastAnalyzedTime={siteId === "A" ? siteATime : siteBTime}
+  siteId={siteId}
               
             />
 
@@ -5428,7 +5419,7 @@ if (e && e.preventDefault) e.preventDefault();
 
 
               <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
-                {analysisTime && result && (
+                {/* {analysisTime && result && (
                     <div className="analysis-timestamp-container">
                       <div className="timestamp-content">
                         
@@ -5443,7 +5434,7 @@ if (e && e.preventDefault) e.preventDefault();
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 {/* Center Tabs */}
                 <div className="tab-buttons-container">
                   
@@ -5609,7 +5600,9 @@ if (e && e.preventDefault) e.preventDefault();
 
                     <h4 className="pane-header">{locationAName.toUpperCase()} - FULL TERRAIN REPORT</h4>
 
-                    {renderTabContent(result, analyzedCoords, locationAName, true)}
+                    {/* {renderTabContent(result, analyzedCoords, locationAName, true)} */}
+                    {renderTabContent(result, analyzedCoords, locationAName, true, "A")}
+
 
                   </div>
 
@@ -5661,7 +5654,7 @@ if (e && e.preventDefault) e.preventDefault();
 
                       <h4 className="pane-header only-desktop">{locationAName.toUpperCase()}</h4>
 
-                      {result ? renderTabContent(result, analyzedCoords, locationAName, false) : <div className="empty-results">Analyzing Site A...</div>}
+                      {result ? renderTabContent(result, analyzedCoords, locationAName, false, "A") : <div className="empty-results">Analyzing Site A...</div>}
 
                     </div>
 
@@ -5673,7 +5666,7 @@ if (e && e.preventDefault) e.preventDefault();
 
                       <h4 className="pane-header only-desktop">{locationBName.toUpperCase() || "SITE B"}</h4>
 
-                      {compareResult ? renderTabContent(compareResult, analyzedCoordsB, locationBName, false) : <div className="empty-results">Waiting for selection...</div>}
+                      {compareResult ? renderTabContent(compareResult, analyzedCoordsB, locationBName, false , "B") : <div className="empty-results">Waiting for selection...</div>}
 
                     </div>
 

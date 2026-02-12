@@ -13362,3 +13362,158 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
 
 
 
+
+
+/* ============================================================
+   LIGHT THEME FIX: Map HUD Cards (2D/3D/Fullscreen + Geo-Triad)
+   ============================================================ */
+
+/* ---------- 1) Default (Dark theme) - Keep your existing look ---------- */
+.engine-switch-container,
+.map-variety-picker,
+.tactical-mode-toggle-container {
+  background: rgba(0, 0, 0, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Buttons inside */
+.engine-switch-container .switch-btn,
+.engine-switch-container .fullscreen-btn,
+.tactical-mode-toggle-container .snap-btn,
+.map-variety-picker select,
+.map-variety-picker .spectral-toggle-bar button {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Labels */
+.map-variety-picker .picker-header,
+.tactical-mode-toggle-container .toggle-label {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+/* Divider */
+.engine-switch-container .vertical-divider {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+
+/* ---------- 2) LIGHT THEME OVERRIDE (THIS IS THE MAIN FIX) ---------- */
+[data-theme="light"] .engine-switch-container,
+[data-theme="light"] .map-variety-picker,
+[data-theme="light"] .tactical-mode-toggle-container {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important; /* slate-900 */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* 2D / 3D / fullscreen buttons */
+[data-theme="light"] .engine-switch-container .switch-btn,
+[data-theme="light"] .engine-switch-container .fullscreen-btn {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+/* Active 2D / 3D button */
+[data-theme="light"] .engine-switch-container .switch-btn.active {
+  background: rgba(var(--accent-color, 16, 185, 129), 0.18) !important;
+  border-color: rgba(var(--accent-color, 16, 185, 129), 0.45) !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+/* Hover polish */
+[data-theme="light"] .engine-switch-container .switch-btn:hover,
+[data-theme="light"] .engine-switch-container .fullscreen-btn:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Divider in light theme */
+[data-theme="light"] .engine-switch-container .vertical-divider {
+  background: rgba(15, 23, 42, 0.18) !important;
+}
+
+/* Map variety header */
+[data-theme="light"] .map-variety-picker .picker-header {
+  color: rgba(15, 23, 42, 0.72) !important;
+}
+
+/* Select styling */
+[data-theme="light"] .map-variety-picker select.variety-select {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+/* NDVI / Heat / Flow buttons */
+[data-theme="light"] .map-variety-picker .spectral-toggle-bar button {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid rgba(15, 23, 42, 0.10) !important;
+  color: rgba(15, 23, 42, 0.82) !important;
+}
+
+/* Active spectral button */
+[data-theme="light"] .map-variety-picker .spectral-toggle-bar button.active {
+  background: rgba(var(--accent-color, 16, 185, 129), 0.18) !important;
+  border-color: rgba(var(--accent-color, 16, 185, 129), 0.45) !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+
+/* Snap buttons (A / B / Live) */
+[data-theme="light"] .tactical-mode-toggle-container .snap-btn {
+  background: rgba(15, 23, 42, 0.05) !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .tactical-mode-toggle-container .snap-btn:hover {
+  background: rgba(15, 23, 42, 0.10) !important;
+}
+
+
+
+/* If your slider uses pseudo elements, this ensures it doesn't look washed out */
+[data-theme="light"] .tactical-mode-toggle-container .slider-attractive {
+  background: rgba(15, 23, 42, 0.18) !important;
+}
+
+[data-theme="light"] .tactical-mode-toggle-container input:checked + .slider-attractive {
+  background: rgba(var(--accent-color, 16, 185, 129), 0.55) !important;
+}
+
+
+/* ---------------------------
+   2) ZOOM HUD FIX
+---------------------------- */
+
+[data-theme="light"] .tactical-zoom-hud {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+[data-theme="light"] .tactical-zoom-hud button {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .tactical-zoom-hud button:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .tactical-zoom-hud .zoom-divider {
+  background: rgba(15, 23, 42, 0.18) !important;
+}
+
