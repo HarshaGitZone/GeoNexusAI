@@ -236,8 +236,8 @@ const importProjectFile = async (file) => {
     const hour = now.getHours();
     let solarPhase = "DAY PHASE";
     let solarIcon = "☀️";
-    if (hour >= 20 || hour < 5) { solarPhase = "NIGHT PHASE"; solarIcon = "🌙"; }
-    else if (hour >= 5 && hour < 7) { solarPhase = "DAWN / GOLDEN"; solarIcon = "🌅"; }
+    if (hour >= 20 || hour < 5) { solarPhase = "NIGHT"; solarIcon = "🌙"; }
+    else if (hour >= 5 && hour < 7) { solarPhase = "DAWN"; solarIcon = "🌅"; }
     else if (hour >= 18 && hour < 20) { solarPhase = "DUSK / TWILIGHT"; solarIcon = "🌇"; }
 
     return { utcTime, gmtStr, epoch, doy, progress: progress.toFixed(4), solarPhase, solarIcon };
