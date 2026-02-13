@@ -91,7 +91,9 @@ class ParallelAPIExecutor:
         factors = {}
         for i, (key, result) in enumerate(zip(api_calls.keys(), results)):
             if isinstance(result, Exception):
-                logger.warning(f"API call failed for {key}: {result}")
+                # Only log critical errors, suppress expected network failures
+                if "Cannot connect to host" not in str(result) and "Connection refused" not in str(result):
+                    logger.warning(f"API call failed for {key}: {result}")
                 factors[key] = self._get_fallback(key)
             else:
                 factors[key] = result
@@ -119,7 +121,9 @@ class ParallelAPIExecutor:
                         "source": "Open-Meteo API"
                     }
         except Exception as e:
-            logger.warning(f"Weather API error: {e}")
+            # Suppress expected network errors
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Weather API error: {e}")
             return {"value": 25, "source": "Weather fallback"}
     
     async def _fetch_infrastructure(self, lat: float, lng: float):
@@ -145,7 +149,9 @@ class ParallelAPIExecutor:
                     score = min(100, count * 10)
                     return {"value": score, "source": "Overpass API"}
         except Exception as e:
-            logger.warning(f"Infrastructure API error: {e}")
+            # Suppress expected network errors
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Infrastructure API error: {e}")
             return {"value": 50, "source": "Infrastructure fallback"}
     
     async def _fetch_pollution(self, lat: float, lng: float):

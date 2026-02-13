@@ -86,10 +86,44 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 load_dotenv()
 
 # --- Initialize Logging ---
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)  # Changed from INFO to WARNING to reduce noise
 logger = logging.getLogger(__name__)
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
+# Suppress noisy third-party logs
+logging.getLogger('urllib3.connectionpool').setLevel(logging.WARNING)
+logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger('aiohttp').setLevel(logging.WARNING)
+
+# Additional suppression for common noise
+logging.getLogger('requests.packages.urllib3').setLevel(logging.WARNING)
+logging.getLogger('urllib3.connection').setLevel(logging.WARNING)
+
+# Suppress any remaining debug output from __main__
+main_logger = logging.getLogger('__main__')
+main_logger.setLevel(logging.WARNING)
+
+# Redirect stdout to suppress any print statements that might be generating debug info
+import sys
+import os
+if os.environ.get('SUPPRESS_DEBUG_LOGS', 'true').lower() == 'true':
+    class DebugSuppressor:
+        def write(self, text):
+            # Suppress common debug patterns
+            if any(pattern in text for pattern in [
+                'Day/Night Debug', 'Hour:', 'API is_day:', 'Location:',
+                'Tile fetch error for year', 'NameResolutionError',
+                'Failed to resolve', 'getaddrinfo failed'
+            ]):
+                return
+            # Write other output normally
+            sys.__stdout__.write(text)
+        
+        def flush(self):
+            sys.__stdout__.flush()
+    
+    sys.stdout = DebugSuppressor()
 
 from ai_assistant import generate_system_prompt, PROJECT_KNOWLEDGE, FORMATTING_RULES
 from reports.pdf_generator import generate_land_report
@@ -401,10 +435,6 @@ def get_live_weather(lat, lng):
 
         code = current.get("weather_code", 0)
         is_day = current.get("is_day")
-        
-        # Debug day/night detection
-        current_hour = datetime.now().hour
-        logger.info(f"Day/Night Debug - Hour: {current_hour}, API is_day: {is_day}, Location: {lat}, {lng}")
         
         # Enhanced weather description mapping
         description = "Clear Sky"
@@ -892,7 +922,11 @@ def get_visual_forensics(lat, lng, past_year=2017):
                         used_year = year
                         break
             except Exception as e:
-                logger.error(f"Tile fetch error for year {year} at {url}: {e}")
+                # Suppress DNS resolution errors for tile servers
+                if ("getaddrinfo failed" not in str(e) and 
+                    "Failed to resolve" not in str(e) and 
+                    "NameResolutionError" not in str(e)):
+                    logger.error(f"Tile fetch error for year {year} at {url}: {e}")
                 continue
 
         if valid_b_img is None:
@@ -911,7 +945,11 @@ def get_visual_forensics(lat, lng, past_year=2017):
             img_c_raw = Image.open(BytesIO(res_c.content)).convert('L').resize((256, 256))
             img_c = np.array(img_c_raw) / 255.0
         except Exception as e:
-            logger.error(f"Current tile fetch error at {url_current}: {e}")
+            # Suppress DNS resolution errors for tile servers
+            if ("getaddrinfo failed" not in str(e) and 
+                "Failed to resolve" not in str(e) and 
+                "NameResolutionError" not in str(e)):
+                logger.error(f"Current tile fetch error at {url_current}: {e}")
             return None
 
         # ---------------------------------------------------
@@ -2749,7 +2787,11 @@ def retry_request(url, timeout=15, max_retries=2, verify=True, headers=None, par
                 logger.error(f"Request failed after {max_retries} attempts for {url}: {e}")
                 raise
             else:
-                logger.warning(f"Request attempt {attempt + 1} failed for {url}, retrying...")
+                # Suppress retry warnings for DNS resolution failures
+                if ("getaddrinfo failed" not in str(e) and 
+                    "Failed to resolve" not in str(e) and 
+                    "NameResolutionError" not in str(e)):
+                    logger.warning(f"Request attempt {attempt + 1} failed for {url}, retrying...")
                 time.sleep(1 * (attempt + 1))  # Exponential backoff
     return None
 
@@ -5023,8 +5065,8 @@ def _get_regional_weather_estimate(lat, lng):
     
     is_day_time = 1 if sunrise_hour <= current_hour < sunset_hour else 0
     
-    # Debug fallback day/night detection
-    logger.info(f"Fallback Day/Night Debug - UTC Hour: {utc_now.hour}, Local Hour: {current_hour}, TZ Offset: {timezone_offset}, Sunrise: {sunrise_hour:.1f}, Sunset: {sunset_hour:.1f}, is_day: {is_day_time}, Location: {lat}, {lng}")
+    # Suppress any debug logging that might be happening
+    # Note: If you see "Day/Night Debug" logs, check for print statements in this function
     
     return {
         "status": "available",
