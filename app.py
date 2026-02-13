@@ -43,6 +43,7 @@ RENDER_SAFE_MODE = os.environ.get(
     "RENDER_SAFE_MODE",
     "true" if IS_RENDER else "false"
 ).lower() == "true"
+USE_FAST_ANALYSIS = os.environ.get("USE_FAST_ANALYSIS", "false").lower() == "true"
 
 # Light Imports
 from PIL import Image
@@ -291,6 +292,22 @@ CORS(app, resources={r"/*": {
     "allow_headers": ["Content-Type", "Authorization", "Accept"],
 }}, supports_credentials=True)
 init_db()
+
+
+def _fetch_land_intelligence(lat: float, lng: float) -> dict:
+    """
+    Fetch factor intelligence with a safe default to GeoDataService.
+    Fast path is opt-in only to avoid synthetic fallback values in production output.
+    """
+    if USE_FAST_ANALYSIS:
+        try:
+            from utils.fast_analysis import get_land_intelligence_sync
+            return get_land_intelligence_sync(lat, lng)
+        except Exception as fast_err:
+            logger.warning(f"Fast analysis unavailable, falling back to GeoDataService: {fast_err}")
+    return GeoDataService.get_land_intelligence(lat, lng)
+
+
 def normalize_coords(lat, lng):
     # Clamp latitude to Web Mercator / Earth limits
     lat = max(min(lat, 85.0511), -85.0511)
@@ -1094,11 +1111,9 @@ def _get_visual_factors_summary(lat, lng):
     """
     try:
         from suitability_factors.aggregator import Aggregator
-        from suitability_factors.geo_data_service import GeoDataService
-        from utils.fast_analysis import get_land_intelligence_sync
         
-        # Get comprehensive factor data (FAST VERSION - 60-80% speedup)
-        factor_data = get_land_intelligence_sync(lat, lng)
+        # Get comprehensive factor data
+        factor_data = _fetch_land_intelligence(lat, lng)
         agg_result = Aggregator.compute_suitability_score(factor_data)
         
         # Extract 23 factors with proper categorization
@@ -1345,11 +1360,9 @@ def get_cnn_classification(lat, lng):
         # Get 23-factor scores for comprehensive telemetry
         try:
             from suitability_factors.aggregator import Aggregator
-            from suitability_factors.geo_data_service import GeoDataService
-            from utils.fast_analysis import get_land_intelligence_sync
             
-            # Get comprehensive factor data (FAST VERSION - 60-80% speedup)
-            factor_data = get_land_intelligence_sync(lat, lng)
+            # Get comprehensive factor data
+            factor_data = _fetch_land_intelligence(lat, lng)
             agg_result = Aggregator.compute_suitability_score(factor_data)
             
             # Extract 23 factors with proper categorization
@@ -5646,13 +5659,8 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     # 0. 🏙️ GLOBAL TIER-1 HUB CHECK
     is_tier_one, hub_name = check_global_tier_one(latitude, longitude)
 
-    # 1. 🚀 RECRUIT ALL 23 FACTORS
-    if RENDER_SAFE_MODE:
-        # Faster path for memory-constrained deployments (Render/Vercel proxy flow).
-        from utils.fast_analysis import get_land_intelligence_sync
-        intelligence = get_land_intelligence_sync(latitude, longitude)
-    else:
-        intelligence = GeoDataService.get_land_intelligence(latitude, longitude)
+    # 1. 🚀 RECRUIT ALL 23 FACTORS (real data path; fast mode is explicit opt-in only)
+    intelligence = _fetch_land_intelligence(latitude, longitude)
     
     # --- DYNAMIC POLLUTION OVERRIDE ---
     if not RENDER_SAFE_MODE:
