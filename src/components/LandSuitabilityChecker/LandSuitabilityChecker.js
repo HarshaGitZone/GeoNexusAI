@@ -21,7 +21,7 @@ import GeoGPT from '../GeoGPT/GeoGPT';
 import AudioLandscape from "../AudioLandscape/AudioLandscape";
 import { API_BASE } from '../../config/api';
 
-// 🎵 Audio Context for Global Audio Management
+// Audio Context for Global Audio Management
 
 
 // Fix Leaflet marker icons with local fallback
@@ -114,152 +114,6 @@ const isNearbyDevice = (lat1, lng1, deviceLoc) => {
 
 
 
-// --- DYNAMIC INFERENCE ENGINE ---
-
-// const getSitePotential = (factors,activeSpectral) => {
-
-//   const potentials = [];
-
-//   const f = factors;
-
-
-
-//   const hazards = Object.entries(f)
-
-//     .filter(([key, val]) => (key === 'flood' || key === 'landslide' || key === 'pollution') && val < 45)
-
-//     .map(([key]) => key.toUpperCase());
-
-
-
-//   if (hazards.length > 0) {
-
-//     potentials.push({
-
-//       type: "Risk",
-
-//       label: "Environmental Constraints",
-
-//       class: "pot-red",
-
-//       icon: "⚠️",
-
-//       reason: `Warning: This site faces critical risks due to low safety scores in ${hazards.join(" & ")}. Development may require expensive mitigation or be restricted to conservation.`
-
-//     });
-
-//   }
-
-
-
-//   if (f.flood > 50 && f.landslide > 50 && f.pollution > 40) {
-
-//     const strength = f.pollution > 70 ? "pristine air quality" : "stable terrain";
-
-//     potentials.push({
-
-//       type: "Residential",
-
-//       label: "Residential Potential",
-
-//       class: "pot-green",
-
-//       icon: "🏠",
-
-//       reason: `Recommended for housing due to ${strength}. The site provides a safe foundation with manageable environmental risks.`
-
-//     });
-
-//   }
-
-
-
-//   if (f.soil > 60 || f.rainfall > 60) {
-
-//     const leadFactor = f.soil > f.rainfall ? "High Soil Nutrient Density" : "Abundant Rainfall Patterns";
-
-//     potentials.push({
-
-//       type: "Agricultural",
-
-//       label: "Agricultural Utility",
-
-//       class: "pot-blue",
-
-//       icon: "🚜",
-
-//       reason: `Viable for farming driven by ${leadFactor}. This land can support sustainable crop cycles if water management is maintained.`
-
-//     });
-
-//   }
-
-
-
-//   if (f.proximity > 60 && f.landuse > 40) {
-
-//     potentials.push({
-
-//       type: "Industrial",
-
-//       label: "Logistics & Industry",
-
-//       class: "pot-purple",
-
-//       icon: "🏭",
-
-//       reason: `Strategic for commercial use because it ranks top 20% in Infrastructure Proximity (${f.proximity.toFixed(0)}%). Ideal for warehouses or manufacturing.`
-
-//     });
-
-//   }
-
-//   // 3️⃣ HYDROLOGY INTELLIGENCE: Connect Flow to Flood Risk
-
-//   if (activeSpectral === "hydrology" && f.flood < 50) {
-
-//     potentials.push({
-
-//       type: "Risk",
-
-//       label: "Hydrological Trap",
-
-//       class: "pot-red",
-
-//       icon: "🌊",
-
-//       reason: "Overlay reveals physics-based water accumulation at this coordinate. Stormwater will likely pool here due to the terrain slope."
-
-//     });
-
-//   }
-
-
-
-//   // 2️⃣ THERMAL INTELLIGENCE: Residential Livability
-
-//   if (activeSpectral === "thermal" && f.pollution < 60) {
-
-//     potentials.push({
-
-//       type: "Climate",
-
-//       label: "Urban Heat Island",
-
-//       class: "pot-blue",
-
-//       icon: "🌡️",
-
-//       reason: "Site absorbs high solar radiation. Residential planning should include green roofing to mitigate cooling costs."
-
-//     });
-
-//   }
-
-//   return potentials;
-
-// };
-
 const getSitePotential = (factors, activeSpectral) => {
 
   const potentials = [];
@@ -342,7 +196,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
   // --------------------------------------------------
 
-  // 1️⃣ HARD RISK DETECTION (RESTRICTION ZONE)
+  // 1) HARD RISK DETECTION (RESTRICTION ZONE)
 
   // --------------------------------------------------
 
@@ -386,7 +240,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
       class: "pot-red",
 
-      icon: "⚠️",
+      icon: "⚠",
 
       reason: `Critical limitations: ${hazards.join(" & ")}. ${detail.length ? `Numericals: ${detail.join("; ")}. ` : ""}Construction may require advanced mitigation or be restricted to conservation or low-impact usage.`,
 
@@ -398,7 +252,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
   // --------------------------------------------------
 
-  // 2️⃣ RESIDENTIAL SUITABILITY
+  // 2) RESIDENTIAL SUITABILITY
 
   // --------------------------------------------------
 
@@ -450,7 +304,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
   // --------------------------------------------------
 
-  // 3️⃣ AGRICULTURAL POTENTIAL (only when vegetation supports it)
+  // 3) AGRICULTURAL POTENTIAL (only when vegetation supports it)
 
   // --------------------------------------------------
 
@@ -494,7 +348,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
   // --------------------------------------------------
 
-  // 4️⃣ INDUSTRIAL / LOGISTICS POTENTIAL
+  // 4) INDUSTRIAL / LOGISTICS POTENTIAL
 
   // --------------------------------------------------
 
@@ -530,7 +384,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
   // --------------------------------------------------
 
-  // 5️⃣ CONSERVATION / LOW-IMPACT ZONE (NEW, MEANINGFUL)
+  // 5) CONSERVATION / LOW-IMPACT ZONE (NEW, MEANINGFUL)
 
   // --------------------------------------------------
 
@@ -566,7 +420,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
   // --------------------------------------------------
 
-  // 6️⃣ SPECTRAL-AWARE WARNINGS (CONTEXTUAL)
+  // 6) SPECTRAL-AWARE WARNINGS (CONTEXTUAL)
 
   // --------------------------------------------------
 
@@ -602,7 +456,7 @@ const getSitePotential = (factors, activeSpectral) => {
 
       class: "pot-blue",
 
-      icon: "🌡️",
+      icon: "🌡",
 
       reason:
 
@@ -682,11 +536,11 @@ const getSitePotential = (factors, activeSpectral) => {
 
 
 
-const PotentialSection = ({ factors, score }) => {
+const PotentialSection = ({ factors, score, scoreHidden }) => {
 
   const recommendations = getSitePotential(factors);
 
-  const rating = score > 80 ? "A" : score > 60 ? "B" : score > 40 ? "C" : "F";
+  const rating = scoreHidden ? "-" : (score > 80 ? "A" : score > 60 ? "B" : score > 40 ? "C" : "F");
 
 
 
@@ -714,7 +568,7 @@ const PotentialSection = ({ factors, score }) => {
 
             {/* <span className="geo-label">INDEX</span> */}
 
-            <span className="geo-value">{score?.toFixed(0)}%</span>
+            <span className="geo-value">{scoreHidden ? "-" : `${score?.toFixed(0)}%`}</span>
 
           </div>
 
@@ -772,7 +626,7 @@ const FactorsSection = memo(({
 
   active3DStyle, setLat, setLng, isSelectingB, handleCompareSelect,
 
-  currentZoom, setCurrentZoom, zoom,lastAnalyzedTime// ✅ CLEAN NAMES
+  currentZoom, setCurrentZoom, zoom,lastAnalyzedTime// CLEAN NAMES
 
 }) => {
 
@@ -784,7 +638,14 @@ const FactorsSection = memo(({
 
   const isValidCoords = !isNaN(nLat) && !isNaN(nLng);
 
-  const { factors, category_scores, suitability_score } = data;
+  const { factors, category_scores, suitability_score, raw_suitability_score, score_hidden } = data;
+  const numericSuitabilityScore = Number.isFinite(raw_suitability_score) ? raw_suitability_score : suitability_score;
+  const forcedHiddenByContext =
+    /Not Suitable \(Water Body\)|Not Suitable \(Protected\/Forest Area\)/i.test(String(data?.label || "")) ||
+    Boolean(data?.water_body_snippet) ||
+    Boolean(data?.protected_snippet);
+  const isScoreHidden = Boolean(score_hidden || data?.is_hard_unsuitable || forcedHiddenByContext);
+  const suitabilityDisplay = isScoreHidden ? "-" : (Number.isFinite(numericSuitabilityScore) ? numericSuitabilityScore.toFixed(1) : "-");
 
 
 
@@ -792,17 +653,17 @@ const FactorsSection = memo(({
 
   const categoryConfig = {
 
-    physical_terrain: { icon: "⛰️", label: "Physical Terrain" },
+    physical_terrain: { icon: "⛰", label: "Physical Terrain" },
 
     hydrology: { icon: "💧", label: "Hydrology" },
 
     environmental: { icon: "🌿", label: "Environmental" },
 
-    climatic: { icon: "🌤️", label: "Climatic" },
+    climatic: { icon: "🌤", label: "Climatic" },
 
     socio_econ: { icon: "🏗️", label: "Socio-Economic" },
 
-    risk_resilience: { icon: "🛡️", label: "Risk & Resilience" }
+    risk_resilience: { icon: "🛡", label: "Risk & Resilience" }
 
   };
 
@@ -824,7 +685,7 @@ const FactorsSection = memo(({
 
         <button className="view-toggle" onClick={() => setViewMode(viewMode === "bars" ? "radar" : "bars")}>
 
-          {viewMode === "bars" ? "🕸️ Radar View" : "📊 Bar View"}
+          {viewMode === "bars" ? "🕸 Radar View" : "📊 Bar View"}
 
         </button>
 
@@ -907,7 +768,7 @@ const FactorsSection = memo(({
 
             <div className="summation-value">
 
-              <strong>{suitability_score?.toFixed(1)}%</strong>
+              <strong>{isScoreHidden ? suitabilityDisplay : `${suitabilityDisplay}%`}</strong>
 
             </div>
 
@@ -945,7 +806,7 @@ const FactorsSection = memo(({
 
     <>
 
-      <div className={`card hero-card glass-morphic ${data.suitability_score < 40 ? 'danger-glow' : ''}`}>
+      <div className={`card hero-card glass-morphic ${!isScoreHidden && numericSuitabilityScore < 40 ? 'danger-glow' : ''}`}>
 
 
 
@@ -963,7 +824,7 @@ const FactorsSection = memo(({
 
                 // zoom={15} 
 
-                zoom={16}               // ✅ REQUIRED: Pass the state
+                zoom={16}               // REQUIRED: Pass the state
 
                 // key={`map-2d-${zoom}`}
 
@@ -971,7 +832,7 @@ const FactorsSection = memo(({
 
                 dragging={false}
 
-                scrollWheelZoom={false}    // 🔒 LOCK: Prevents zooming inside the mini-card
+                scrollWheelZoom={false}    // LOCK: Prevents zooming inside the mini-card
 
                 doubleClickZoom={false}
 
@@ -983,11 +844,11 @@ const FactorsSection = memo(({
 
               >
 
-                {/* 🚀 THIS IS THE FIX: It watches lat/lng and moves the engine */}
+                {/* This watches lat/lng and moves the engine */}
 
                 <TileLayer url={varieties[mapVariety] || varieties.hybrid} />
 
-                {/* ✅ RESTORED FOR MINIMAP */}
+                {/* Restored for minimap */}
 
                 {activeSpectral !== "standard" && spectralLayers[activeSpectral] && (
 
@@ -1077,13 +938,18 @@ const FactorsSection = memo(({
 
 
 
-        <div className="score-value" style={{ "--score-color": data.suitability_score < 40 ? "#ef4444" : data.suitability_score < 70 ? "#f59e0b" : "#10b981" }}>
+        <div className="score-value" style={{ "--score-color": isScoreHidden ? "#9ca3af" : (numericSuitabilityScore < 40 ? "#ef4444" : numericSuitabilityScore < 70 ? "#f59e0b" : "#10b981") }}>
 
-          {data.suitability_score?.toFixed(1)}
+          {suitabilityDisplay}
 
         </div>
 
         <div className={`status-pill ${data.label?.toLowerCase().replace(/\s+/g, '-')}`}>{data.label}</div>
+        {isScoreHidden && data.score_hidden_reason && (
+          <div className="suitability-snippet">
+            <span className="snippet-protected">{data.score_hidden_reason}</span>
+          </div>
+        )}
 
         {(data.water_body_snippet || data.protected_snippet) && (
 
@@ -1104,7 +970,7 @@ const FactorsSection = memo(({
           </div>
 
         )}
-        {/* 🕒 NEW: INDEPENDENT TIMESTAMP UI */}
+        {/* NEW: INDEPENDENT TIMESTAMP UI */}
 {/* {lastAnalyzedTime && (
     <div className="card-timestamp-footer">
         <span className="ts-label">LAST ANALYZED:</span>
@@ -1371,7 +1237,7 @@ const TacticalMapController = ({
 
 
 
-  // 🎨 Icon Factory
+  // ðŸŽ¨ Icon Factory
 
   const createIcon = (color) => new L.Icon({
     iconUrl: `https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-2x-${color}.png`,
@@ -1389,13 +1255,13 @@ const TacticalMapController = ({
 
   // ... (rest of the code remains the same)
 
-  // 🚀 THE FIXED RETURN: Properly contained within the function braces
+  // ðŸš€ THE FIXED RETURN: Properly contained within the function braces
 
   return (
 
     <>
 
-      {/* 🔵 SITE A: Visible only if Tactical Mode is ON */}
+      {/* ðŸ”µ SITE A: Visible only if Tactical Mode is ON */}
 
       {isTacticalMode && Number.isFinite(posA[0]) && (
 
@@ -1409,7 +1275,7 @@ const TacticalMapController = ({
 
 
 
-      {/* 🔴 SITE B: Visible only if Tactical Mode is ON */}
+      {/* ðŸ”´ SITE B: Visible only if Tactical Mode is ON */}
 
       {isTacticalMode && Number.isFinite(posB[0]) && (
 
@@ -1423,7 +1289,7 @@ const TacticalMapController = ({
 
 
 
-      {/* 🟢 LIVE POINTER: Always visible */}
+      {/* ðŸŸ¢ LIVE POINTER: Always visible */}
 
       {Number.isFinite(posLive[0]) && (
 
@@ -1604,7 +1470,10 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
   const [activeTab, setActiveTab] = useState("suitability");
 
-  const [isDarkMode, setIsDarkMode] = useState(() => JSON.parse(localStorage.getItem("geo_theme")) ?? true);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const rawTheme = localStorage.getItem("geo_theme");
+    return rawTheme === null ? true : JSON.parse(rawTheme);
+  });
 
   const [adaptiveWeather, setAdaptiveWeather] = useState(() => JSON.parse(localStorage.getItem("geo_adaptive_weather")) || false);
 
@@ -1996,7 +1865,7 @@ localStorage.setItem("geo_last_analysis_time_b", nowB);
 
       // setAnalyzedCoordsB({ lat: tLat.toString(), lng: tLng.toString() });
 
-      // 📍 PERSISTENCE FIX: Save analyzed coords so the Red marker stays
+      //  PERSISTENCE FIX: Save analyzed coords so the Red marker stays
 
       const coordsB = { lat: tLat.toString(), lng: tLng.toString() };
 
@@ -2272,7 +2141,7 @@ if (e && e.preventDefault) e.preventDefault();
 
         const scoreBVal = (activeCompareMode && results[2]?.status === 'fulfilled')
 
-          ? results[2].value.suitability_score
+          ? (results[2].value.raw_suitability_score ?? results[2].value.suitability_score)
 
           : undefined;
 
@@ -2298,7 +2167,7 @@ if (e && e.preventDefault) e.preventDefault();
 
           lng,
 
-          score: analysisData.suitability_score,
+          score: analysisData.raw_suitability_score ?? analysisData.suitability_score,
 
           timestamp: new Date().getTime(),
 
@@ -2702,7 +2571,7 @@ useEffect(() => {
 
 
 
-  // ✅ FIX: Ensure comparison history is saved after URL-based analysis (DEPLOYED FIX)
+  // âœ… FIX: Ensure comparison history is saved after URL-based analysis (DEPLOYED FIX)
 
   useEffect(() => {
 
@@ -2738,7 +2607,7 @@ useEffect(() => {
 
         lng,
 
-        score: result.suitability_score,
+        score: result.raw_suitability_score ?? result.suitability_score,
 
         isCompareMode: true,
 
@@ -2748,7 +2617,7 @@ useEffect(() => {
 
         bLng: bLngInput,
 
-        scoreB: compareResult.suitability_score,
+        scoreB: compareResult.raw_suitability_score ?? compareResult.suitability_score,
 
         timestamp: Date.now()
 
@@ -3173,194 +3042,13 @@ useEffect(() => {
   };
 
 
-
-  // const EvidenceSection = ({ data }) => {
-  //   // const meta = data.explanation?.factors_meta;
-  //   const meta = data?.explanation?.factors_meta || data?.factors_meta || {};
-
-
-  //   if (!meta) {
-  //     return (
-  //       <div className="card evidence-card">
-  //         <h3 className="evidence-title">EVIDENCE DETAILS</h3>
-  //         <p>No evidence metadata available.</p>
-  //       </div>
-  //     );
-  //   }
-
-  //   // ✅ FIX: Define factorLabels inside the component so it's accessible
-  //   const factorLabels = {
-  //     slope: "SLOPE",
-  //     elevation: "ELEVATION",
-  //     ruggedness: "RUGGEDNESS",
-  //     stability: "STABILITY",
-  //     flood: "FLOOD RISK",
-  //     water: "WATER PROXIMITY",
-  //     drainage: "DRAINAGE",
-  //     groundwater: "GROUNDWATER",
-  //     vegetation: "VEGETATION",
-  //     soil: "SOIL QUALITY",
-  //     pollution: "AIR POLLUTION",
-  //     biodiversity: "BIODIVERSITY",
-  //     heat_island: "HEAT ISLAND",
-  //     rainfall: "RAINFALL",
-  //     thermal: "THERMAL COMFORT",
-  //     intensity: "HEAT STRESS",
-  //     landuse: "LANDUSE",
-  //     infrastructure: "PROXIMITY",
-  //     population: "POPULATION",
-  //     multi_hazard: "MULTI-HAZARD",
-  //     climate_change: "CLIMATE CHANGE",
-  //     recovery: "RECOVERY CAPACITY",
-  //     habitability: "HABITABILITY"
-  //   };
-
-  //   // ✅ FIX: Define generateEvidence helper logic
-  //   const generateEvidence = (factorKey, factor) => {
-  //     if (factor.evidence) return factor.evidence;
-  //     const val = factor.value || 0;
-  //     return `Score: ${val}/100. Analysis based on regional ${factorKey.replace(/_/g, ' ')} telemetry.`;
-  //   };
-
-  //   const getFactorWeight = (category, factorKey) => {
-  //     const weights = {
-  //       physical: { slope: 30, stability: 25, elevation: 25, ruggedness: 20 },
-  //       hydrology: { flood: 35, groundwater: 25, drainage: 20, water: 20 },
-  //       environmental: { biodiversity: 25, pollution: 25, soil: 20, heat_island: 15, vegetation: 15 },
-  //       climatic: { thermal: 40, intensity: 35, rainfall: 25 },
-  //       socio_econ: { infrastructure: 40, landuse: 30, population: 30 },
-  //       risk_resilience: { multi_hazard: 35, climate_change: 25, habitability: 20, recovery: 20 }
-  //     };
-  //     return weights[category]?.[factorKey] || 0;
-  //   };
-
-  //   const calculateRoleBasedWeightedScore = (category, factors) => {
-  //     let weightedSum = 0;
-  //     let totalWeight = 0;
-  //     Object.entries(factors).forEach(([factorKey, factor]) => {
-  //       const weight = getFactorWeight(category, factorKey);
-  //       const value = typeof factor.value === 'number' ? factor.value : 50;
-  //       weightedSum += value * weight;
-  //       totalWeight += weight;
-  //     });
-  //     return totalWeight > 0 ? weightedSum / totalWeight : 0;
-  //   };
-
-  //   const getFactorRole = (category, factorKey) => {
-  //     const roles = {
-  //       physical: { slope: "Primary construction constraint", stability: "Landslide/erosion safety", elevation: "Flood & climate baseline", ruggedness: "Construction difficulty" },
-  //       hydrology: { flood: "Catastrophic failure driver", water: "Resource + flood modifier", drainage: "Surface runoff handling", groundwater: "Foundation durability" },
-  //       environmental: { vegetation: "Surface cover indicator", soil: "Semi-permanent land constraint", pollution: "Human health impact", biodiversity: "Legal/ecological constraint", heat_island: "Urban stress indicator" },
-  //       climatic: { rainfall: "Flood & water balance", thermal: "Human livability", intensity: "Peak stress risk" },
-  //       socio_econ: { landuse: "Legal feasibility", infrastructure: "Development enabler", population: "Demand & pressure" },
-  //       risk_resilience: { multi_hazard: "Compound disaster risk", climate_change: "Long-term exposure", recovery: "Post-event resilience", habitability: "Sustained livability" }
-  //     };
-  //     return roles[category]?.[factorKey] || "Supporting factor";
-  //   };
-
-  //   const getCategoryDescription = (category) => {
-  //     const descriptions = {
-  //       physical: "Physical terrain characteristics including slope, elevation, ruggedness, and ground stability. Critical for foundation design, construction costs, and site accessibility.",
-  //       environmental: "Environmental conditions covering vegetation, soil quality, air pollution, biodiversity, and urban heat island effects. Essential for environmental compliance and sustainability.",
-  //       hydrology: "Water-related factors including flood risk, water proximity, drainage capacity, and groundwater availability. Vital for water management and flood prevention.",
-  //       climatic: "Climate conditions such as rainfall patterns, thermal comfort, and heat stress intensity. Important for HVAC design, energy efficiency, and climate resilience.",
-  //       socio_econ: "Socio-economic factors including land use classification, infrastructure access, and population density. Key for market analysis and development feasibility.",
-  //       risk_resilience: "Risk assessment and resilience factors covering multi-hazard risks, climate change impacts, recovery capacity, and long-term habitability. Critical for disaster preparedness and sustainable development."
-  //     };
-  //     return descriptions[category] || "Category analysis and assessment.";
-  //   };
-
-  //   const factorOrder = {
-  //     physical: ['elevation', 'ruggedness', 'slope', 'stability'],
-  //     environmental: ['biodiversity', 'heat_island', 'pollution', 'soil', 'vegetation'],
-  //     hydrology: ['drainage', 'flood', 'groundwater', 'water'],
-  //     climatic: ['intensity', 'rainfall', 'thermal'],
-  //     socio_econ: ['infrastructure', 'landuse', 'population'],
-  //     risk_resilience: ['climate_change', 'habitability', 'multi_hazard', 'recovery', L]
-  //   };
-
-  //   return (
-  //     <div className="evidence-section-container">
-  //       <h3 className="evidence-title">EVIDENCE DETAILS</h3>
-  //       <div className="evidence-categories">
-  //         {/* {Object.entries(meta).map(([category, categoryGroup]) => { */}
-  //         {Object.entries(meta).map(([category, categoryGroupRaw]) => {
-  //           const categoryGroup = categoryGroupRaw || {};
-
-  //           // const categoryScore = data?.category_scores?.[category] || 0;
-  //           const categoryScore =
-  //             data?.category_scores?.[category] ||
-  //             data?.explanation?.category_scores?.[category] ||
-  //             0;
-
-  //           const weightedScore = calculateRoleBasedWeightedScore(category, categoryGroup);
-  //           const categoryColorClass = categoryScore < 40 ? "tone-red" : categoryScore < 70 ? "tone-yellow" : "tone-green";
-
-  //           const orderedFactorKeys = factorOrder[category]
-  //             ? factorOrder[category].filter(key => categoryGroup[key])
-  //             : Object.keys(categoryGroup);
-
-  //           return (
-  //             <div key={category} className="evidence-category-container">
-  //               <div className={`evidence-category-header-container ${categoryColorClass}`}>
-  //                 <div className="category-header-content">
-  //                   <h4 className="evidence-category-title">
-  //                     {/* {category.replace('_', ' ').toUpperCase()} */}
-  //                     {category.replaceAll('_', ' ').toUpperCase()}
-
-  //                     <span className="evidence-category-score">({categoryScore.toFixed(1)}/100)</span>
-  //                     <span className="evidence-weighted-score">Weighted: ({weightedScore.toFixed(1)}/100)</span>
-  //                   </h4>
-  //                   <p className="evidence-category-description">{getCategoryDescription(category)}</p>
-  //                 </div>
-  //               </div>
-
-  //               <div className="evidence-factors-sequential">
-  //                 {orderedFactorKeys.map((factorKey) => {
-  //                   const factor = categoryGroup[factorKey];
-  //                   const numericValue = typeof factor.value === 'number' ? factor.value : 50;
-  //                   const factorColor = numericValue < 40 ? "tone-red" : numericValue < 70 ? "tone-yellow" : "tone-green";
-  //                   const evidenceText = factor.evidence || generateEvidence(factorKey, factor);
-  //                   const factorWeight = getFactorWeight(category, factorKey);
-  //                   const globalWeight = (16.67 * factorWeight / 100).toFixed(2);
-
-  //                   return (
-  //                     <div key={`${category}-${factorKey}`} className={`evidence-factor-card ${factorColor}`}>
-  //                       <div className="factor-card-header">
-  //                         <div className="factor-header-left">
-  //                           <h5 className="factor-name">{factorLabels[factorKey] || factorKey.replace(/_/g, ' ').toUpperCase()}</h5>
-  //                           <div className="factor-weighting-info">
-  //                             <span className="factor-score">{numericValue.toFixed(1)}/100</span>
-  //                             <span className="weight-breakdown">{factorWeight}% of cat → {globalWeight}% global</span>
-  //                           </div>
-  //                         </div>
-  //                         <div className={`factor-status-badge ${factorColor}`}>
-  //                           {numericValue >= 70 ? 'HIGH' : numericValue >= 40 ? 'MID' : 'LOW'}
-  //                         </div>
-  //                       </div>
-  //                       <div className="factor-card-content">
-  //                         <div className="evidence-text">{evidenceText}</div>
-  //                         <div className="factor-metadata-compact">
-  //                           <div className="metadata-row">
-  //                             <span className="metadata-item-compact">📍 {factor.source || 'Data Engine'}</span>
-  //                             {factor.unit && <span className="metadata-item-compact">📏 {factor.unit}</span>}
-  //                             <span className="metadata-item-compact">⚖️ {getFactorRole(category, factorKey)}</span>
-  //                           </div>
-  //                         </div>
-  //                       </div>
-  //                     </div>
-  //                   );
-  //                 })}
-  //               </div>
-  //             </div>
-  //           );
-  //         })}
-  //       </div>
-  //     </div>
-  //   );
-  // };
   const EvidenceSection = ({ data, filterCategories = null }) => {
     const meta = data?.explanation?.factors_meta || data?.factors_meta || {};
+    const scoreProof = data?.score_proof || {};
+    const proofCertainty = scoreProof?.certainty || {};
+    const topPositiveDrivers = scoreProof?.top_positive_drivers || [];
+    const topRiskDrivers = scoreProof?.top_risk_drivers || [];
+    const contributionTable = scoreProof?.contribution_table || [];
 
     if (!meta || Object.keys(meta).length === 0) {
       return (
@@ -3426,7 +3114,7 @@ useEffect(() => {
 
         if (typeof pm25 === 'number' && pm25 > 0) {
           const pollutantBreakdown = [];
-          if (pm10 !== 'N/A') pollutantBreakdown.push(`PM10: ${pm10} µg/m³`);
+           if (pm10 !== 'N/A') pollutantBreakdown.push(`PM10: ${pm10} µg/m³`);
           if (no2 !== 'N/A') pollutantBreakdown.push(`NO2: ${no2} µg/m³`);
           if (so2 !== 'N/A') pollutantBreakdown.push(`SO2: ${so2} µg/m³`);
           if (o3 !== 'N/A') pollutantBreakdown.push(`O3: ${o3} µg/m³`);
@@ -3436,9 +3124,9 @@ useEffect(() => {
           const standardsInfo = ` WHO standards: Annual ${pm25WhoAnnual} µg/m³, 24hr ${pm25Who24hr} µg/m³. EPA annual: ${pm25EpaAnnual} µg/m³.`;
 
           if (pm25 <= 5) {
-            return `Air Quality Index: ${val}/100. EXCELLENT air quality. PM2.5: ${pm25} µg/m³ (well below WHO annual standard of ${pm25WhoAnnual} µg/m³).${standardsInfo} Health risk: ${healthRisk}. AQI Category: ${aqiCategory}. Location: ${location}, ${city}. Data source: ${raw.dataset_source || 'OpenAQ'}. Last updated: ${lastUpdated} (${dataFreshness}). Dominant pollutant: ${dominantPollutant}.${additionalPollutants} Multi-pollutant impact: ${raw.multi_pollutant_impact || 'Normal'}.`;
+            return `Air Quality Index: ${val}/100. EXCELLENT air quality. PM2.5: ${pm25}µg/m³ (well below WHO annual standard of ${pm25WhoAnnual} µg/m³).${standardsInfo} Health risk: ${healthRisk}. AQI Category: ${aqiCategory}. Location: ${location}, ${city}. Data source: ${raw.dataset_source || 'OpenAQ'}. Last updated: ${lastUpdated} (${dataFreshness}). Dominant pollutant: ${dominantPollutant}.${additionalPollutants} Multi-pollutant impact: ${raw.multi_pollutant_impact || 'Normal'}.`;
           } else if (pm25 <= 12) {
-            return `Air Quality Index: ${val}/100. GOOD air quality. PM2.5: ${pm25} µg/m³ (below WHO annual standard of ${pm25WhoAnnual} µg/m³).${standardsInfo} Health risk: ${healthRisk}. AQI Category: ${aqiCategory}. Location: ${location}, ${city}. Data source: ${raw.dataset_source || 'OpenAQ'}. Last updated: ${lastUpdated} (${dataFreshness}). Dominant pollutant: ${dominantPollutant}.${additionalPollutants} Multi-pollutant impact: ${raw.multi_pollutant_impact || 'Normal'}.`;
+            return `Air Quality Index: ${val}/100. GOOD air quality. PM2.5: ${pm25} µg/m³ (below WHO annual standard of ${pm25WhoAnnual} µg/m³.${standardsInfo} Health risk: ${healthRisk}. AQI Category: ${aqiCategory}. Location: ${location}, ${city}. Data source: ${raw.dataset_source || 'OpenAQ'}. Last updated: ${lastUpdated} (${dataFreshness}). Dominant pollutant: ${dominantPollutant}.${additionalPollutants} Multi-pollutant impact: ${raw.multi_pollutant_impact || 'Normal'}.`;
           } else if (pm25 <= 25) {
             return `Air Quality Index: ${val}/100. MODERATE air quality. PM2.5: ${pm25} µg/m³ (exceeding WHO annual standard of ${pm25WhoAnnual} µg/m³).${standardsInfo} Health risk: ${healthRisk}. AQI Category: ${aqiCategory}. Location: ${location}, ${city}. Data source: ${raw.dataset_source || 'OpenAQ'}. Last updated: ${lastUpdated} (${dataFreshness}). Dominant pollutant: ${dominantPollutant}.${additionalPollutants} Multi-pollutant impact: ${raw.multi_pollutant_impact || 'Normal'}.`;
           } else if (pm25 <= 50) {
@@ -3455,16 +3143,48 @@ useEffect(() => {
       return `Score: ${val}/100. Analysis based on regional ${factorKey.replace(/_/g, ' ')} telemetry.`;
     };
 
+    const categoryPriorityWeights = {
+      physical: 21,
+      environmental: 12,
+      hydrology: 20,
+      climatic: 12,
+      socio_econ: 20,
+      risk_resilience: 15
+    };
+
+    const factorPriorityWeights = {
+      physical: { slope: 35, elevation: 20, ruggedness: 20, stability: 25 },
+      environmental: { vegetation: 15, soil: 35, pollution: 30, biodiversity: 10, heat_island: 10 },
+      hydrology: { flood: 35, water: 30, drainage: 20, groundwater: 15 },
+      climatic: { thermal: 45, rainfall: 35, intensity: 20 },
+      socio_econ: { infrastructure: 45, landuse: 30, population: 25 },
+      risk_resilience: { multi_hazard: 35, climate_change: 25, recovery: 20, habitability: 20 }
+    };
+
+    const categoryDisplayLabels = {
+      physical: "Physical",
+      environmental: "Environmental",
+      hydrology: "Hydrology",
+      climatic: "Climatic",
+      socio_econ: "Socio-Economic",
+      risk_resilience: "Risk & Resilience"
+    };
+
+    const categoryDisplayOrder = ["physical", "hydrology", "socio_econ", "risk_resilience", "environmental", "climatic"];
+
+    const getCategoryWeight = (category) => categoryPriorityWeights[category] || 0;
+    const getCategoryLabel = (category) => categoryDisplayLabels[category] || category;
+
+    const ledgerRows = contributionTable
+      .filter((row) => !filterCategories || filterCategories.includes(row?.category))
+      .sort((a, b) => {
+        const gw = Number(b?.global_weight_pct || 0) - Number(a?.global_weight_pct || 0);
+        if (gw !== 0) return gw;
+        return Number(b?.contribution_points || 0) - Number(a?.contribution_points || 0);
+      });
+
     const getFactorWeight = (category, factorKey) => {
-      const weights = {
-        physical: { slope: 35, elevation: 30, stability: 20, ruggedness: 15 },
-        hydrology: { water: 35, flood: 30, groundwater: 20, drainage: 15 },
-        environmental: { pollution: 30, vegetation: 25, soil: 20, biodiversity: 15, heat_island: 10 },
-        climatic: { thermal: 40, intensity: 35, rainfall: 25 },
-        socio_econ: { infrastructure: 40, landuse: 35, population: 25 },
-        risk_resilience: { multi_hazard: 30, climate_change: 25, habitability: 25, recovery: 20 }
-      };
-      return weights[category]?.[factorKey] || 0;
+      return factorPriorityWeights[category]?.[factorKey] || 0;
     };
 
     const calculateRoleBasedWeightedScore = (category, factors) => {
@@ -3516,6 +3236,88 @@ useEffect(() => {
       <div className="evidence-section-container">
         {/* Hide the main section title if we are showing the "Extra" sections on the left */}
         {!filterCategories && <h3 className="evidence-title">EVIDENCE DETAILS</h3>}
+        {!filterCategories && (
+          <div className="evidence-priority-overview">
+            <div className="evidence-priority-title">Human Suitability Priority Profile (Global Category Weights)</div>
+            <div className="evidence-priority-list">
+              {categoryDisplayOrder
+                .filter((category) => Object.prototype.hasOwnProperty.call(meta, category))
+                .map((category) => (
+                  <span key={`priority-${category}`} className="evidence-priority-pill">
+                    {categoryDisplayLabels[category]}: {getCategoryWeight(category).toFixed(1)}%
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+        {!filterCategories && scoreProof?.model && (
+          <div className="evidence-proof-overview">
+            <div className="evidence-proof-title">Score Proof and Certainty</div>
+            <div className="evidence-proof-metrics">
+              <span className="evidence-proof-metric">Reliability: {Number(proofCertainty?.weighted_data_reliability || 0).toFixed(1)}/100</span>
+              <span className="evidence-proof-metric">Confidence: {Number(proofCertainty?.weighted_model_confidence || 0).toFixed(1)}/100</span>
+              <span className="evidence-proof-metric">Freshness: {Number(proofCertainty?.weighted_data_freshness || 0).toFixed(1)}/100</span>
+              <span className="evidence-proof-metric">Freshest Obs: {proofCertainty?.freshest_observation_hours == null ? "N/A" : `${Number(proofCertainty.freshest_observation_hours).toFixed(1)}h`}</span>
+            </div>
+            <div className="evidence-driver-grid">
+              <div className="evidence-driver-col">
+                <div className="evidence-driver-heading">Top Positive Drivers</div>
+                {topPositiveDrivers.slice(0, 5).map((d, i) => (
+                  <div key={`pos-${i}`} className="evidence-driver-row">
+                    {(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) -> +{Number(d.contribution_points || 0).toFixed(2)}
+                  </div>
+                ))}
+              </div>
+              <div className="evidence-driver-col">
+                <div className="evidence-driver-heading">Top Risk Drivers</div>
+                {topRiskDrivers.slice(0, 5).map((d, i) => (
+                  <div key={`risk-${i}`} className="evidence-driver-row risk">
+                    {(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) value {Number(d.value || 0).toFixed(1)}/100
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {!filterCategories && ledgerRows.length > 0 && (
+          <div className="evidence-ledger">
+            <div className="evidence-ledger-title">Data Source Ledger (Factor-Level Proof)</div>
+            <div className="evidence-ledger-table-wrap">
+              <table className="evidence-ledger-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Factor</th>
+                    <th>Source</th>
+                    <th>Mode</th>
+                    <th>Confidence</th>
+                    <th>Freshness</th>
+                    <th>Reliability</th>
+                    <th>Validation</th>
+                    <th>Global Wt</th>
+                    <th>Contribution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ledgerRows.map((row, idx) => (
+                    <tr key={`ledger-${idx}`}>
+                      <td>{getCategoryLabel(row?.category)}</td>
+                      <td>{factorLabels[row?.factor] || String(row?.factor || '').replaceAll('_', ' ').toUpperCase()}</td>
+                      <td className="source-cell">{row?.source || "Unknown"}</td>
+                      <td>{row?.data_mode || "N/A"}</td>
+                      <td>{Number(row?.confidence_score || 0).toFixed(1)}</td>
+                      <td>{row?.freshness_hours == null ? "N/A" : `${Number(row.freshness_hours).toFixed(1)}h`}</td>
+                      <td>{Number(row?.reliability_score || 0).toFixed(1)}</td>
+                      <td>{row?.validation_status ? `${String(row.validation_status).toUpperCase()} (${Number(row?.validation_score || 0).toFixed(1)})` : "N/A"}</td>
+                      <td>{Number(row?.global_weight_pct || 0).toFixed(2)}%</td>
+                      <td>{Number(row?.contribution_points || 0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
         <div className="evidence-categories">
           {Object.entries(meta)
             .filter(([category]) => !filterCategories || filterCategories.includes(category))
@@ -3523,6 +3325,7 @@ useEffect(() => {
               const categoryGroup = categoryGroupRaw || {};
               const categoryScore = data?.category_scores?.[category] || data?.explanation?.category_scores?.[category] || 0;
               const weightedScore = calculateRoleBasedWeightedScore(category, categoryGroup);
+              const categoryWeight = getCategoryWeight(category);
               const categoryColorClass = categoryScore < 40 ? "tone-red" : categoryScore < 70 ? "tone-yellow" : "tone-green";
               const orderedFactorKeys = factorOrder[category] ? factorOrder[category].filter(key => categoryGroup[key]) : Object.keys(categoryGroup);
 
@@ -3533,6 +3336,7 @@ useEffect(() => {
                       <h4 className="evidence-category-title">
                         {category.replaceAll('_', ' ').toUpperCase()}
                         <span className="evidence-category-score">({categoryScore.toFixed(1)}/100)</span>
+                        <span className="evidence-weighted-score">Priority: ({categoryWeight.toFixed(1)}% global)</span>
                         <span className="evidence-weighted-score">Weighted: ({weightedScore.toFixed(1)}/100)</span>
                       </h4>
                       <p className="evidence-category-description">{getCategoryDescription(category)}</p>
@@ -3545,7 +3349,10 @@ useEffect(() => {
                       const factorColor = numericValue < 40 ? "tone-red" : numericValue < 70 ? "tone-yellow" : "tone-green";
                       const evidenceText = factor.evidence || generateEvidence(factorKey, factor);
                       const factorWeight = getFactorWeight(category, factorKey);
-                      const globalWeight = (16.67 * factorWeight / 100).toFixed(2);
+                      const globalWeight = ((categoryWeight * factorWeight) / 100).toFixed(2);
+                      const confValue = typeof factor?.confidence === 'number' ? `${factor.confidence.toFixed(0)}/100` : (factor?.confidence || 'N/A');
+                      const freshnessTag = factor?.details?.data_freshness || (factor?.details?.last_updated ? 'Timestamped' : 'N/A');
+                      const validationBadge = factor?.validation?.status ? `${String(factor.validation.status).toUpperCase()} ${Number(factor?.validation?.score || 0).toFixed(0)}` : 'N/A';
                       return (
                         <div key={`${category}-${factorKey}`} className={`evidence-factor-card ${factorColor}`}>
                           <div className="factor-card-header">
@@ -3553,7 +3360,7 @@ useEffect(() => {
                               <h5 className="factor-name">{factorLabels[factorKey] || factorKey.replace(/_/g, ' ').toUpperCase()}</h5>
                               <div className="factor-weighting-info">
                                 <span className="factor-score">{numericValue.toFixed(1)}/100</span>
-                                <span className="weight-breakdown">{factorWeight}% of cat → {globalWeight}% global</span>
+                                <span className="weight-breakdown">{factorWeight}% of cat -> {globalWeight}% global</span>
                               </div>
                             </div>
                             <div className={`factor-status-badge ${factorColor}`}>
@@ -3564,9 +3371,13 @@ useEffect(() => {
                             <div className="evidence-text">{evidenceText}</div>
                             <div className="factor-metadata-compact">
                               <div className="metadata-row">
-                                <span className="metadata-item-compact">📍 {factor.source || 'Data Engine'}</span>
-                                {factor.unit && <span className="metadata-item-compact">📏 {factor.unit}</span>}
-                                <span className="metadata-item-compact">⚖️ {getFactorRole(category, factorKey)}</span>
+                                <span className="metadata-item-compact"> {factor.source || 'Data Engine'}</span>
+                                {factor.unit && <span className="metadata-item-compact"> {factor.unit}</span>}
+                                <span className="metadata-item-compact">Mode: {factor?.data_mode || 'N/A'}</span>
+                                <span className="metadata-item-compact">Confidence: {confValue}</span>
+                                <span className="metadata-item-compact">Freshness: {freshnessTag}</span>
+                                <span className="metadata-item-compact">Validation: {validationBadge}</span>
+                                <span className="metadata-item-compact">Role: {getFactorRole(category, factorKey)}</span>
                               </div>
                             </div>
                           </div>
@@ -3683,6 +3494,15 @@ useEffect(() => {
     const containerClass = isFullWidth ? "results-grid" : "column-stack";
     // const currentSnapshot = name === locationAName ? snapshotData : snapshotDataB;
     const currentSnapshot = siteId === "A" ? snapshotData : snapshotDataB;
+    const rawScoreMaybe = Number(data?.raw_suitability_score);
+    const shownScoreMaybe = Number(data?.suitability_score);
+    const numericSuitabilityScore = Number.isFinite(rawScoreMaybe)
+      ? rawScoreMaybe
+      : (Number.isFinite(shownScoreMaybe) ? shownScoreMaybe : 0);
+    const isScoreHidden = Boolean(data?.score_hidden);
+    const suitabilityDisplay = isScoreHidden
+      ? (data?.score_display || "-")
+      : (Number.isFinite(numericSuitabilityScore) ? numericSuitabilityScore.toFixed(1) : "-");
 
 
     if (activeTab === "suitability") {
@@ -3823,7 +3643,7 @@ useEffect(() => {
 
                   >
 
-                    {confidence < 40 && <span className="mini-warn">⚠️</span>}
+                    {confidence < 40 && <span className="mini-warn">⚠</span>}
 
                     {cnnTheme.label}
 
@@ -4143,7 +3963,7 @@ useEffect(() => {
 
 
 
-              <PotentialSection factors={data.factors} score={data.suitability_score} />
+              <PotentialSection factors={data.factors} score={numericSuitabilityScore} scoreHidden={isScoreHidden} />
 
 
 
@@ -4161,7 +3981,7 @@ useEffect(() => {
 
                       <strong>Construction Viability</strong>
 
-                      <span>{data.suitability_score > 70 ? 'Excellent' : data.suitability_score > 50 ? 'Good' : 'Limited'}</span>
+                      <span>{isScoreHidden ? 'Restricted' : (numericSuitabilityScore > 70 ? 'Excellent' : numericSuitabilityScore > 50 ? 'Good' : 'Limited')}</span>
 
                     </div>
 
@@ -4285,7 +4105,7 @@ useEffect(() => {
 
                 <div className="drawer-item">
 
-                  <span>🛡️ Biodiversity Buffer:</span>
+                  <span>🛡 Biodiversity Buffer:</span>
 
                   <strong>{landuseVal > 60 ? "PREMIUM" : "STANDARD"}</strong>
 
@@ -4467,11 +4287,11 @@ useEffect(() => {
 
               <div className="intel-header">
 
-                <h3>🚀 Advanced AI Projection (2036)</h3>
+                <h3>{"\uD83D\uDE80"} Advanced AI Projection (2036)</h3>
 
                 <div className="future-score-wrap">
 
-                  <span className="current-mini">{data.suitability_score?.toFixed(1)}</span>
+                  <span className="current-mini">{suitabilityDisplay}</span>
 
                   <span className="drift-arrow">→</span>
 
@@ -4639,7 +4459,7 @@ useEffect(() => {
 
                 {/* <div className="terrain-score-badge">
 
-                <span className="score-value">{data.factors?.physical?.slope?.value?.toFixed(1) || '---'}°</span>
+                <span className="score-value">{data.factors?.physical?.slope?.value?.toFixed(1) || '---'}Â°</span>
 
                 <span className="score-label">SLOPE</span>
 
@@ -4783,7 +4603,7 @@ useEffect(() => {
 
                   <div className="insight-item">
 
-                    <span className="insight-icon">🛡️</span>
+                    <span className="insight-icon">🛡</span>
 
                     <div className="insight-content">
 
@@ -4863,7 +4683,7 @@ useEffect(() => {
 
                       (data.factors?.physical?.slope?.value || 0) < 15 ? '👍' :
 
-                        (data.factors?.physical?.slope?.value || 0) < 30 ? '⚠️' : '🚫'}
+                        (data.factors?.physical?.slope?.value || 0) < 30 ? '⚠' : '🚫'}
 
                   </span>
 
@@ -5145,7 +4965,7 @@ useEffect(() => {
             lng={parseFloat(lng)}
           />
 
-          {/* 🎯 MOVE THE REF TO WRAP EVERYTHING */}
+          {/* MOVE THE REF TO WRAP EVERYTHING */}
 
           <div
 
@@ -5168,7 +4988,7 @@ useEffect(() => {
               <button onClick={handleZoomOut}>−</button>
 
             </div>
-            {/* 🚀 INSERT THE GLOBAL SYNC DOCK HERE */}
+            {/* INSERT THE GLOBAL SYNC DOCK HERE */}
   <GlobalSyncDock />
 
             {/* TACTICAL ENGINE TOGGLE */}
@@ -5264,11 +5084,11 @@ useEffect(() => {
               ) : (
 
                 <select value={active3DStyle} onChange={(e) => setActive3DStyle(e.target.value)} className="variety-select">
-                  <option value="satellite">🛰️ 3D Satellite</option>
-                  <option value="topo">🏔️ 3D Topographic</option>
-                  <option value="dark">🕶️ 3D Stealth</option>
+                  <option value="satellite">🛰 3D Satellite</option>
+                  <option value="topo"> 3D Topographic</option>
+                  <option value="dark">🕶 3D Stealth</option>
                   <option value="nature">🌱 3D Nature</option>
-                  <option value="streets">🏙️ 3D Urban (Buildings)</option> {/* New */}
+                  <option value="streets"> 3D Urban (Buildings)</option> {/* New */}
                   <option value="outdoor">⛅ 3D Atmospheric</option>
                 </select>
               )}
@@ -5290,7 +5110,7 @@ useEffect(() => {
                 <div className="tactical-snap-controls animate-slide-in">
                   <button className="snap-btn btn-a" onClick={() => window.snapToA?.()}>A</button>
                   <button className="snap-btn btn-b" onClick={() => window.snapToB?.()}>B</button>
-                  <button className="snap-btn btn-live" onClick={() => window.snapToLive?.()}>📍</button>
+                  <button className="snap-btn btn-live" onClick={() => window.snapToLive?.()}></button>
                 </div>
               )}
             </div>
@@ -5374,7 +5194,7 @@ useEffect(() => {
 
                 zoom={zoom}
 
-                setLat={setLat}      // ✅ REQUIRED
+                setLat={setLat}      // REQUIRED
 
                 setLng={setLng}
 
@@ -5386,7 +5206,7 @@ useEffect(() => {
 
                 interactive={true}
 
-                // 🚀 ADD THESE PROPS TO SYNC WITH 3D
+                // ADD THESE PROPS TO SYNC WITH 3D
 
                 isTacticalMode={isTacticalMode}
 
@@ -5461,7 +5281,7 @@ useEffect(() => {
                 {/* Right Controls */}
                 <div className="analysis-header">
                   {/* <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
-      {isAnalysisFullscreen ? "✕" : "⛶"}
+      {isAnalysisFullscreen ? "âœ•" : "â›¶"}
     </button> */}
                   <button
                     className={`fullscreen-tab-btn ${isAnalysisFullscreen ? "close-btn" : ""}`}
@@ -5473,7 +5293,7 @@ useEffect(() => {
                   {/* {analysisTime && result && (
   <div className="analysis-timestamp-container">
     <div className="timestamp-content">
-      <span className="timestamp-status-icon">●</span>
+      <span className="timestamp-status-icon">● </span>
       <span className="timestamp-label">LAST ANALYZED:</span>
       <span className="timestamp-value">{analysisTime}</span>
     </div>
@@ -5483,71 +5303,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* <div className={`results-tab-bar glass-morphic ${isAnalysisFullscreen ? 'fullscreen' : ''}`}>
-            
-                <div className="tab-buttons-container">
-                  <button className={activeTab === "suitability" ? "active" : ""} onClick={() => setActiveTab("suitability")}>
-                    <span className="tab-icon">🎯</span>
-                    <span className="tab-text">Suitability</span>
-                  </button>
-                  <button className={activeTab === "environmental" ? "active" : ""} onClick={() => setActiveTab("environmental")}>
-                    <span className="tab-icon">🌐</span>
-                    <span className="tab-text">Locational Intelligence</span>
-                  </button>
-                  <button className={activeTab === "infrastructure" ? "active" : ""} onClick={() => setActiveTab("infrastructure")}>
-                    <span className="tab-icon">🏗️</span>
-                    <span className="tab-text">Strategic Utility</span>
-                  </button>
-                </div> */}
-
-              {/* Right Side: Control Icons */}
-              {/* <div className="fullscreen-controls">
-                  <button
-                    className="fullscreen-tab-btn"
-                    onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}
-                    title="Toggle Fullscreen"
-                  >
-                    ⛶
-                  </button>
-                </div> */}
-
-
-              {/* <div className="fullscreen-controls">
-                  <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
-                    {isAnalysisFullscreen ? "✕" : "⛶"}
-                  </button>
-                  {analysisTime && result && (
-                    <span className="analysis-time-badge">
-                      🕒 {analysisTime}
-                    </span>
-                  )}
-
-
-
-                </div> */}
-
-              {/* <div className="analysis-header">
-  <div className="analysis-header-left">
-     <button className="fullscreen-tab-btn" onClick={() => setIsAnalysisFullscreen(!isAnalysisFullscreen)}>
-                    {isAnalysisFullscreen ? "✕" : "⛶"}
-                  </button>
-  </div>
-
-  <div className="analysis-header-right">
-    {analysisTime && result && (
-      <span className="analysis-time-badge">
-        🕒 {analysisTime}
-      </span>
-    )}
-  </div>
-</div> */}
-
-              {/* </div> */}
-
-
-
-              {/* 2. Loading Overlay: This will now appear OVER the placeholder space immediately */}
-
+              
               {(loading || compareLoading) && (
 
                 <div className="loading-overlay">
@@ -5630,7 +5386,7 @@ useEffect(() => {
 
                     >
 
-                      📍 {locationAName}
+                    📍{locationAName}
 
                     </button>
 
@@ -5642,7 +5398,7 @@ useEffect(() => {
 
                     >
 
-                      📍 {locationBName || "Site B"}
+                       📍{locationBName || "Site B"}
 
                     </button>
 
