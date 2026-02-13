@@ -1642,7 +1642,14 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
   const [locationBName, setLocationBName] = useState(() => localStorage.getItem("geo_name_b") || "Site B");
 
+  const SIDEBAR_MIN_WIDTH = 64;
   const [sidebarWidth, setSidebarWidth] = useState(() => Number(localStorage.getItem("sidebar_width")) || 320);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    () => JSON.parse(localStorage.getItem("sidebar_collapsed")) || false
+  );
+  const previousSidebarWidthRef = useRef(
+    Number(localStorage.getItem("sidebar_width_expanded")) || Number(localStorage.getItem("sidebar_width")) || 320
+  );
 
   const [bottomHeight, setBottomHeight] = useState(() => {
     const saved = Number(localStorage.getItem("bottom_height"));
@@ -2898,7 +2905,7 @@ useEffect(() => {
 
   const handleMouseMoveForResize = useCallback((e) => {
 
-    if (isResizingSide.current) {
+    if (isResizingSide.current && !isSidebarCollapsed) {
 
       const newWidth = e.clientX;
 
@@ -2919,7 +2926,7 @@ useEffect(() => {
 
     }
 
-  }, []);
+  }, [isSidebarCollapsed]);
 
 
 
@@ -2941,6 +2948,8 @@ useEffect(() => {
 
   const startResizingSide = useCallback(() => {
 
+    if (isSidebarCollapsed) return;
+
     isResizingSide.current = true;
 
     document.addEventListener("mousemove", handleMouseMoveForResize);
@@ -2949,7 +2958,43 @@ useEffect(() => {
 
     document.body.style.cursor = "col-resize";
 
-  }, [handleMouseMoveForResize, stopResizing]);
+  }, [handleMouseMoveForResize, stopResizing, isSidebarCollapsed]);
+
+  const toggleSidebarCollapse = useCallback(() => {
+    if (isSidebarCollapsed) {
+      const restoredWidth =
+        Number(localStorage.getItem("sidebar_width_expanded")) ||
+        previousSidebarWidthRef.current ||
+        320;
+      const clampedWidth = Math.min(600, Math.max(260, restoredWidth));
+      setSidebarWidth(clampedWidth);
+      setIsSidebarCollapsed(false);
+      return;
+    }
+
+    previousSidebarWidthRef.current = sidebarWidth;
+    localStorage.setItem("sidebar_width_expanded", String(sidebarWidth));
+    setSidebarWidth(SIDEBAR_MIN_WIDTH);
+    setIsSidebarCollapsed(true);
+  }, [isSidebarCollapsed, sidebarWidth, SIDEBAR_MIN_WIDTH]);
+
+  useEffect(() => {
+    localStorage.setItem("sidebar_collapsed", JSON.stringify(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    if (isSidebarCollapsed && sidebarWidth !== SIDEBAR_MIN_WIDTH) {
+      setSidebarWidth(SIDEBAR_MIN_WIDTH);
+    }
+  }, [isSidebarCollapsed, sidebarWidth, SIDEBAR_MIN_WIDTH]);
+
+  useEffect(() => {
+    if (isSidebarCollapsed) return;
+    if (sidebarWidth >= 260) {
+      previousSidebarWidthRef.current = sidebarWidth;
+      localStorage.setItem("sidebar_width_expanded", String(sidebarWidth));
+    }
+  }, [sidebarWidth, isSidebarCollapsed]);
 
 
 
@@ -3412,12 +3457,12 @@ useEffect(() => {
 
     const getFactorWeight = (category, factorKey) => {
       const weights = {
-        physical: { slope: 30, stability: 25, elevation: 25, ruggedness: 20 },
-        hydrology: { flood: 35, groundwater: 25, drainage: 20, water: 20 },
-        environmental: { biodiversity: 25, pollution: 25, soil: 20, heat_island: 15, vegetation: 15 },
+        physical: { slope: 35, elevation: 30, stability: 20, ruggedness: 15 },
+        hydrology: { water: 35, flood: 30, groundwater: 20, drainage: 15 },
+        environmental: { pollution: 30, vegetation: 25, soil: 20, biodiversity: 15, heat_island: 10 },
         climatic: { thermal: 40, intensity: 35, rainfall: 25 },
-        socio_econ: { infrastructure: 40, landuse: 30, population: 30 },
-        risk_resilience: { multi_hazard: 35, climate_change: 25, habitability: 20, recovery: 20 }
+        socio_econ: { infrastructure: 40, landuse: 35, population: 25 },
+        risk_resilience: { multi_hazard: 30, climate_change: 25, habitability: 25, recovery: 20 }
       };
       return weights[category]?.[factorKey] || 0;
     };
@@ -5039,6 +5084,8 @@ useEffect(() => {
         setSavedPlaces={setSavedPlaces}
 
         sidebarWidth={sidebarWidth} startResizingSide={startResizingSide}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
 
         analyzedCoordsB={analyzedCoordsB}
 

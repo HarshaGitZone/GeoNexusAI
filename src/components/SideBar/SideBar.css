@@ -4657,6 +4657,47 @@ aside.sidebar .btn-save:hover:not(:disabled) {
 html:root body[data-theme="light"] aside.sidebar .btn-save:hover { color: #ffffff !important; }
 html:root body[data-theme="dark"] aside.sidebar .btn-save:hover { color: #000000 !important; }
 
+/* Sidebar collapse toggle */
+.sidebar.sidebar-collapsed {
+    overflow: hidden !important;
+}
+
+.sidebar .sidebar-collapse-toggle {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(148, 163, 184, 0.4) !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    color: #f8fafc !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 200 !important;
+    transition: background 0.2s ease, transform 0.2s ease !important;
+}
+
+.sidebar .sidebar-collapse-toggle:hover {
+    background: rgba(51, 65, 85, 0.95) !important;
+    transform: scale(1.04) !important;
+}
+
+.sidebar .sidebar-collapse-glyph {
+    display: inline-block !important;
+    color: #f8fafc !important;
+    font-family: "JetBrains Mono", "Consolas", monospace !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px !important;
+    line-height: 1 !important;
+}
+
 
 
 

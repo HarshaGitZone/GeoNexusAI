@@ -35,6 +35,8 @@ export default function SideBar({
   setResult, setAnalyzedCoords,
   analyzedCoords,
   onProjectImport,
+  isCollapsed,
+  onToggleCollapse,
 }) {
   const [saveProjectLoading, setSaveProjectLoading] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -512,7 +514,7 @@ const generateShareLink = () => {
   return (
     <>
     <aside
-      className="sidebar glass-morphic"
+      className={`sidebar glass-morphic ${isCollapsed ? "sidebar-collapsed" : ""}`}
       style={{
         width: `${sidebarWidth}px`,
         flex: `0 0 ${sidebarWidth}px`,
@@ -521,6 +523,19 @@ const generateShareLink = () => {
         flexDirection: "column",
       }}
     >
+      <button
+        type="button"
+        className="sidebar-collapse-toggle"
+        onClick={onToggleCollapse}
+        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        <span className="sidebar-collapse-glyph" aria-hidden="true">
+          {isCollapsed ? ">>" : "<<"}
+        </span>
+      </button>
+      {!isCollapsed && (
+      <>
       {/* Date and Time Display */}
       {/* <div className="sidebar-datetime-display">
         <span className="datetime-date">{currentTime.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
@@ -1192,7 +1207,9 @@ const generateShareLink = () => {
 
       </div>
 
-      <div className="sidebar-resizer" onMouseDown={startResizingSide} />
+      </>
+      )}
+      {!isCollapsed && <div className="sidebar-resizer" onMouseDown={startResizingSide} />}
     </aside>
     {/* 🚀 MOVE THE MODAL OUTSIDE THE ASIDE TAG 🚀 */}
       {isShareModalOpen && (
