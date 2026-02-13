@@ -37,6 +37,53 @@ def _elevation_to_suitability(elev_m: float) -> float:
 
 
 class Aggregator:
+    CATEGORY_WEIGHTS = {
+        "physical": 0.21,
+        "environmental": 0.12,
+        "hydrology": 0.20,
+        "climatic": 0.12,
+        "socio_econ": 0.20,
+        "risk_resilience": 0.15
+    }
+
+    FACTOR_WEIGHTS = {
+        "physical": {
+            "slope": 0.35,
+            "elevation": 0.20,
+            "ruggedness": 0.20,
+            "stability": 0.25
+        },
+        "environmental": {
+            "vegetation": 0.15,
+            "soil": 0.35,
+            "pollution": 0.30,
+            "biodiversity": 0.10,
+            "heat_island": 0.10
+        },
+        "hydrology": {
+            "flood": 0.35,
+            "water": 0.30,
+            "drainage": 0.20,
+            "groundwater": 0.15
+        },
+        "climatic": {
+            "thermal": 0.45,
+            "rainfall": 0.35,
+            "intensity": 0.20
+        },
+        "socio_econ": {
+            "infrastructure": 0.45,
+            "landuse": 0.30,
+            "population": 0.25
+        },
+        "risk_resilience": {
+            "multi_hazard": 0.35,
+            "climate_change": 0.25,
+            "recovery": 0.20,
+            "habitability": 0.20
+        }
+    }
+
     @staticmethod
     def _normalize(val: Any, default: float = 50.0, factor_name: str = None, lat: float = None, lng: float = None) -> float:
         """Safely convert and clamp values between 0 and 100 with dynamic context-aware defaults."""
@@ -111,6 +158,17 @@ class Aggregator:
         return False
 
     @classmethod
+    def _compute_category_score(cls, category_name: str, factor_scores: Dict[str, float]) -> float:
+        """Compute a weighted category score from factor scores."""
+        weights = cls.FACTOR_WEIGHTS[category_name]
+        return sum(float(factor_scores.get(factor, 0.0)) * weight for factor, weight in weights.items())
+
+    @classmethod
+    def _compute_global_score(cls, category_scores: Dict[str, float]) -> float:
+        """Compute weighted global suitability score from category scores."""
+        return sum(float(category_scores.get(category, 0.0)) * weight for category, weight in cls.CATEGORY_WEIGHTS.items())
+
+    @classmethod
     def compute_suitability_score(cls, package: Dict[str, Any]) -> Dict[str, Any]:
         """
         MASTER SCORING ENGINE
@@ -132,7 +190,13 @@ class Aggregator:
         elev_score = _elevation_to_suitability(elev_val) if elev_val is not None else 50.0
         ruggedness_score = cls._normalize(p.get("ruggedness"), 50.0, "ruggedness", lat, lng)
         stability_score = cls._normalize(p.get("stability"), 50.0, "stability", lat, lng)
-        cat_physical = (slope_score + elev_score + ruggedness_score + stability_score) / 4
+        physical_factors = {
+            "slope": slope_score,
+            "elevation": elev_score,
+            "ruggedness": ruggedness_score,
+            "stability": stability_score
+        }
+        cat_physical = cls._compute_category_score("physical", physical_factors)
 
         # --- 2. ENVIRONMENTAL (5 Factors) ---
         e = raw.get("environmental", {})
@@ -160,13 +224,14 @@ class Aggregator:
             }
             soil_score = estimate_soil_quality_score(soil_context)
         
-        cat_environmental = (
-            vegetation_score + 
-            soil_score + 
-            cls._normalize(e.get("pollution"), 50.0, "pollution", lat, lng) +
-            cls._normalize(e.get("biodiversity"), 50.0, "biodiversity", lat, lng) +
-            cls._normalize(e.get("heat_island"), 50.0, "heat_island", lat, lng)
-        ) / 5
+        environmental_factors = {
+            "vegetation": vegetation_score,
+            "soil": soil_score,
+            "pollution": cls._normalize(e.get("pollution"), 50.0, "pollution", lat, lng),
+            "biodiversity": cls._normalize(e.get("biodiversity"), 50.0, "biodiversity", lat, lng),
+            "heat_island": cls._normalize(e.get("heat_island"), 50.0, "heat_island", lat, lng)
+        }
+        cat_environmental = cls._compute_category_score("environmental", environmental_factors)
 
         # --- 3. HYDROLOGY (4 Factors) ---
         h = raw.get("hydrology", {})
@@ -176,7 +241,13 @@ class Aggregator:
         groundwater_val = cls._normalize(h.get("groundwater"), 50.0, "groundwater", lat, lng)
         
         # Include all 4 hydrology factors in average
-        cat_hydrology = (water_val + drainage_val + flood_val + groundwater_val) / 4
+        hydrology_factors = {
+            "water": water_val,
+            "drainage": drainage_val,
+            "flood": flood_val,
+            "groundwater": groundwater_val
+        }
+        cat_hydrology = cls._compute_category_score("hydrology", hydrology_factors)
         flood_safety = flood_val  # Keep separate for penalty logic
         
         # --- Water body detection (after hydrology is calculated) ---
@@ -195,13 +266,8 @@ class Aggregator:
             }
             soil_score = estimate_soil_quality_score(soil_context_updated)
             # Update environmental category with corrected soil score
-            cat_environmental = (
-                vegetation_score + 
-                soil_score + 
-                cls._normalize(e.get("pollution"), 50.0, "pollution", lat, lng) +
-                cls._normalize(e.get("biodiversity"), 50.0, "biodiversity", lat, lng) +
-                cls._normalize(e.get("heat_island"), 50.0, "heat_island", lat, lng)
-            ) / 5
+            environmental_factors["soil"] = soil_score
+            cat_environmental = cls._compute_category_score("environmental", environmental_factors)
 
         # --- 4. CLIMATIC (3 Factors) ---
         c = raw.get("climatic", {})
@@ -209,11 +275,12 @@ class Aggregator:
         rainfall_score = cls._normalize(c.get("rainfall"), 50.0, "rainfall", lat, lng)
         thermal_score = cls._normalize(c.get("thermal"), 50.0, "thermal", lat, lng)
         
-        cat_climatic = (
-            rainfall_score +
-            thermal_score +
-            intensity_score
-        ) / 3
+        climatic_factors = {
+            "rainfall": rainfall_score,
+            "thermal": thermal_score,
+            "intensity": intensity_score
+        }
+        cat_climatic = cls._compute_category_score("climatic", climatic_factors)
 
         # --- 5. SOCIO-ECONOMIC (3 Factors) ---
         s = raw.get("socio_econ", {})
@@ -228,20 +295,22 @@ class Aggregator:
         else:
             infrastructure_val = cls._normalize(infrastructure_data, 50.0, "infrastructure", lat, lng)
         
-        cat_socio = (
-            infrastructure_val +
-            landuse_val +
-            cls._normalize(s.get("population"), 50.0, "population", lat, lng)
-        ) / 3
+        socio_factors = {
+            "infrastructure": infrastructure_val,
+            "landuse": landuse_val,
+            "population": cls._normalize(s.get("population"), 50.0, "population", lat, lng)
+        }
+        cat_socio = cls._compute_category_score("socio_econ", socio_factors)
 
         # --- 6. RISK & RESILIENCE (4 Factors) ---
         r = raw.get("risk_resilience", {})
-        cat_risk_resilience = (
-            cls._normalize(r.get("multi_hazard"), 50.0, "multi_hazard", lat, lng) +
-            cls._normalize(r.get("climate_change"), 50.0, "climate_change", lat, lng) +
-            cls._normalize(r.get("recovery"), 50.0, "recovery", lat, lng) +
-            cls._normalize(r.get("habitability"), 50.0, "habitability", lat, lng)
-        ) / 4
+        risk_factors = {
+            "multi_hazard": cls._normalize(r.get("multi_hazard"), 50.0, "multi_hazard", lat, lng),
+            "climate_change": cls._normalize(r.get("climate_change"), 50.0, "climate_change", lat, lng),
+            "recovery": cls._normalize(r.get("recovery"), 50.0, "recovery", lat, lng),
+            "habitability": cls._normalize(r.get("habitability"), 50.0, "habitability", lat, lng)
+        }
+        cat_risk_resilience = cls._compute_category_score("risk_resilience", risk_factors)
 
         # --- Water body detection (comprehensive - already done above) ---
         water_body_name = None
@@ -257,15 +326,15 @@ class Aggregator:
             flood_safety = 0.0
 
         # --- FINAL AGGREGATION ---
-        weights = {"phys": 0.167, "env": 0.167, "hydro": 0.167, "clim": 0.167, "socio": 0.167, "risk": 0.167}
-        base_score = (
-            (cat_physical * weights["phys"]) +
-            (cat_environmental * weights["env"]) +
-            (cat_hydrology * weights["hydro"]) +
-            (cat_climatic * weights["clim"]) +
-            (cat_socio * weights["socio"]) +
-            (cat_risk_resilience * weights["risk"])
-        )
+        category_scores = {
+            "physical": cat_physical,
+            "environmental": cat_environmental,
+            "hydrology": cat_hydrology,
+            "climatic": cat_climatic,
+            "socio_econ": cat_socio,
+            "risk_resilience": cat_risk_resilience
+        }
+        base_score = cls._compute_global_score(category_scores)
 
         # 🚨 MASTER PENALTY LOGIC
         final_score = base_score
@@ -317,45 +386,23 @@ class Aggregator:
                 }
             }
             
-            # Recalculate category averages with updated factors
-            cat_physical = (updated_factors["physical"]["elevation"] + 
-                           updated_factors["physical"]["ruggedness"] + 
-                           updated_factors["physical"]["slope"] + 
-                           updated_factors["physical"]["stability"]) / 4
+            # Recalculate category scores with weighted factor profile
+            cat_physical = cls._compute_category_score("physical", updated_factors["physical"])
+            cat_environmental = cls._compute_category_score("environmental", updated_factors["environmental"])
+            cat_hydrology = cls._compute_category_score("hydrology", updated_factors["hydrology"])
+            cat_climatic = cls._compute_category_score("climatic", updated_factors["climatic"])
+            cat_socio = cls._compute_category_score("socio_econ", updated_factors["socio_econ"])
+            cat_risk_resilience = cls._compute_category_score("risk_resilience", updated_factors["risk_resilience"])
             
-            cat_environmental = (updated_factors["environmental"]["vegetation"] + 
-                                 updated_factors["environmental"]["pollution"] + 
-                                 updated_factors["environmental"]["soil"] + 
-                                 updated_factors["environmental"]["biodiversity"] + 
-                                 updated_factors["environmental"]["heat_island"]) / 5
-            
-            cat_hydrology = (updated_factors["hydrology"]["flood"] + 
-                           updated_factors["hydrology"]["water"] + 
-                           updated_factors["hydrology"]["drainage"] + 
-                           updated_factors["hydrology"]["groundwater"]) / 4
-            
-            cat_climatic = (updated_factors["climatic"]["intensity"] + 
-                           updated_factors["climatic"]["rainfall"] + 
-                           updated_factors["climatic"]["thermal"]) / 3
-            
-            cat_socio = (updated_factors["socio_econ"]["infrastructure"] + 
-                        updated_factors["socio_econ"]["landuse"] + 
-                        updated_factors["socio_econ"]["population"]) / 3
-            
-            cat_risk_resilience = (updated_factors["risk_resilience"]["multi_hazard"] + 
-                                 updated_factors["risk_resilience"]["climate_change"] + 
-                                 updated_factors["risk_resilience"]["recovery"] + 
-                                 updated_factors["risk_resilience"]["habitability"]) / 4
-            
-            # Calculate final score based on actual averages (not hardcoded)
-            final_score = (
-                (cat_physical * weights["phys"]) +
-                (cat_environmental * weights["env"]) +
-                (cat_hydrology * weights["hydro"]) +
-                (cat_climatic * weights["clim"]) +
-                (cat_socio * weights["socio"]) +
-                (cat_risk_resilience * weights["risk"])
-            )
+            # Calculate final score based on weighted profile
+            final_score = cls._compute_global_score({
+                "physical": cat_physical,
+                "environmental": cat_environmental,
+                "hydrology": cat_hydrology,
+                "climatic": cat_climatic,
+                "socio_econ": cat_socio,
+                "risk_resilience": cat_risk_resilience
+            })
             
             penalty_note = "Non-Terrestrial (Open Water) - Factor-Averaged Score"
             is_hard_unsuitable = True
@@ -372,7 +419,7 @@ class Aggregator:
             # For protected areas, adjust factors to reflect conservation restrictions
             protected_factors = {
                 "physical": {
-                    "elevation": slope_score,     # Keep original elevation
+                    "elevation": elev_score,     # Keep original elevation
                     "ruggedness": ruggedness_score, # Keep original ruggedness
                     "slope": slope_score,        # Keep original slope
                     "stability": stability_score  # Keep original stability
@@ -408,45 +455,23 @@ class Aggregator:
                 }
             }
             
-            # Recalculate category averages with protected area factors
-            cat_physical = (protected_factors["physical"]["elevation"] + 
-                           protected_factors["physical"]["ruggedness"] + 
-                           protected_factors["physical"]["slope"] + 
-                           protected_factors["physical"]["stability"]) / 4
+            # Recalculate category scores with weighted factor profile
+            cat_physical = cls._compute_category_score("physical", protected_factors["physical"])
+            cat_environmental = cls._compute_category_score("environmental", protected_factors["environmental"])
+            cat_hydrology = cls._compute_category_score("hydrology", protected_factors["hydrology"])
+            cat_climatic = cls._compute_category_score("climatic", protected_factors["climatic"])
+            cat_socio = cls._compute_category_score("socio_econ", protected_factors["socio_econ"])
+            cat_risk_resilience = cls._compute_category_score("risk_resilience", protected_factors["risk_resilience"])
             
-            cat_environmental = (protected_factors["environmental"]["vegetation"] + 
-                                 protected_factors["environmental"]["pollution"] + 
-                                 protected_factors["environmental"]["soil"] + 
-                                 protected_factors["environmental"]["biodiversity"] + 
-                                 protected_factors["environmental"]["heat_island"]) / 5
-            
-            cat_hydrology = (protected_factors["hydrology"]["flood"] + 
-                           protected_factors["hydrology"]["water"] + 
-                           protected_factors["hydrology"]["drainage"] + 
-                           protected_factors["hydrology"]["groundwater"]) / 4
-            
-            cat_climatic = (protected_factors["climatic"]["intensity"] + 
-                           protected_factors["climatic"]["rainfall"] + 
-                           protected_factors["climatic"]["thermal"]) / 3
-            
-            cat_socio = (protected_factors["socio_econ"]["infrastructure"] + 
-                        protected_factors["socio_econ"]["landuse"] + 
-                        protected_factors["socio_econ"]["population"]) / 3
-            
-            cat_risk_resilience = (protected_factors["risk_resilience"]["multi_hazard"] + 
-                                 protected_factors["risk_resilience"]["climate_change"] + 
-                                 protected_factors["risk_resilience"]["recovery"] + 
-                                 protected_factors["risk_resilience"]["habitability"]) / 4
-            
-            # Calculate final score based on actual averages (not hardcoded)
-            final_score = (
-                (cat_physical * weights["phys"]) +
-                (cat_environmental * weights["env"]) +
-                (cat_hydrology * weights["hydro"]) +
-                (cat_climatic * weights["clim"]) +
-                (cat_socio * weights["socio"]) +
-                (cat_risk_resilience * weights["risk"])
-            )
+            # Calculate final score based on weighted profile
+            final_score = cls._compute_global_score({
+                "physical": cat_physical,
+                "environmental": cat_environmental,
+                "hydrology": cat_hydrology,
+                "climatic": cat_climatic,
+                "socio_econ": cat_socio,
+                "risk_resilience": cat_risk_resilience
+            })
             
             penalty_note = "Protected Environmental Zone - Factor-Averaged Score"
             label = "Not Suitable (Protected/Forest Area)"

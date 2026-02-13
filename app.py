@@ -81,7 +81,7 @@ import requests
 import numpy as np
 import pandas as pd
 import pickle
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -3272,7 +3272,7 @@ def generate_temporal_forecast(current_suitability, history_10y):
     """
     veg_loss = abs(history_10y['drifts'].get('landuse', 0))
     urban_gain = abs(history_10y['drifts'].get('proximity', 0) or history_10y['drifts'].get('infrastructure', 0))
-    current_score = current_suitability.get('suitability_score', 50)
+    current_score = current_suitability.get('raw_suitability_score', current_suitability.get('suitability_score', 50))
     cat = current_suitability.get('category_scores') or {}
     
     # Flatten factors for low-score detection
@@ -3745,7 +3745,7 @@ def get_history():
                 history_bundle[t_key]["forecast"] = generate_temporal_forecast(current_suitability, history_bundle[t_key])
         
         return jsonify({
-            "current_score": current_suitability['suitability_score'],
+            "current_score": current_suitability.get('raw_suitability_score', current_suitability.get('suitability_score', 50)),
             "current_factors": f,
             "current_category_scores": {
                 "physical": current_physical,
@@ -3801,6 +3801,37 @@ def suitability():
         latitude = float(data.get("latitude", 17.3850))
         longitude = float(data.get("longitude", 78.4867))
 
+        def _enforce_score_hide_policy(result_obj: dict) -> dict:
+            if not isinstance(result_obj, dict):
+                return result_obj
+            label = str(result_obj.get("label", ""))
+            hard_unsuitable = bool(result_obj.get("score_hidden")) or bool(result_obj.get("is_hard_unsuitable")) or label in {
+                "Not Suitable (Water Body)",
+                "Not Suitable (Protected/Forest Area)"
+            } or bool(result_obj.get("water_body_snippet")) or bool(result_obj.get("protected_snippet"))
+            raw_score = result_obj.get("raw_suitability_score", result_obj.get("suitability_score", 0.0))
+            try:
+                raw_score = float(raw_score)
+            except (TypeError, ValueError):
+                raw_score = 0.0
+
+            result_obj["raw_suitability_score"] = raw_score
+            result_obj["score_hidden"] = hard_unsuitable
+
+            if hard_unsuitable:
+                result_obj["suitability_score"] = None
+                result_obj["score_display"] = "-"
+                if not result_obj.get("score_hidden_reason"):
+                    if label == "Not Suitable (Water Body)" or result_obj.get("water_body_snippet"):
+                        result_obj["score_hidden_reason"] = "Location is on open water; suitability score is intentionally hidden."
+                    elif label == "Not Suitable (Protected/Forest Area)" or result_obj.get("protected_snippet"):
+                        result_obj["score_hidden_reason"] = "Location is in a protected/forest area; suitability score is intentionally hidden."
+            else:
+                if result_obj.get("suitability_score") is None:
+                    result_obj["suitability_score"] = raw_score
+                result_obj["score_display"] = f"{raw_score:.1f}"
+            return result_obj
+
         # Apply memory optimizations if available
         if PRODUCTION_OPTIMIZATIONS_AVAILABLE:
             production_optimizations.optimize_pytorch_memory()
@@ -3811,12 +3842,15 @@ def suitability():
 
         if cache_key in ANALYSIS_CACHE:
             result = ANALYSIS_CACHE[cache_key]
+            result = _enforce_score_hide_policy(result)
+            ANALYSIS_CACHE[cache_key] = result
             result['cnn_analysis'] = cnn_analysis
             return jsonify(result)
 
         # 2. 🚀 TRIGGER 23-FACTOR ANALYSIS (Integrated Logic)
         # Calls GeoDataService and Aggregator inside your master function
         result = _perform_suitability_analysis(latitude, longitude)
+        result = _enforce_score_hide_policy(result)
 
         # 3. INJECT CNN DATA (Preserved Logic)
         result['cnn_analysis'] = cnn_analysis
@@ -3990,7 +4024,7 @@ def suitability():
         # Now pass the clean flat dictionary to the strategic engine
         result['strategic_intelligence'] = generate_strategic_intelligence(
             flat_factors_for_intel,
-            result['suitability_score'],
+            result.get('raw_suitability_score', result.get('suitability_score', 50)),
             nearby_list
         )
 
@@ -4060,6 +4094,281 @@ def build_factor_evidence(f):
         }
     }
 
+def _confidence_to_score(conf) -> float:
+    """Normalize confidence (numeric or label) into a 0-100 score."""
+    if isinstance(conf, (int, float)):
+        return max(0.0, min(100.0, float(conf)))
+    if isinstance(conf, str):
+        c = conf.strip().lower()
+        if c in ("very high", "vhigh"):
+            return 95.0
+        if c in ("high",):
+            return 85.0
+        if c in ("medium", "moderate"):
+            return 65.0
+        if c in ("low",):
+            return 45.0
+        if c in ("very low", "vlow"):
+            return 25.0
+    return 60.0
+
+def _extract_data_freshness_hours(factor: dict):
+    """Estimate freshness in hours from known timestamps or freshness labels."""
+    if not isinstance(factor, dict):
+        return None
+    details = factor.get("details") if isinstance(factor.get("details"), dict) else {}
+    now = datetime.utcnow()
+
+    # Timestamp candidates commonly used by upstream factors/APIs.
+    ts_candidates = [
+        details.get("last_updated"),
+        details.get("timestamp"),
+        details.get("analysis_time"),
+        factor.get("timestamp")
+    ]
+    for ts in ts_candidates:
+        if not ts or not isinstance(ts, str):
+            continue
+        txt = ts.strip().replace("Z", "+00:00")
+        try:
+            dt = datetime.fromisoformat(txt)
+            if dt.tzinfo is not None:
+                dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+            hours = (now - dt).total_seconds() / 3600.0
+            return max(0.0, hours)
+        except Exception:
+            continue
+
+    freshness_label = str(details.get("data_freshness") or "").lower()
+    if "real-time" in freshness_label or "realtime" in freshness_label or "live" in freshness_label:
+        return 1.0
+    if "hour" in freshness_label:
+        return 6.0
+    if "day" in freshness_label:
+        return 24.0
+    if "week" in freshness_label:
+        return 24.0 * 7.0
+    if "baseline" in freshness_label or "fallback" in freshness_label:
+        return 24.0 * 30.0
+    return None
+
+def _freshness_to_score(freshness_hours):
+    """Map data age to a 0-100 freshness score."""
+    if freshness_hours is None:
+        return 60.0
+    h = float(freshness_hours)
+    if h <= 6:
+        return 100.0
+    if h <= 24:
+        return 92.0
+    if h <= 72:
+        return 82.0
+    if h <= 24 * 7:
+        return 70.0
+    if h <= 24 * 30:
+        return 52.0
+    return 35.0
+
+def _infer_data_mode(source: str, details: dict = None) -> str:
+    """Infer data mode for auditability (real-time/derived/fallback)."""
+    details = details if isinstance(details, dict) else {}
+    src_text = f"{source or ''} {details.get('source') or ''} {details.get('dataset_source') or ''}".lower()
+    if any(k in src_text for k in ("real-time", "realtime", "live")):
+        return "Real-time"
+    if any(k in src_text for k in ("fallback", "baseline", "estimate", "estimated", "default", "proxy")):
+        return "Estimated/Fallback"
+    return "Measured/Derived"
+
+def _build_factor_proof_suffix(factor: dict) -> str:
+    """Build a concise proof suffix for every evidence statement."""
+    factor = factor if isinstance(factor, dict) else {}
+    details = factor.get("details") if isinstance(factor.get("details"), dict) else {}
+    source = factor.get("source") or details.get("source") or details.get("dataset_source") or "Unknown"
+    confidence_score = _confidence_to_score(factor.get("confidence"))
+    freshness_hours = _extract_data_freshness_hours(factor)
+    data_mode = factor.get("data_mode") or _infer_data_mode(source, details)
+    q = details.get("query_point") if isinstance(details.get("query_point"), dict) else {}
+    q_lat = q.get("lat")
+    q_lng = q.get("lng")
+    coord_text = f"{q_lat:.6f}, {q_lng:.6f}" if isinstance(q_lat, (int, float)) and isinstance(q_lng, (int, float)) else "N/A"
+    freshness_text = f"{freshness_hours:.1f}h" if isinstance(freshness_hours, (int, float)) else (details.get("data_freshness") or "N/A")
+    metrics = []
+    for k, v in details.items():
+        if k in ("query_point", "analysis_generated_at_utc", "source", "dataset_source", "data_freshness"):
+            continue
+        if isinstance(v, (int, float)):
+            metrics.append(f"{k}={v:.3f}" if isinstance(v, float) else f"{k}={v}")
+        if len(metrics) >= 4:
+            break
+    metric_text = f"; Metrics={', '.join(metrics)}" if metrics else ""
+    return f"Proof: Source={source}; Mode={data_mode}; Confidence={confidence_score:.1f}/100; Freshness={freshness_text}; QueryPoint={coord_text}{metric_text}."
+
+def _validate_factor_record(factor_name: str, factor: dict) -> dict:
+    """
+    Validate one factor for numeric quality and source reliability.
+    Returns validation metadata with score and issues list.
+    """
+    factor = factor if isinstance(factor, dict) else {}
+    details = factor.get("details") if isinstance(factor.get("details"), dict) else {}
+    value = factor.get("value")
+    raw = factor.get("raw")
+    source = factor.get("source")
+    mode = factor.get("data_mode") or _infer_data_mode(source, details)
+    confidence_score = _confidence_to_score(factor.get("confidence"))
+    freshness_hours = _extract_data_freshness_hours(factor)
+    freshness_score = _freshness_to_score(freshness_hours)
+
+    issues = []
+    score = 100.0
+
+    try:
+        value_num = float(value)
+        if value_num < 0 or value_num > 100:
+            issues.append("value_out_of_range")
+            score -= 40
+    except Exception:
+        issues.append("value_not_numeric")
+        score -= 45
+        value_num = None
+
+    if not source:
+        issues.append("missing_source")
+        score -= 20
+
+    if confidence_score < 45:
+        issues.append("low_confidence")
+        score -= 18
+
+    if freshness_score < 45:
+        issues.append("stale_or_unknown_freshness")
+        score -= 12
+
+    if mode == "Estimated/Fallback":
+        issues.append("fallback_data_mode")
+        score -= 10
+
+    if factor_name in ("elevation", "slope", "water", "flood") and raw is None and details.get("distance_km") is None:
+        issues.append("missing_raw_metric")
+        score -= 8
+
+    status = "pass" if score >= 80 else "warn" if score >= 60 else "fail"
+    return {
+        "status": status,
+        "score": round(max(0.0, min(100.0, score)), 1),
+        "issues": issues,
+        "confidence_score": round(confidence_score, 1),
+        "freshness_score": round(freshness_score, 1),
+        "freshness_hours": round(freshness_hours, 2) if isinstance(freshness_hours, (int, float)) else None,
+        "data_mode": mode
+    }
+
+def _build_score_proof_payload(factors: dict, category_scores: dict, suitability_score: float, label: str, penalty: str):
+    """
+    Build a transparent scoring proof payload:
+    - category priorities
+    - factor-level global contributions
+    - top positive/risk drivers
+    - weighted reliability/freshness certainty metrics
+    """
+    category_weights = {
+        k: float(v) for k, v in getattr(Aggregator, "CATEGORY_WEIGHTS", {}).items()
+    }
+    factor_weights = {
+        k: {fk: float(fv) for fk, fv in v.items()}
+        for k, v in getattr(Aggregator, "FACTOR_WEIGHTS", {}).items()
+    }
+
+    rows = []
+    for category, cat_factors in (factors or {}).items():
+        cat_weight = category_weights.get(category, 0.0)
+        if not isinstance(cat_factors, dict):
+            continue
+        for factor_key, factor_data in cat_factors.items():
+            factor_data = factor_data if isinstance(factor_data, dict) else {}
+            value = factor_data.get("value", 50.0)
+            try:
+                value = float(value)
+            except Exception:
+                value = 50.0
+            value = max(0.0, min(100.0, value))
+
+            factor_weight = factor_weights.get(category, {}).get(factor_key, 0.0)
+            global_weight = cat_weight * factor_weight  # decimal fraction of 1.0
+            contribution_points = value * global_weight
+
+            confidence_score = _confidence_to_score(factor_data.get("confidence"))
+            freshness_hours = _extract_data_freshness_hours(factor_data)
+            freshness_score = _freshness_to_score(freshness_hours)
+            reliability_score = (confidence_score * 0.7) + (freshness_score * 0.3)
+
+            details = factor_data.get("details") if isinstance(factor_data.get("details"), dict) else {}
+            rows.append({
+                "category": category,
+                "factor": factor_key,
+                "value": round(value, 2),
+                "category_weight_pct": round(cat_weight * 100.0, 2),
+                "factor_weight_pct_of_category": round(factor_weight * 100.0, 2),
+                "global_weight_pct": round(global_weight * 100.0, 2),
+                "contribution_points": round(contribution_points, 3),
+                "source": factor_data.get("source") or details.get("source") or "Unknown",
+                "data_mode": factor_data.get("data_mode") or _infer_data_mode(factor_data.get("source"), details),
+                "confidence_score": round(confidence_score, 1),
+                "freshness_hours": round(freshness_hours, 2) if freshness_hours is not None else None,
+                "freshness_score": round(freshness_score, 1),
+                "reliability_score": round(reliability_score, 1),
+                "data_freshness_label": details.get("data_freshness"),
+                "validation_status": ((factor_data.get("validation") or {}).get("status")),
+                "validation_score": ((factor_data.get("validation") or {}).get("score"))
+            })
+
+    total_global_weight = sum(r["global_weight_pct"] for r in rows)
+    weight_denom = total_global_weight if total_global_weight > 0 else 1.0
+
+    weighted_reliability = sum(r["reliability_score"] * r["global_weight_pct"] for r in rows) / weight_denom
+    weighted_confidence = sum(r["confidence_score"] * r["global_weight_pct"] for r in rows) / weight_denom
+    weighted_freshness = sum(r["freshness_score"] * r["global_weight_pct"] for r in rows) / weight_denom
+
+    top_positive = sorted(rows, key=lambda x: x["contribution_points"], reverse=True)[:6]
+    top_risk = sorted(
+        rows,
+        key=lambda x: ((100.0 - x["value"]) * (x["global_weight_pct"] / 100.0)),
+        reverse=True
+    )[:6]
+
+    freshness_samples = [r["freshness_hours"] for r in rows if isinstance(r.get("freshness_hours"), (int, float))]
+    freshest_observation_h = min(freshness_samples) if freshness_samples else None
+
+    return {
+        "model": {
+            "name": "GeoAI Human Suitability Index",
+            "version": "HSI-2026.1",
+            "objective": "Estimate suitability for sustained human activity, not legal/engineering certification."
+        },
+        "result": {
+            "score": round(float(suitability_score), 1),
+            "label": label,
+            "penalty_applied": penalty or "None"
+        },
+        "category_priorities": [
+            {
+                "category": c,
+                "global_weight_pct": round(w * 100.0, 2),
+                "category_score": round(float((category_scores or {}).get(c, 0.0)), 1)
+            }
+            for c, w in category_weights.items()
+        ],
+        "certainty": {
+            "weighted_data_reliability": round(weighted_reliability, 1),
+            "weighted_model_confidence": round(weighted_confidence, 1),
+            "weighted_data_freshness": round(weighted_freshness, 1),
+            "freshest_observation_hours": round(freshest_observation_h, 2) if freshest_observation_h is not None else None,
+            "note": "Reliability is weighted by factor importance and combines confidence + freshness."
+        },
+        "top_positive_drivers": top_positive,
+        "top_risk_drivers": top_risk,
+        "contribution_table": rows
+    }
+
 def normalize_factor(factor: dict, *, default_value=50.0):
     """
     Enforces a strict schema for all factors.
@@ -4096,12 +4405,14 @@ def normalize_factor(factor: dict, *, default_value=50.0):
     return {
         "value": value,
         "raw": factor.get("raw"),
+        "scaled_score": factor.get("scaled_score"),
         "label": factor.get("label"),
         "source": factor.get("source"),
         "confidence": factor.get("confidence", 75),
         "evidence": factor.get("evidence"),
         "unit": factor.get("unit"),
         "details": factor.get("details"),
+        "data_mode": factor.get("data_mode"),
         "distance_km": factor.get("distance_km"),
         "classification": factor.get("classification"),
         "density": factor.get("density")
@@ -4142,18 +4453,31 @@ def _generate_evidence_text(factor_name: str, factor_data: dict, raw_factors: di
         return f"Slope suitability score {score_val:.0f}/100. {label or 'Terrain slope evaluated from elevation data.'}"
     
     elif factor_name == "elevation":
+        elev_raw = None
+        if isinstance(raw_factors, dict):
+            elev_obj = raw_factors.get("physical", {}).get("elevation", {})
+            if isinstance(elev_obj, dict):
+                elev_raw = elev_obj.get("value")
+            elif isinstance(elev_obj, (int, float)):
+                elev_raw = float(elev_obj)
+        if elev_raw is None and isinstance(factor_data.get("raw"), (int, float)):
+            elev_raw = float(factor_data.get("raw"))
+
+        score_val = 50.0 if val is None else float(val)
+        if elev_raw is None:
+            return f"Elevation raw meters unavailable. Suitability score {score_val:.1f}/100 from elevation model."
         if val is None:
             return "Elevation data unavailable. Score defaulted to 50."
-        if val < 50:
-            return f"Elevation: {val}m above sea level (measured). LOW coastal/floodplain. Monitor sea-level and flood. Reference: <50m low, 50–200m low-moderate, 200–600m optimal. Score {val}/100 reflects low band."
-        elif val < 200:
-            return f"Elevation: {val}m above sea level. LOW to MODERATE. Good accessibility; manageable flood exposure. Score {val}/100 reflects 50–200m band."
-        elif val < 600:
-            return f"Elevation: {val}m above sea level. MODERATE — optimal range for most construction (reference 200–600m). Score {val}/100 reflects optimal band."
-        elif val < 1500:
-            return f"Elevation: {val}m above sea level. HIGH. Consider temperature extremes and access. Score {val}/100 reflects 600–1500m band."
+        if elev_raw < 50:
+            return f"Elevation: {elev_raw:.1f}m above sea level (measured). LOW coastal/floodplain. Monitor sea-level and flood. Reference: <50m low, 50-200m low-moderate, 200-600m optimal. Suitability score {score_val:.1f}/100."
+        elif elev_raw < 200:
+            return f"Elevation: {elev_raw:.1f}m above sea level. LOW to MODERATE. Good accessibility; manageable flood exposure. Suitability score {score_val:.1f}/100."
+        elif elev_raw < 600:
+            return f"Elevation: {elev_raw:.1f}m above sea level. MODERATE and near-optimal for most construction (reference 200-600m). Suitability score {score_val:.1f}/100."
+        elif elev_raw < 1500:
+            return f"Elevation: {elev_raw:.1f}m above sea level. HIGH. Consider temperature extremes and logistics. Suitability score {score_val:.1f}/100."
         else:
-            return f"Elevation: {val}m above sea level. VERY HIGH. Challenging; reduced oxygen, extreme weather. Score {val}/100 reflects >1500m band."
+            return f"Elevation: {elev_raw:.1f}m above sea level. VERY HIGH. Challenging conditions and reduced oxygen. Suitability score {score_val:.1f}/100."
     
     elif factor_name == "flood":
         # Get water distance for combined assessment
@@ -5321,12 +5645,34 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     # Store the specific proofs in the factor object for the UI to display
     f["socio_econ"]["infrastructure"]["real_world_proof"] = hub_intelligence["details"].get("real_world_proof", [])
 
-    # Generate standard evidence for all other 22 factors
+    # Attach coordinate/time anchored proof metadata to every factor
+    analysis_generated_at_utc = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    validation_rows = []
     for cat in f:
         for factor in f[cat]:
-            # Skip infrastructure as we just manually handled it with high-fidelity proof above
-            if not (cat == "socio_econ" and factor == "infrastructure"):
-                f[cat][factor]["evidence"] = _generate_evidence_text(factor, f[cat][factor], raw)
+            details = f[cat][factor].get("details")
+            details = details if isinstance(details, dict) else {}
+            details.setdefault("query_point", {"lat": round(float(latitude), 6), "lng": round(float(longitude), 6)})
+            details.setdefault("analysis_generated_at_utc", analysis_generated_at_utc)
+            f[cat][factor]["details"] = details
+            f[cat][factor]["data_mode"] = _infer_data_mode(f[cat][factor].get("source"), details)
+
+            # Keep custom infra narrative if present; otherwise generate standard evidence.
+            base_evidence = f[cat][factor].get("evidence")
+            if not base_evidence:
+                base_evidence = _generate_evidence_text(factor, f[cat][factor], raw)
+            if "Proof:" not in str(base_evidence):
+                base_evidence = f"{base_evidence} {_build_factor_proof_suffix(f[cat][factor])}"
+            f[cat][factor]["evidence"] = base_evidence
+            validation = _validate_factor_record(factor, f[cat][factor])
+            f[cat][factor]["validation"] = validation
+            validation_rows.append({
+                "category": cat,
+                "factor": factor,
+                "status": validation.get("status"),
+                "score": validation.get("score"),
+                "issues": validation.get("issues", [])
+            })
 
     # 5. 📂 GEOSPATIAL PASSPORT
     slope_raw = raw.get("physical", {}).get("slope", {})
@@ -5347,17 +5693,51 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
         "water_distance_km": round(float(water_dist), 3) if water_dist is not None else None,
         "flood_safety_score": round(f["hydrology"]["flood"]["value"], 1),
         "category_breakdown": {k: round(v, 1) for k, v in (agg_result.get("category_scores") or {}).items()},
+        "validation": {
+            "total_factors": len(validation_rows),
+            "pass_count": sum(1 for r in validation_rows if r.get("status") == "pass"),
+            "warn_count": sum(1 for r in validation_rows if r.get("status") == "warn"),
+            "fail_count": sum(1 for r in validation_rows if r.get("status") == "fail")
+        }
     }
 
     # 6. Optional ML ensemble score
     flat_factors = _extract_flat_factors(f)
     ml_score, ml_used, score_source_ml = _predict_suitability_ml(flat_factors)
     out_extra = {"ml_score": ml_score, "score_source_ml": score_source_ml} if ml_used else {}
+    score_proof = _build_score_proof_payload(
+        factors=f,
+        category_scores=agg_result.get("category_scores", {}),
+        suitability_score=agg_result.get("score", 0.0),
+        label=agg_result.get("label", "Unknown"),
+        penalty=agg_result.get("penalty", "None")
+    )
+
+    is_hard_unsuitable = bool(agg_result.get("is_hard_unsuitable")) or agg_result.get("label") in {
+        "Not Suitable (Water Body)",
+        "Not Suitable (Protected/Forest Area)"
+    }
+    raw_score = float(agg_result.get("score", 0.0))
+    score_hidden_reason = None
+    if is_hard_unsuitable:
+        if agg_result.get("label") == "Not Suitable (Water Body)":
+            score_hidden_reason = "Location is on open water; suitability score is intentionally hidden."
+        elif agg_result.get("label") == "Not Suitable (Protected/Forest Area)":
+            score_hidden_reason = "Location is in a protected/forest area; suitability score is intentionally hidden."
+        else:
+            score_hidden_reason = "Location is marked as hard-unsuitable; suitability score is intentionally hidden."
 
     # 7. CONSTRUCT THE 23-FACTOR OUTPUT BUNDLE
     return {
-        "suitability_score": agg_result["score"],
+        "raw_suitability_score": raw_score,
+        "suitability_score": None if is_hard_unsuitable else raw_score,
+        "score_hidden": is_hard_unsuitable,
+        "score_hidden_reason": score_hidden_reason,
+        "score_display": "-" if is_hard_unsuitable else f"{raw_score:.1f}",
         "label": agg_result["label"],
+        "is_hard_unsuitable": bool(agg_result.get("is_hard_unsuitable")),
+        "water_body_snippet": agg_result.get("water_body_snippet"),
+        "protected_snippet": agg_result.get("protected_snippet"),
         "penalty_applied": agg_result.get("penalty", "None"),
         "category_scores": agg_result["category_scores"],
         "geospatial_passport": geospatial_passport,
@@ -5368,8 +5748,13 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             "verdict": _generate_slope_verdict(geospatial_passport["slope_percent"]),
             "confidence": "High", "source": "NASA SRTM"
         },
+        "score_proof": score_proof,
         "explanation": {
-            "factors_meta": build_factor_evidence(f)
+            "factors_meta": build_factor_evidence(f),
+            "certainty": score_proof.get("certainty", {}),
+            "top_positive_drivers": score_proof.get("top_positive_drivers", []),
+            "top_risk_drivers": score_proof.get("top_risk_drivers", []),
+            "model_note": "Suitability is an evidence-based estimate; final decisions still require ground validation."
         },
         # "metadata": intelligence["metadata_proof"],
         "metadata": intelligence.get("metadata_proof", {}),
