@@ -8,7 +8,13 @@
 # from flask_cors import CORS
 # from typing import List
 # import traceback
-import production_optimizations
+# Safe import of production optimizations
+try:
+    import production_optimizations
+    PRODUCTION_OPTIMIZATIONS_AVAILABLE = True
+except ImportError as e:
+    print(f">>> WARNING: production_optimizations not available: {e}")
+    PRODUCTION_OPTIMIZATIONS_AVAILABLE = False
 
 # from projects_db import init_db, save_project, load_project
 
@@ -3736,13 +3742,14 @@ def calculate_historical_suitability(current_lat, current_lng, range_type):
 def health_check():
     """Simple health check to verify backend is running"""
     try:
-        # Apply memory optimization
-        production_optimizations.optimize_pytorch_memory()
+        # Apply memory optimization if available
+        if PRODUCTION_OPTIMIZATIONS_AVAILABLE:
+            production_optimizations.optimize_pytorch_memory()
         
         return jsonify({
             "status": "healthy",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "memory_optimized": True,
+            "memory_optimized": PRODUCTION_OPTIMIZATIONS_AVAILABLE,
             "cors_enabled": True
         })
     except Exception as e:
@@ -3758,8 +3765,9 @@ def suitability():
         latitude = float(data.get("latitude", 17.3850))
         longitude = float(data.get("longitude", 78.4867))
 
-        # Apply memory optimizations before processing
-        production_optimizations.optimize_pytorch_memory()
+        # Apply memory optimizations if available
+        if PRODUCTION_OPTIMIZATIONS_AVAILABLE:
+            production_optimizations.optimize_pytorch_memory()
         
         # 1. CHECK CACHE & CNN (Preserved Logic)
         cache_key = get_cache_key(latitude, longitude)
@@ -3965,8 +3973,16 @@ def suitability():
 
     except Exception as e:
         logger.exception("Critical Suitability Error")
-        error_response = production_optimizations.handle_production_error(e, "Suitability Analysis")
-        return jsonify(error_response), 500
+        # Use production error handler if available
+        if PRODUCTION_OPTIMIZATIONS_AVAILABLE:
+            error_response = production_optimizations.handle_production_error(e, "Suitability Analysis")
+            return jsonify(error_response), 500
+        else:
+            # Fallback error handling
+            return jsonify({
+                "error": "Suitability Analysis Failed",
+                "details": str(e)
+            }), 500
 
 
 def build_factor_evidence(f):
@@ -5165,8 +5181,9 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     MASTER INTEGRATION ENGINE: VALENCIA-GRADE UPDATE
     Recruits 23 factors across 6 categories with Global Tier-1 Hub Awareness.
     """
-    # Apply memory optimization at start
-    production_optimizations.optimize_pytorch_memory()
+    # Apply memory optimization if available
+    if PRODUCTION_OPTIMIZATIONS_AVAILABLE:
+        production_optimizations.optimize_pytorch_memory()
     
     # 0. 🏙️ GLOBAL TIER-1 HUB CHECK
     is_tier_one, hub_name = check_global_tier_one(latitude, longitude)
@@ -5591,5 +5608,9 @@ def geocode_proxy():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host="0.0.0.0", port=port, threaded=True)
+    print(">>> Starting GeoAI Backend...")
+    print(f">>> Production Optimizations Available: {PRODUCTION_OPTIMIZATIONS_AVAILABLE}")
+    print(f">>> Torch Available: {TORCH_AVAILABLE}")
+    print(">>> CORS configured for:", ALLOWED_ORIGINS)
+    print(">>> Ready to serve requests!")
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
