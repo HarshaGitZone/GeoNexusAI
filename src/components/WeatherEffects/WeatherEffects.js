@@ -9,57 +9,10 @@ export default function WeatherEffects({ weather, adaptiveWeather, isDarkMode, s
     const description = (weather.description || weather.conditions || '').toLowerCase();
     const main = (weather.weather_code !== undefined ? weather.weather_code.toString() : '').toLowerCase();
     const temperature = parseFloat(weather.temperature || weather.temp || weather.temp_c || 0);
-    let isDay = weather.is_day;
+    const isDay = weather.is_day; // Use API's is_day field directly
     
     // Temperature-based snow detection
     const isColdEnoughForSnow = temperature <= 0; // 0°C or below should show snow
-    
-    // Override isDay with frontend calculation for accuracy
-    if (lat && lng) {
-      // console.log(`Site ${siteId} Using Passed Coordinates:`, { lat, lng });
-      
-      // Calculate local time for this location
-      const utcNow = new Date();
-      const timezoneOffset = Math.round(lng / 15); // 15 degrees = 1 hour
-      const localHour = (utcNow.getUTCHours() + timezoneOffset + 24) % 24;
-      
-      // Simple sunrise/sunset calculation based on latitude and month
-      const currentMonth = new Date().getMonth();
-      let sunriseHour, sunsetHour;
-      
-      if (lat > 0) { // Northern Hemisphere
-        if (currentMonth >= 11 || currentMonth <= 1) { // Winter
-          sunriseHour = 7 + (Math.abs(lat) / 30);
-          sunsetHour = 17 - (Math.abs(lat) / 30);
-        } else if (currentMonth >= 5 && currentMonth <= 7) { // Summer
-          sunriseHour = 5 + (Math.abs(lat) / 60);
-          sunsetHour = 19 - (Math.abs(lat) / 60);
-        } else { // Spring/Fall
-          sunriseHour = 6 + (Math.abs(lat) / 45);
-          sunsetHour = 18 - (Math.abs(lat) / 45);
-        }
-      } else { // Southern Hemisphere (opposite seasons)
-        if (currentMonth >= 11 || currentMonth <= 1) { // Summer
-          sunriseHour = 5 + (Math.abs(lat) / 60);
-          sunsetHour = 19 - (Math.abs(lat) / 60);
-        } else if (currentMonth >= 5 && currentMonth <= 7) { // Winter
-          sunriseHour = 7 + (Math.abs(lat) / 30);
-          sunsetHour = 17 - (Math.abs(lat) / 30);
-        } else { // Spring/Fall
-          sunriseHour = 6 + (Math.abs(lat) / 45);
-          sunsetHour = 18 - (Math.abs(lat) / 45);
-        }
-      }
-      
-      sunriseHour = Math.max(4, Math.min(8, sunriseHour));
-      sunsetHour = Math.max(16, Math.min(20, sunsetHour));
-      
-      isDay = sunriseHour <= localHour && localHour < sunsetHour ? 1 : 0;
-      
-      // console.log(`Site ${siteId} Time Calculation: UTC=${utcNow.getUTCHours()}, Local=${localHour}, Sunrise=${sunriseHour.toFixed(1)}, Sunset=${sunsetHour.toFixed(1)}, isDay=${isDay}`);
-    } else {
-      // console.warn(`Site ${siteId}: No coordinates provided`);
-    }
     
     // Check for day/night first
     let weatherType = 'default';

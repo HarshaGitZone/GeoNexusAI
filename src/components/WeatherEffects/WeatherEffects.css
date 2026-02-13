@@ -5,13 +5,13 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1000; /* Higher z-index to cover everything */
+  z-index: 1000;
   overflow: hidden;
-  opacity: var(--weather-opacity-a, 0.3); /* Default to Site A opacity */
+  opacity: var(--weather-opacity-a, 0.7);
 }
 
 .weather-effects-overlay.site-b {
-  opacity: var(--weather-opacity-b, 0.3); /* Use Site B opacity */
+  opacity: var(--weather-opacity-b, 0.7);
 }
 
 /* Rain Effect - More immersive and intensity-responsive */
@@ -19,7 +19,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 1.2); /* More visible rain */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 1.2);
 }
 
 .raindrop {
@@ -29,7 +29,7 @@
   background: linear-gradient(to bottom, rgba(174, 194, 224, 0.6), rgba(174, 194, 224, 0.2));
   border-radius: 0 0 100% 100%;
   animation: rain-fall linear infinite;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.8); /* Intensity-based opacity */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.8);
 }
 
 .raindrop:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 1s; }
@@ -56,7 +56,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 1.2);
+  opacity: calc(var(--weather-opacity-a, 0.7) * 1.2);
 }
 
 /* Sun peeking through snow clouds */
@@ -106,7 +106,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.9);
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.9);
 }
 
 .snow-cloud {
@@ -270,7 +270,7 @@
   background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   filter: blur(2px);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.9); /* Bright, visible clouds */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.9);
   box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
 }
 
@@ -284,7 +284,7 @@
   top: -30px;
   left: 30px;
   filter: blur(3px);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.7); /* Responsive opacity */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.7);
 }
 
 .cloud span.cloud-puff-2 {
@@ -296,7 +296,7 @@
   top: -20px;
   right: 30px;
   filter: blur(4px);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.6); /* Responsive opacity */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.6);
 }
 
 .cloud span.cloud-puff-3 {
@@ -308,7 +308,7 @@
   top: -15px;
   left: 50px;
   filter: blur(5px);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.5); /* Background clouds */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.5);
 }
 
 .cloud span.cloud-puff-4 {
@@ -320,7 +320,7 @@
   top: -10px;
   right: 40px;
   filter: blur(6px);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.4); /* Distant background clouds */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.4);
 }
 
 @keyframes cloud-drift {
@@ -338,16 +338,16 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(to bottom, 
-    rgba(255, 220, 100, calc(var(--weather-opacity-a, 0.3) * 0.6)) 0%, 
-    rgba(255, 200, 80, calc(var(--weather-opacity-a, 0.3) * 0.5)) 30%, 
-    rgba(255, 180, 60, calc(var(--weather-opacity-a, 0.3) * 0.3)) 70%, 
-    rgba(255, 160, 40, calc(var(--weather-opacity-a, 0.3) * 0.15)) 100%);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 1.5); /* Balanced day atmosphere */
+    rgba(255, 220, 100, calc(var(--weather-opacity-a, 0.7) * 0.6)) 0%, 
+    rgba(255, 200, 80, calc(var(--weather-opacity-a, 0.7) * 0.5)) 30%, 
+    rgba(255, 180, 60, calc(var(--weather-opacity-a, 0.7) * 0.3)) 70%, 
+    rgba(255, 160, 40, calc(var(--weather-opacity-a, 0.7) * 0.15)) 100%);
+  opacity: calc(var(--weather-opacity-a, 0.7) * 1.5);
 }
 
 .sun-disc {
   position: absolute;
-  top: -8%; /* Half visible position */
+  top: -8%;
   right: -8%;
   width: 420px;
   height: 420px;
@@ -360,13 +360,13 @@
     rgba(255, 170, 20, 0.3) 100%);
   border-radius: 50%;
   box-shadow: 
-    0 0 calc(100px * var(--weather-opacity-a, 0.3)) rgba(255, 220, 100, 0.8),
-    0 0 calc(200px * var(--weather-opacity-a, 0.3)) rgba(255, 200, 50, 0.5),
-    0 0 calc(350px * var(--weather-opacity-a, 0.3)) rgba(255, 180, 30, 0.3),
-    0 0 calc(500px * var(--weather-opacity-a, 0.3)) rgba(255, 160, 20, 0.15),
-    0 0 calc(700px * var(--weather-opacity-a, 0.3)) rgba(255, 140, 10, 0.08);
+    0 0 calc(100px * var(--weather-opacity-a, 0.7)) rgba(255, 220, 100, 0.8),
+    0 0 calc(200px * var(--weather-opacity-a, 0.7)) rgba(255, 200, 50, 0.5),
+    0 0 calc(350px * var(--weather-opacity-a, 0.7)) rgba(255, 180, 30, 0.3),
+    0 0 calc(500px * var(--weather-opacity-a, 0.7)) rgba(255, 160, 20, 0.15),
+    0 0 calc(700px * var(--weather-opacity-a, 0.7)) rgba(255, 140, 10, 0.08);
   animation: sun-pulse 4s ease-in-out infinite;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 2.5); /* Visible sun */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 2.5);
 }
 
 .sun-rays {
@@ -388,7 +388,7 @@
   transform-origin: center top;
   margin-left: -6px;
   margin-top: -100px;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 2); /* Balanced rays */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 2);
   filter: blur(1px);
 }
 
@@ -429,7 +429,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 1.2); /* Balanced dominant rays */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 1.2);
 }
 
 .dominant-ray {
@@ -445,7 +445,7 @@
     rgba(255, 220, 100, 0.3) 58%, 
     transparent 100%);
   transform-origin: top right;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.9); /* Balanced dominant rays */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.9);
 }
 
 .dominant-ray:nth-child(1) { transform: rotate(-32deg); }
@@ -462,7 +462,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.8);
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.8);
 }
 
 .sunny-cloud {
@@ -770,27 +770,27 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(to bottom, 
-    rgba(0, 0, 0, calc(var(--weather-opacity-a, 0.3) * 0.9)) 0%, 
-    rgba(0, 0, 20, calc(var(--weather-opacity-a, 0.3) * 0.8)) 50%, 
-    rgba(0, 0, 40, calc(var(--weather-opacity-a, 0.3) * 0.6)) 100%);
-  opacity: calc(var(--weather-opacity-a, 0.3) * 3); /* Very dominant night */
+    rgba(0, 0, 0, calc(var(--weather-opacity-a, 0.7) * 0.9)) 0%, 
+    rgba(0, 0, 20, calc(var(--weather-opacity-a, 0.7) * 0.8)) 50%, 
+    rgba(0, 0, 40, calc(var(--weather-opacity-a, 0.7) * 0.6)) 100%);
+  opacity: calc(var(--weather-opacity-a, 0.7) * 3);
 }
 
 .moon {
   position: absolute;
-  top: -5%; /* Move to top-right, half visible */
+  top: -5%;
   right: -5%;
   width: 350px;
   height: 350px;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(240, 240, 245, 0.7));
   border-radius: 50%;
   box-shadow: 
-    0 0 calc(80px * var(--weather-opacity-a, 0.3)) rgba(255, 255, 255, 0.6),
-    0 0 calc(150px * var(--weather-opacity-a, 0.3)) rgba(255, 255, 255, 0.4),
-    0 0 calc(250px * var(--weather-opacity-a, 0.3)) rgba(255, 255, 255, 0.2),
-    0 0 calc(400px * var(--weather-opacity-a, 0.3)) rgba(255, 255, 255, 0.1);
+    0 0 calc(80px * var(--weather-opacity-a, 0.7)) rgba(255, 255, 255, 0.6),
+    0 0 calc(150px * var(--weather-opacity-a, 0.7)) rgba(255, 255, 255, 0.4),
+    0 0 calc(250px * var(--weather-opacity-a, 0.7)) rgba(255, 255, 255, 0.2),
+    0 0 calc(400px * var(--weather-opacity-a, 0.7)) rgba(255, 255, 255, 0.1);
   animation: moon-glow 4s ease-in-out infinite;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 2.5); /* Very bright moon */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 2.5);
 }
 
 .moon-crater-1 {
@@ -801,7 +801,7 @@
   border-radius: 50%;
   top: 30px;
   left: 70px;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.8); /* Intensity-based craters */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.8);
 }
 
 .moon-crater-2 {
@@ -812,7 +812,7 @@
   border-radius: 50%;
   top: 50px;
   left: 20px;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.6); /* Fainter craters */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.6);
 }
 
 .moon-crater-3 {
@@ -823,7 +823,7 @@
   border-radius: 50%;
   top: 35px;
   left: 85px;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 0.4); /* Very faint craters */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 0.4);
 }
 
 /* Add stars to night effect */
@@ -831,7 +831,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--weather-opacity-a, 0.3) * 1.2); /* Brighter stars with intensity */
+  opacity: calc(var(--weather-opacity-a, 0.7) * 1.2);
 }
 
 .star {
