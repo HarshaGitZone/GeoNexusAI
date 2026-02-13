@@ -375,6 +375,42 @@ def _predict_suitability_ml(flat_factors):
         return None, False, None
 
 def get_live_weather(lat, lng):
+    """
+    Enhanced weather function using the new accurate weather service
+    with location-specific adapters and validation
+    """
+    try:
+        # Import the enhanced weather service
+        from services.enhanced_weather_service import get_accurate_weather
+        from services.location_weather_adapters import location_weather_manager
+        from services.weather_validator import weather_enricher
+        
+        lat, lng = normalize_coords(lat, lng)
+        
+        # First try location-specific adapter for better regional accuracy
+        location_weather = location_weather_manager.get_location_weather(lat, lng)
+        
+        if location_weather:
+            # Enrich with validation and accuracy indicators
+            enriched_weather = weather_enricher.enrich_weather_data(location_weather, lat, lng)
+            logger.info(f"Using location-specific weather adapter for {lat}, {lng}")
+            return enriched_weather
+        
+        # Fallback to enhanced weather service with multiple APIs
+        weather_data = get_accurate_weather(lat, lng)
+        
+        # Enrich with validation and accuracy indicators
+        enriched_weather = weather_enricher.enrich_weather_data(weather_data, lat, lng)
+        
+        return enriched_weather
+        
+    except Exception as e:
+        logger.error(f"Enhanced weather service error: {e}")
+        # Final fallback to original implementation
+        return _get_fallback_weather(lat, lng)
+
+def _get_fallback_weather(lat, lng):
+    """Fallback weather function using original implementation"""
     try:
         lat, lng = normalize_coords(lat, lng)
 
