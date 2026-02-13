@@ -1,41 +1,30 @@
-# Production-ready fixes for Render deployment
+# Minimal production optimizations for Render deployment
 import os
-import sys
 import gc
 import logging
 
 # Configure logging for production
-logging.basicConfig(level=logging.WARNING)  # Reduce logging in production
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# Check if we're in production (Render) vs local development
-IS_PRODUCTION = (
-    os.getenv("RENDER", "false").lower() == "true" or  # Render deployment
-    os.getenv("PYTHONPATH", "").find("/app") != -1 or   # Render Python path
-    os.getcwd().startswith("/app") or                   # Render working directory
-    os.getenv("ENV") == "production" or                 # Generic production flag
-    False
-)
+# Check if we're in production
+IS_PRODUCTION = os.getenv("RENDER", "false").lower() == "true"
 
-# Memory optimization for PyTorch (LOCAL ONLY)
 def optimize_pytorch_memory():
-    """Optimize PyTorch for production environment (LOCAL ONLY)"""
+    """PyTorch optimization - SKIPPED in production"""
     if IS_PRODUCTION:
         logger.info("Skipping PyTorch optimization in production")
         return
-        
+    
     try:
         import torch
-        # Disable gradient computation for inference
         torch.set_grad_enabled(False)
-        # Enable memory efficient attention if available
         if hasattr(torch, 'cuda') and torch.cuda.is_available():
             torch.cuda.empty_cache()
         logger.info("PyTorch memory optimization applied")
     except ImportError:
         logger.warning("PyTorch not available for optimization")
 
-# Add retry logic for external API calls
 def with_retry(func, max_retries=3, backoff_factor=1.0):
     """Decorator to add retry logic to functions"""
     def wrapper(*args, **kwargs):
@@ -58,13 +47,11 @@ def with_retry(func, max_retries=3, backoff_factor=1.0):
     
     return wrapper
 
-# Global error handler for production
 def handle_production_error(e, context="Unknown"):
     """Centralized error handling for production"""
     error_msg = f"Error in {context}: {str(e)}"
     logger.error(error_msg)
     
-    # Check for common production issues
     if "timeout" in str(e).lower():
         return {"error": "Request timeout", "details": "External services are slow, please try again"}
     elif "memory" in str(e).lower():
@@ -74,7 +61,7 @@ def handle_production_error(e, context="Unknown"):
     else:
         return {"error": "Internal server error", "details": "An unexpected error occurred"}
 
-# Apply optimizations on import (LOCAL ONLY for PyTorch)
+# Apply optimizations (only PyTorch is conditional)
 if not IS_PRODUCTION:
     optimize_pytorch_memory()
-gc.collect()  # Force garbage collection
+gc.collect()

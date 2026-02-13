@@ -35,7 +35,7 @@ except ImportError as e:
 # LAND_CLASSES = ["Urban", "Forest", "Agriculture", "Water", "Industrial"]
 import os
 import sys
-
+import datetime
 # --- RENDER DETECTION ---
 # Render sets 'RENDER' environment variable to 'true' automatically
 IS_RENDER = os.environ.get('RENDER', 'false').lower() == 'true'
@@ -3825,6 +3825,24 @@ def health_check():
         return jsonify({
             "status": "unhealthy", 
             "error": str(e)
+        }), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Simple health check endpoint for deployment monitoring"""
+    try:
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "environment": "production" if os.getenv("RENDER") == "true" else "development",
+            "python_version": sys.version,
+            "working_directory": os.getcwd()
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.datetime.utcnow().isoformat()
         }), 500
 
 @app.route('/suitability', methods=['POST', 'OPTIONS'])
