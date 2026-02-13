@@ -299,6 +299,10 @@ def _fetch_land_intelligence(lat: float, lng: float) -> dict:
     Fetch factor intelligence with a safe default to GeoDataService.
     Fast path is opt-in only to avoid synthetic fallback values in production output.
     """
+    # Force sequential path on Render for stability.
+    if IS_RENDER:
+        return GeoDataService.get_land_intelligence(lat, lng)
+
     if USE_FAST_ANALYSIS:
         try:
             from utils.fast_analysis import get_land_intelligence_sync
