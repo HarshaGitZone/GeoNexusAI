@@ -72,7 +72,12 @@ def handle_production_error(e, context="Unknown"):
     elif "connection" in str(e).lower():
         return {"error": "Connection failed", "details": "External services unavailable"}
     else:
-        return {"error": "Internal server error", "details": "An unexpected error occurred"}
+        return {
+            "error": "Internal server error",
+            "details": "An unexpected error occurred",
+            "context": context,
+            "type": e.__class__.__name__
+        }
 
 # Apply optimizations on import (LOCAL ONLY for PyTorch)
 if not IS_PRODUCTION:

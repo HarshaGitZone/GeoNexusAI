@@ -3931,22 +3931,28 @@ def suitability():
         # 3. INJECT CNN DATA (Preserved Logic)
         result['cnn_analysis'] = cnn_analysis
 
-        ff = result["factors"]
+        ff = result.get("factors") or {}
+
+        def _safe_factor(cat, key, default=50.0):
+            try:
+                return float(((ff.get(cat) or {}).get(key) or {}).get("value", default))
+            except Exception:
+                return float(default)
 
         # Extract values for classification logic
         # Note: We use .get() and ['value'] to ensure we hit the correct nested structure
-        vegetation_score = ff["environmental"]["vegetation"]["value"]
-        landuse_score     = ff["socio_econ"]["landuse"]["value"]
-        infrastructure_score = ff["socio_econ"]["infrastructure"]["value"]  # Renamed for clarity
-        poll_score        = ff["environmental"]["pollution"]["value"]
-        slope_score       = ff["physical"]["slope"]["value"]
-        water_score       = ff["hydrology"]["water"]["value"]
-        flood_score       = ff["hydrology"]["flood"]["value"]
-        drainage_score    = ff["hydrology"]["drainage"]["value"]
-        soil_score        = ff["environmental"]["soil"]["value"]
-        rainfall_score    = ff["climatic"]["rainfall"]["value"]
-        thermal_score     = ff["climatic"]["thermal"]["value"]
-        pop_score         = ff["socio_econ"]["population"]["value"]
+        vegetation_score = _safe_factor("environmental", "vegetation")
+        landuse_score = _safe_factor("socio_econ", "landuse")
+        infrastructure_score = _safe_factor("socio_econ", "infrastructure")
+        poll_score = _safe_factor("environmental", "pollution")
+        slope_score = _safe_factor("physical", "slope")
+        water_score = _safe_factor("hydrology", "water")
+        flood_score = _safe_factor("hydrology", "flood")
+        drainage_score = _safe_factor("hydrology", "drainage")
+        soil_score = _safe_factor("environmental", "soil")
+        rainfall_score = _safe_factor("climatic", "rainfall")
+        thermal_score = _safe_factor("climatic", "thermal")
+        pop_score = _safe_factor("socio_econ", "population")
 
         inferred_class = "Mixed land use"
         base_conf = 65.0
@@ -4087,7 +4093,7 @@ def suitability():
         # We must create a dictionary that matches the 23-factor expectations exactly
         flat_factors_for_intel = {
             "slope": slope_score,
-            "elevation": ff["physical"]["elevation"]["value"],
+            "elevation": _safe_factor("physical", "elevation"),
             "flood": flood_score,
             "water": water_score,
             "drainage": drainage_score,
@@ -4096,7 +4102,7 @@ def suitability():
             "soil": soil_score,
             "rainfall": rainfall_score,
             "thermal": thermal_score,
-            "intensity": ff["climatic"]["intensity"]["value"],
+            "intensity": _safe_factor("climatic", "intensity"),
             "landuse": landuse_score,
             "infrastructure": infrastructure_score,  # Key must be 'infrastructure'
             "population": pop_score
@@ -5699,39 +5705,39 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
             pass
     f = {
         "physical": {
-            "slope": normalize_factor(raw["physical"]["slope"]),
-            "elevation": normalize_factor(raw["physical"]["elevation"]),
-            "ruggedness": normalize_factor(raw["physical"].get("ruggedness", {})),
-            "stability": normalize_factor(raw["physical"].get("stability", {})),
+            "slope": normalize_factor(raw.get("physical", {}).get("slope", {})),
+            "elevation": normalize_factor(raw.get("physical", {}).get("elevation", {})),
+            "ruggedness": normalize_factor(raw.get("physical", {}).get("ruggedness", {})),
+            "stability": normalize_factor(raw.get("physical", {}).get("stability", {})),
         },
         "hydrology": {
-            "flood": normalize_factor(raw["hydrology"]["flood"]),
-            "water": normalize_factor(raw["hydrology"]["water"]),
-            "drainage": normalize_factor(raw["hydrology"].get("drainage", {})),
-            "groundwater": normalize_factor(raw["hydrology"].get("groundwater", {})),
+            "flood": normalize_factor(raw.get("hydrology", {}).get("flood", {})),
+            "water": normalize_factor(raw.get("hydrology", {}).get("water", {})),
+            "drainage": normalize_factor(raw.get("hydrology", {}).get("drainage", {})),
+            "groundwater": normalize_factor(raw.get("hydrology", {}).get("groundwater", {})),
         },
         "environmental": {
-            "vegetation": normalize_factor(raw["environmental"]["vegetation"]),
-            "pollution": normalize_factor(raw["environmental"]["pollution"]),
-            "soil": normalize_factor(raw["environmental"]["soil"]),
-            "biodiversity": normalize_factor(raw["environmental"].get("biodiversity", {})),
-            "heat_island": normalize_factor(raw["environmental"].get("heat_island", {})),
+            "vegetation": normalize_factor(raw.get("environmental", {}).get("vegetation", {})),
+            "pollution": normalize_factor(raw.get("environmental", {}).get("pollution", {})),
+            "soil": normalize_factor(raw.get("environmental", {}).get("soil", {})),
+            "biodiversity": normalize_factor(raw.get("environmental", {}).get("biodiversity", {})),
+            "heat_island": normalize_factor(raw.get("environmental", {}).get("heat_island", {})),
         },
         "climatic": {
-            "rainfall": normalize_factor(raw["climatic"]["rainfall"]),
-            "thermal": normalize_factor(raw["climatic"]["thermal"]),
-            "intensity": normalize_factor(raw["climatic"].get("intensity", {})),
+            "rainfall": normalize_factor(raw.get("climatic", {}).get("rainfall", {})),
+            "thermal": normalize_factor(raw.get("climatic", {}).get("thermal", {})),
+            "intensity": normalize_factor(raw.get("climatic", {}).get("intensity", {})),
         },
         "socio_econ": {
-            "landuse": normalize_factor(raw["socio_econ"]["landuse"]),
-            "infrastructure": normalize_factor(raw["socio_econ"]["infrastructure"]),
-            "population": normalize_factor(raw["socio_econ"]["population"]),
+            "landuse": normalize_factor(raw.get("socio_econ", {}).get("landuse", {})),
+            "infrastructure": normalize_factor(raw.get("socio_econ", {}).get("infrastructure", {})),
+            "population": normalize_factor(raw.get("socio_econ", {}).get("population", {})),
         },
         "risk_resilience": {
-            "multi_hazard": normalize_factor(raw["risk_resilience"].get("multi_hazard", {})),
-            "climate_change": normalize_factor(raw["risk_resilience"].get("climate_change", {})),
-            "recovery": normalize_factor(raw["risk_resilience"].get("recovery", {})),
-            "habitability": normalize_factor(raw["risk_resilience"].get("habitability", {})),
+            "multi_hazard": normalize_factor(raw.get("risk_resilience", {}).get("multi_hazard", {})),
+            "climate_change": normalize_factor(raw.get("risk_resilience", {}).get("climate_change", {})),
+            "recovery": normalize_factor(raw.get("risk_resilience", {}).get("recovery", {})),
+            "habitability": normalize_factor(raw.get("risk_resilience", {}).get("habitability", {})),
         }
     }
 
@@ -5830,12 +5836,12 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
         "score_hidden": is_hard_unsuitable,
         "score_hidden_reason": score_hidden_reason,
         "score_display": "-" if is_hard_unsuitable else f"{raw_score:.1f}",
-        "label": agg_result["label"],
+        "label": agg_result.get("label", "Unknown"),
         "is_hard_unsuitable": bool(agg_result.get("is_hard_unsuitable")),
         "water_body_snippet": agg_result.get("water_body_snippet"),
         "protected_snippet": agg_result.get("protected_snippet"),
         "penalty_applied": agg_result.get("penalty", "None"),
-        "category_scores": agg_result["category_scores"],
+        "category_scores": agg_result.get("category_scores", {}),
         "geospatial_passport": geospatial_passport,
         "factors": f,
         **out_extra,
