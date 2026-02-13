@@ -4658,3 +4658,136 @@ html:root body[data-theme="light"] aside.sidebar .btn-save:hover { color: #fffff
 html:root body[data-theme="dark"] aside.sidebar .btn-save:hover { color: #000000 !important; }
 
 
+
+
+
+/* ============================================================
+   SIDEBAR: TACTICAL UTILITY ORBS (SHAPE CHANGE)
+   ============================================================ */
+
+.geo-tools-row-triple {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 12px !important; /* Balanced gap for circles */
+    margin-top: 10px !important;
+    padding: 0 10px !important;
+}
+
+.btn-tool-orb {
+    /* 1. FORCE CIRCULAR GEOMETRY */
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    
+    /* 2. TEXT HIDING LOGIC */
+    font-size: 0 !important; /* Hides original button text */
+    overflow: hidden !important;
+    cursor: pointer !important;
+    
+    /* 3. VISUAL THEME (Matches your HUD Glass) */
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* 4. ICON RESTORATION: Displaying only the data-icon */
+.btn-tool-orb::before {
+    content: attr(data-icon);
+    font-size: 16px !important; /* Emoji size inside orb */
+    line-height: 1;
+}
+
+/* 5. HOVER: THEMED POWER-UP */
+.btn-tool-orb:hover:not(:disabled) {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    transform: translateY(-3px) scale(1.1) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 6. LIGHT THEME SYNC: Absolute Priority */
+html:root[data-theme="light"] .btn-tool-orb {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #000000 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+html:root[data-theme="light"] .btn-tool-orb:hover {
+    background: var(--accent-color) !important;
+    color: #ffffff !important; /* White icon on light theme palette */
+}
+
+/* 7. DISABLED STATE */
+.btn-tool-orb:disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+    filter: grayscale(1) !important;
+}
+
+
+
+
+/* ============================================================
+   SIDEBAR: TACTICAL MINI-TAB UTILITIES (REFINEMENT)
+   ============================================================ */
+
+.geo-tools-row-triple {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important; /* Tight, professional gap */
+    margin-top: 8px !important;
+    padding: 0 5px !important;
+}
+
+.btn-tool-orb {
+    /* 1. GEOMETRY: Compact Pills instead of full orbs */
+    flex: 1 !important;
+    height: 28px !important;
+    border-radius: 6px !important; /* Matches your input box corners */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    
+    /* 2. VISUALS: Subtle Glass */
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    /* 3. TEXT HANDLING */
+    font-size: 0 !important; /* Keep original text hidden */
+}
+
+/* Icon Centering & Sizing */
+.btn-tool-orb::before {
+    content: attr(data-icon);
+    font-size: 14px !important;
+    display: block !important;
+}
+
+/* 4. HOVER: The "Active Link" Glow */
+.btn-tool-orb:hover:not(:disabled) {
+    background: var(--accent-glow) !important;
+    border-color: var(--accent-color) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px var(--accent-glow) !important;
+}
+
+/* ⚪ LIGHT THEME SYNC */
+html:root[data-theme="light"] .btn-tool-orb {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03) !important;
+}
+
+html:root[data-theme="light"] .btn-tool-orb:hover {
+    background: var(--accent-color) !important;
+    color: #ffffff !important;
+}

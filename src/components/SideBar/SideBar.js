@@ -780,11 +780,18 @@ const generateShareLink = () => {
     </div>
 
     {/* ROW 2: My Loc, Save, and Nearby in one compact line */}
-    <div className="geo-tools-row-triple">
+    {/* <div className="geo-tools-row-triple">
       <button type="button" onClick={handleMyLocation} className="btn-mono-tool">📍 My Loc</button>
       <button type="button" onClick={handleSavePlace} className="btn-mono-tool">⭐ Save</button>
       <button type="button" onClick={handleNearbyPlaces} disabled={!result || nearbyLoading} className="btn-mono-tool">🏘️ Nearby</button>
-    </div>
+    </div> */}
+    {/* ROW 2: Utility Tool Orbs */}
+    <div className="geo-tools-row-triple">
+  <button type="button" onClick={handleMyLocation} className="btn-tool-orb" data-icon="📍" title="My Location">My Loc</button>
+  <button type="button" onClick={handleSavePlace} className="btn-tool-orb" data-icon="⭐" title="Save Place">Save</button>
+  <button type="button" onClick={handleNearbyPlaces} className="btn-tool-orb" data-icon="🏘️" title="Nearby Places" disabled={!result}>Nearby</button>
+</div>
+
   </form>
 </section>
 
