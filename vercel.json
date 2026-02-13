@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://geoaibackend-6x9b.onrender.com/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
