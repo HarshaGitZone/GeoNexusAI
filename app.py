@@ -682,7 +682,6 @@ def calculate_daylight_hours(sunrise, sunset):
         return None
     
     try:
-        from datetime import datetime
         sunrise_time = datetime.fromisoformat(sunrise.replace('Z', '+00:00'))
         sunset_time = datetime.fromisoformat(sunset.replace('Z', '+00:00'))
         daylight = sunset_time - sunrise_time
@@ -3813,7 +3812,7 @@ def health_check():
     try:
         return jsonify({
             "status": "healthy",
-            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "timestamp": datetime.utcnow().isoformat(),
             "environment": "production" if os.getenv("RENDER") == "true" else "development",
             "python_version": sys.version,
             "working_directory": os.getcwd()
@@ -3822,7 +3821,7 @@ def health_check():
         return jsonify({
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat()
         }), 500
 
 @app.route('/suitability', methods=['POST', 'OPTIONS'])
@@ -5254,7 +5253,6 @@ def _get_regional_pollution_estimate(lat, lng):
     Uses coordinate-based heuristics to provide realistic pollution values.
     """
     import math
-    from datetime import datetime
     
     # Normalize coordinates
     lat = float(lat)
@@ -5374,7 +5372,6 @@ def _get_regional_weather_estimate(lat, lng):
     Uses coordinate-based heuristics to provide realistic weather values.
     """
     import math
-    from datetime import datetime
     
     # Normalize coordinates
     lat = float(lat)
@@ -5463,7 +5460,6 @@ def _get_regional_weather_estimate(lat, lng):
     base_values["precip"] = max(0, min(300, base_values["precip"]))
     
     # Calculate actual sunrise/sunset times based on latitude and date
-    from datetime import datetime, timezone, timedelta
     import math
     
     # Get current UTC time and convert to location's local time
@@ -5802,7 +5798,6 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     gc.collect()
 
 from flask import request, jsonify, send_file
-from datetime import datetime
 
 @app.route("/generate_report", methods=["POST", "OPTIONS"])
 def generate_report():
