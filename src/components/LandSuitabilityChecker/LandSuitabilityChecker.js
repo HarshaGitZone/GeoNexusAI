@@ -1703,7 +1703,15 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ latitude: parseFloat(tLat), longitude: parseFloat(tLng) })
       });
-      return await res.json();
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${text}`);
+      }
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { error: "Invalid snapshot response", raw: text };
+      }
     } catch (err) {
 
       console.error("Snapshot error:", err);

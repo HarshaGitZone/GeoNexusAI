@@ -4,8 +4,11 @@ const isBrowser = typeof window !== "undefined";
 const host = isBrowser ? window.location.hostname : "";
 const isVercelHost = host.endsWith(".vercel.app");
 
-// In Vercel deployments, route through same-origin /api rewrite to avoid browser CORS.
-const rawUrl = isVercelHost ? "/api" : (envUrl || "http://localhost:5000");
+// Priority:
+// 1) Explicit env URL (works for both local and deployed)
+// 2) Vercel same-origin proxy
+// 3) Local default
+const rawUrl = envUrl || (isVercelHost ? "/api" : "http://localhost:5000");
 
 // Ensure there is NO trailing slash, preventing duplicate-slash URLs.
 export const API_BASE = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
