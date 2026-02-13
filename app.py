@@ -236,13 +236,41 @@ app = Flask(__name__)
 
 
 
-# 1. Standardize Allowed Origins (Ensure NO trailing slashes)
+def _normalize_origin(origin: str) -> str:
+    """Normalize Origin values to reduce brittle CORS mismatches."""
+    if not origin:
+        return ""
+    return origin.strip().rstrip("/").lower()
+
+
+# 1. Standardize Allowed Origins (no trailing slashes, lowercase)
 ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://geonexus-ai.vercel.app",
-    "https://geonexus-ai.vercel.app/"
+    _normalize_origin("http://localhost:3000"),
+    _normalize_origin("http://127.0.0.1:3000"),
+    _normalize_origin("https://geonexus-ai.vercel.app"),
 ]
+
+# Optional env override for additional deployed frontend origins.
+# Example: CORS_ALLOWED_ORIGINS="https://foo.vercel.app,https://bar.example.com"
+_extra_allowed = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if _extra_allowed:
+    ALLOWED_ORIGINS.extend(
+        [_normalize_origin(x) for x in _extra_allowed.split(",") if x and x.strip()]
+    )
+
+# Deduplicate while preserving order
+ALLOWED_ORIGINS = list(dict.fromkeys(ALLOWED_ORIGINS))
+
+
+def _is_allowed_origin(origin: str) -> bool:
+    """Allow configured origins and Vercel-hosted frontend domains."""
+    normalized = _normalize_origin(origin)
+    if not normalized:
+        return False
+    if normalized in ALLOWED_ORIGINS:
+        return True
+    # Allow Vercel preview/prod subdomains if frontend is hosted on Vercel.
+    return normalized.endswith(".vercel.app")
 
 
 # CORS(app, resources={r"/*": {
@@ -252,7 +280,7 @@ ALLOWED_ORIGINS = [
 #     "expose_headers": ["Content-Type", "Authorization"]
 # }}, supports_credentials=True)
 CORS(app, resources={r"/*": {
-    "origins": ALLOWED_ORIGINS,
+    "origins": ALLOWED_ORIGINS + [r"https://.*\.vercel\.app"],
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization", "Accept"],
 }}, supports_credentials=True)
@@ -270,16 +298,19 @@ def normalize_coords(lat, lng):
 @app.after_request
 def add_cors_headers(response):
     origin = request.headers.get('Origin')
-    if origin in ALLOWED_ORIGINS:
+    if _is_allowed_origin(origin):
+        normalized_origin = _normalize_origin(origin)
         # Avoid duplicate header error if flask-cors already added it
         if 'Access-Control-Allow-Origin' not in response.headers:
-            response.headers.add('Access-Control-Allow-Origin', origin)
+            response.headers.add('Access-Control-Allow-Origin', normalized_origin)
         
         # Standard security headers for split-stack linkage
         response.headers.add('Access-Control-Allow-Credentials', 'true')
         # Use 'add' to append if not present, preventing the 'not allowed' error
         if 'Access-Control-Allow-Headers' not in response.headers:
             response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept')
+        if 'Access-Control-Allow-Methods' not in response.headers:
+            response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
     return response
 ANALYSIS_CACHE = {}
 
@@ -3794,9 +3825,12 @@ def health_check():
             "error": str(e)
         }), 500
 
-@app.route('/suitability', methods=['POST'])
+@app.route('/suitability', methods=['POST', 'OPTIONS'])
 def suitability():
     try:
+        if request.method == 'OPTIONS':
+            return jsonify({}), 200
+
         data = request.json or {}
         latitude = float(data.get("latitude", 17.3850))
         longitude = float(data.get("longitude", 78.4867))
@@ -5775,8 +5809,8 @@ def generate_report():
     if request.method == "OPTIONS":
         response = jsonify({})
         origin = request.headers.get('Origin')
-        if origin in ALLOWED_ORIGINS:
-            response.headers.add('Access-Control-Allow-Origin', origin)
+        if _is_allowed_origin(origin):
+            response.headers.add('Access-Control-Allow-Origin', _normalize_origin(origin))
             response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
             response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
         return response, 200
