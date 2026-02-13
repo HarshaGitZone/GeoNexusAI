@@ -4,11 +4,9 @@ const isBrowser = typeof window !== "undefined";
 const host = isBrowser ? window.location.hostname : "";
 const isVercelHost = host.endsWith(".vercel.app");
 
-// Priority:
-// 1) Explicit env URL (works for both local and deployed)
-// 2) Vercel same-origin proxy
-// 3) Local default
-const rawUrl = envUrl || (isVercelHost ? "/api" : "http://localhost:5000");
+// Deploy (Vercel): always use same-origin proxy to avoid browser CORS to Render.
+// Local/dev: honor explicit env URL, otherwise default localhost backend.
+const rawUrl = isVercelHost ? "/api" : (envUrl || "http://localhost:5000");
 
 // Ensure there is NO trailing slash, preventing duplicate-slash URLs.
 export const API_BASE = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
