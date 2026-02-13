@@ -8,7 +8,7 @@
 # from flask_cors import CORS
 # from typing import List
 # import traceback
-# import production_optimizations
+import production_optimizations
 
 # from projects_db import init_db, save_project, load_project
 
@@ -3732,6 +3732,25 @@ def calculate_historical_suitability(current_lat, current_lng, range_type):
 
     return multiplier * 100
    
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Simple health check to verify backend is running"""
+    try:
+        # Apply memory optimization
+        production_optimizations.optimize_pytorch_memory()
+        
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC"),
+            "memory_optimized": True,
+            "cors_enabled": True
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy", 
+            "error": str(e)
+        }), 500
+
 @app.route('/suitability', methods=['POST'])
 def suitability():
     try:
@@ -3739,6 +3758,9 @@ def suitability():
         latitude = float(data.get("latitude", 17.3850))
         longitude = float(data.get("longitude", 78.4867))
 
+        # Apply memory optimizations before processing
+        production_optimizations.optimize_pytorch_memory()
+        
         # 1. CHECK CACHE & CNN (Preserved Logic)
         cache_key = get_cache_key(latitude, longitude)
         cnn_analysis = get_cnn_classification(latitude, longitude) or {}
@@ -3934,6 +3956,11 @@ def suitability():
         # 7. WEATHER & CACHING
         result['weather'] = get_live_weather(latitude, longitude)
         ANALYSIS_CACHE[cache_key] = result
+        
+        # Force garbage collection to free memory
+        import gc
+        gc.collect()
+        
         return jsonify(result)
 
     except Exception as e:
@@ -5138,6 +5165,9 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     MASTER INTEGRATION ENGINE: VALENCIA-GRADE UPDATE
     Recruits 23 factors across 6 categories with Global Tier-1 Hub Awareness.
     """
+    # Apply memory optimization at start
+    production_optimizations.optimize_pytorch_memory()
+    
     # 0. 🏙️ GLOBAL TIER-1 HUB CHECK
     is_tier_one, hub_name = check_global_tier_one(latitude, longitude)
 
@@ -5294,6 +5324,10 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
         "location": {"latitude": latitude, "longitude": longitude}
     }
+    
+    # Force garbage collection to free memory before returning
+    import gc
+    gc.collect()
 
 from flask import request, jsonify, send_file
 from datetime import datetime
