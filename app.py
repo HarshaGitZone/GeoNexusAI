@@ -39,6 +39,10 @@ import datetime
 # --- RENDER DETECTION ---
 # Render sets 'RENDER' environment variable to 'true' automatically
 IS_RENDER = os.environ.get('RENDER', 'false').lower() == 'true'
+RENDER_SAFE_MODE = os.environ.get(
+    "RENDER_SAFE_MODE",
+    "true" if IS_RENDER else "false"
+).lower() == "true"
 
 # Light Imports
 from PIL import Image
@@ -2988,6 +2992,36 @@ def get_snapshot_identity(lat, lon, timeout=10):
         }
     except Exception as e:
         return {"error": f"Resolution Failed: {str(e)}"}
+
+
+def _build_snapshot_fallback(lat: float, lon: float) -> dict:
+    """Stable low-cost snapshot payload used when upstream services are unavailable."""
+    hem_ns = "Northern" if lat >= 0 else "Southern"
+    hem_ew = "Eastern" if lon >= 0 else "Western"
+    return {
+        "identity": {
+            "name": "Location Snapshot",
+            "hierarchy": "Fallback",
+            "continent": "Global",
+            "full_address": "Address resolution unavailable",
+            "postal_code": "N/A"
+        },
+        "coordinates": {
+            "lat": f"{abs(lat):.4f}° {'N' if lat>=0 else 'S'}",
+            "lng": f"{abs(lon):.4f}° {'E' if lon>=0 else 'W'}",
+            "zone": f"UTM {int((lon + 180) / 6) + 1}",
+            "timezone": f"UTC{(round(lon / 15 * 100) / 100):+.1f}",
+            "utc_offset": round(lon / 15 * 100) / 100
+        },
+        "global_position": {
+            "continent": "Global",
+            "hemisphere": f"{hem_ns} / {hem_ew}"
+        },
+        "hazards_analysis": {},
+        "terrain_context": "Inland/Unknown",
+        "professional_summary": "Fallback snapshot returned due to upstream service timeout.",
+        "fallback": True
+    }
 @app.route("/snapshot_identity", methods=["POST","OPTIONS"])
 def snapshot_identity_route():
 
@@ -2999,13 +3033,22 @@ def snapshot_identity_route():
         lat = float(data.get("latitude"))
         lon = float(data.get("longitude"))
 
-        # Fetch enriched geospatial data
-        snapshot = get_snapshot_identity(lat, lon)
+        # Fetch enriched geospatial data (lightweight mode in Render)
+        snapshot_timeout = 5 if RENDER_SAFE_MODE else 10
+        snapshot = get_snapshot_identity(lat, lon, timeout=snapshot_timeout)
+        if not isinstance(snapshot, dict) or snapshot.get("error"):
+            snapshot = _build_snapshot_fallback(lat, lon)
         return jsonify(snapshot)
 
     except Exception as e:
         logger.error(f"Snapshot Route Error: {e}")
-        return jsonify({"error": "Failed to resolve identity"}), 500
+        try:
+            data = request.json or {}
+            lat = float(data.get("latitude"))
+            lon = float(data.get("longitude"))
+            return jsonify(_build_snapshot_fallback(lat, lon)), 200
+        except Exception:
+            return jsonify({"error": "Failed to resolve identity"}), 500
 def calculate_haversine_distance(lat1, lon1, lat2, lon2):
     """
     Calculates the straight-line distance (Great Circle) between two points 
@@ -4031,8 +4074,13 @@ def suitability():
             result['cnn_analysis']['telemetry']['drainage_quality'] = round(drainage_score, 1)
             result['cnn_analysis']['telemetry']['classification_reasoning'] = reasoning
 
-        # 5. FETCH NEARBY AMENITIES (Preserved Logic)
-        nearby_list = get_nearby_named_places(latitude, longitude)
+        # 5. FETCH NEARBY AMENITIES
+        nearby_list = []
+        if not RENDER_SAFE_MODE:
+            try:
+                nearby_list = get_nearby_named_places(latitude, longitude)
+            except Exception as nearby_err:
+                logger.warning(f"Nearby places skipped: {nearby_err}")
         result['nearby'] = {"places": nearby_list}
 
         # 6. STRATEGIC INTELLIGENCE (The Main Update)
@@ -4055,17 +4103,31 @@ def suitability():
         }
 
         # Now pass the clean flat dictionary to the strategic engine
-        result['strategic_intelligence'] = generate_strategic_intelligence(
-            flat_factors_for_intel,
-            result.get('raw_suitability_score', result.get('suitability_score', 50)),
-            nearby_list
-        )
+        if not RENDER_SAFE_MODE:
+            result['strategic_intelligence'] = generate_strategic_intelligence(
+                flat_factors_for_intel,
+                result.get('raw_suitability_score', result.get('suitability_score', 50)),
+                nearby_list
+            )
+        else:
+            result['strategic_intelligence'] = {
+                "summary": "Render-safe mode: full strategic narrative disabled to keep response stable.",
+                "recommendations": [],
+                "priority_actions": []
+            }
 
         # 6b. Expose these for the frontend "Strategic Utility" tab
         result['flat_factors'] = flat_factors_for_intel
 
         # 7. WEATHER & CACHING
-        result['weather'] = get_live_weather(latitude, longitude)
+        if not RENDER_SAFE_MODE:
+            result['weather'] = get_live_weather(latitude, longitude)
+        else:
+            result['weather'] = {
+                "temperature_c": None,
+                "humidity": None,
+                "condition": "Unavailable in Render-safe mode"
+            }
         ANALYSIS_CACHE[cache_key] = result
         
         # Force garbage collection to free memory
@@ -5579,17 +5641,21 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     is_tier_one, hub_name = check_global_tier_one(latitude, longitude)
 
     # 1. 🚀 RECRUIT ALL 23 FACTORS
-    intelligence = GeoDataService.get_land_intelligence(latitude, longitude)
+    if RENDER_SAFE_MODE:
+        # Faster path for memory-constrained deployments (Render/Vercel proxy flow).
+        from utils.fast_analysis import get_land_intelligence_sync
+        intelligence = get_land_intelligence_sync(latitude, longitude)
+    else:
+        intelligence = GeoDataService.get_land_intelligence(latitude, longitude)
     
     # --- DYNAMIC POLLUTION OVERRIDE ---
-    real_pollution_data = fetch_realtime_pollution(latitude, longitude)
-    if real_pollution_data:
-        # Inject real-time measurements into the raw factor pool
-        intelligence["raw_factors"]["environmental"]["pollution"] = real_pollution_data
-        # Removed debug logging
-    else:
-        # Fixed Indentation: added pass to prevent SyntaxError
-        pass 
+    if not RENDER_SAFE_MODE:
+        real_pollution_data = fetch_realtime_pollution(latitude, longitude)
+        if real_pollution_data:
+            # Inject real-time measurements into the raw factor pool
+            intelligence["raw_factors"]["environmental"]["pollution"] = real_pollution_data
+        else:
+            pass
     
     # --- UNIVERSAL ACCESSIBILITY (VALENCIA-GRADE) OVERRIDE ---
     # This logic handles multi-modal anchors (Markets, City Hubs, Strategic Roads)
