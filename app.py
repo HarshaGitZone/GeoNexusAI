@@ -1083,9 +1083,7 @@ def get_visual_forensics(lat, lng, past_year=2017):
         logger.error(f"Visual Forensics Engine Failure: {e}")
         return None
 
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({"status": "healthy"}), 200
+# Health check endpoint moved to end of file to avoid duplicates
 def _get_visual_factors_summary(lat, lng):
     """
     Get a summary of 23 factors for visual analysis telemetry.
@@ -3807,25 +3805,7 @@ def calculate_historical_suitability(current_lat, current_lng, range_type):
 
     return multiplier * 100
    
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Simple health check to verify backend is running"""
-    try:
-        # Apply memory optimization if available
-        if PRODUCTION_OPTIMIZATIONS_AVAILABLE:
-            production_optimizations.optimize_pytorch_memory()
-        
-        return jsonify({
-            "status": "healthy",
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "memory_optimized": PRODUCTION_OPTIMIZATIONS_AVAILABLE,
-            "cors_enabled": True
-        })
-    except Exception as e:
-        return jsonify({
-            "status": "unhealthy", 
-            "error": str(e)
-        }), 500
+# Health check endpoint moved to end of file to avoid duplicates
 
 @app.route('/health', methods=['GET'])
 def health_check():
