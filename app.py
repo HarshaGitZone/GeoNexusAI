@@ -245,9 +245,9 @@ def _normalize_origin(origin: str) -> str:
 
 # 1. Standardize Allowed Origins (no trailing slashes, lowercase)
 ALLOWED_ORIGINS = [
-    _normalize_origin("http://localhost:3000"),
-    _normalize_origin("http://127.0.0.1:3000"),
-    _normalize_origin("https://geonexus-ai.vercel.app"),
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", 
+    "https://geonexus-ai.vercel.app"
 ]
 
 # Optional env override for additional deployed frontend origins.
@@ -269,8 +269,10 @@ def _is_allowed_origin(origin: str) -> bool:
         return False
     if normalized in ALLOWED_ORIGINS:
         return True
-    # Allow Vercel preview/prod subdomains if frontend is hosted on Vercel.
-    return normalized.endswith(".vercel.app")
+    # Allow any Vercel subdomain for development flexibility
+    if normalized.endswith(".vercel.app") or "vercel.app" in normalized:
+        return True
+    return False
 
 
 # CORS(app, resources={r"/*": {
@@ -280,7 +282,7 @@ def _is_allowed_origin(origin: str) -> bool:
 #     "expose_headers": ["Content-Type", "Authorization"]
 # }}, supports_credentials=True)
 CORS(app, resources={r"/*": {
-    "origins": ALLOWED_ORIGINS + [r"https://.*\.vercel\.app"],
+    "origins": ALLOWED_ORIGINS,
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization", "Accept"],
 }}, supports_credentials=True)
