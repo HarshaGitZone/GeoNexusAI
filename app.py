@@ -86,7 +86,7 @@ import requests
 import numpy as np
 import pandas as pd
 import pickle
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta, timezone
 import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -3872,7 +3872,7 @@ def health_check():
     try:
         return jsonify({
             "status": "healthy",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "environment": "production" if os.getenv("RENDER") == "true" else "development",
             "python_version": sys.version,
             "working_directory": os.getcwd()
@@ -3881,7 +3881,7 @@ def health_check():
         return jsonify({
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }), 500
 
 @app.route('/suitability', methods=['POST', 'OPTIONS'])
@@ -4235,7 +4235,7 @@ def _extract_data_freshness_hours(factor: dict):
     if not isinstance(factor, dict):
         return None
     details = factor.get("details") if isinstance(factor.get("details"), dict) else {}
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     # Timestamp candidates commonly used by upstream factors/APIs.
     ts_candidates = [
@@ -5760,7 +5760,7 @@ def _perform_suitability_analysis(latitude: float, longitude: float) -> dict:
     f["socio_econ"]["infrastructure"]["real_world_proof"] = hub_intelligence["details"].get("real_world_proof", [])
 
     # Attach coordinate/time anchored proof metadata to every factor
-    analysis_generated_at_utc = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    analysis_generated_at_utc = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
     validation_rows = []
     for cat in f:
         for factor in f[cat]:
