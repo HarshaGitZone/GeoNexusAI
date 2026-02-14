@@ -445,27 +445,105 @@ def get_live_weather(lat, lng):
         
         lat, lng = normalize_coords(lat, lng)
         
-        # First try location-specific adapter for better regional accuracy
-        location_weather = location_weather_manager.get_location_weather(lat, lng)
-        
-        if location_weather:
-            # Enrich with validation and accuracy indicators
-            enriched_weather = weather_enricher.enrich_weather_data(location_weather, lat, lng)
-            logger.info(f"Using location-specific weather adapter for {lat}, {lng}")
-            return enriched_weather
-        
-        # Fallback to enhanced weather service with multiple APIs
+        # First try live weather service with API-backed adapters.
         weather_data = get_accurate_weather(lat, lng)
+
+        if weather_data:
+            # Enrich with validation and accuracy indicators
+            enriched_weather = weather_enricher.enrich_weather_data(weather_data, lat, lng)
+            return _normalize_weather_for_frontend(enriched_weather, lat, lng)
+
+        # Fallback to location-specific adapter when live APIs are unavailable.
+        location_weather = location_weather_manager.get_location_weather(lat, lng)
+        if location_weather:
+            enriched_weather = weather_enricher.enrich_weather_data(location_weather, lat, lng)
+            logger.info(f"Using location-specific weather adapter fallback for {lat}, {lng}")
+            return _normalize_weather_for_frontend(enriched_weather, lat, lng)
         
-        # Enrich with validation and accuracy indicators
-        enriched_weather = weather_enricher.enrich_weather_data(weather_data, lat, lng)
-        
-        return enriched_weather
+        return _get_fallback_weather(lat, lng)
         
     except Exception as e:
         logger.error(f"Enhanced weather service error: {e}")
         # Final fallback to original implementation
         return _get_fallback_weather(lat, lng)
+
+def _normalize_weather_for_frontend(weather_data, lat, lng):
+    """Normalize weather payload keys so frontend cards always render consistently."""
+    if not isinstance(weather_data, dict):
+        return weather_data
+
+    normalized = dict(weather_data)
+
+    temp_c = normalized.get("temp_c")
+    if temp_c is None:
+        temp_c = normalized.get("temperature_c")
+    if temp_c is None:
+        temp_c = normalized.get("temperature")
+    if temp_c is None:
+        temp_c = normalized.get("temp")
+
+    feels_like_c = normalized.get("feels_like_c")
+    if feels_like_c is None:
+        feels_like_c = normalized.get("apparent_temp_c")
+    if feels_like_c is None:
+        feels_like_c = normalized.get("feels_like")
+
+    wind_speed_kmh = normalized.get("wind_speed_kmh")
+    if wind_speed_kmh is None:
+        wind_speed_kmh = normalized.get("wind_speed")
+        # WeatherAPI adapter stores m/s under wind_speed; convert to km/h.
+        if wind_speed_kmh is not None and normalized.get("source") == "weatherapi":
+            wind_speed_kmh = wind_speed_kmh * 3.6
+
+    pressure_hpa = normalized.get("pressure_hpa")
+    if pressure_hpa is None:
+        pressure_hpa = normalized.get("pressure")
+
+    visibility_km = normalized.get("visibility_km")
+    if visibility_km is None:
+        visibility_km = normalized.get("visibility")
+    if visibility_km is not None:
+        # Open-Meteo visibility can arrive in meters.
+        visibility_km = visibility_km / 1000.0 if visibility_km > 1000 else visibility_km
+
+    wind_direction_deg = normalized.get("wind_direction_deg")
+    if wind_direction_deg is None:
+        wind_direction_deg = normalized.get("wind_direction")
+
+    # If adapters do not provide local clock, infer from longitude.
+    if not normalized.get("local_time"):
+        utc_now = datetime.now(timezone.utc)
+        timezone_offset = round(float(lng) / 15)
+        local_dt = utc_now + timedelta(hours=timezone_offset)
+        normalized["local_time"] = local_dt.replace(tzinfo=None).isoformat(timespec="minutes")
+
+    if normalized.get("is_day") is None:
+        try:
+            hour = int(str(normalized.get("local_time")).split("T")[1].split(":")[0])
+            normalized["is_day"] = 1 if 6 <= hour < 18 else 0
+        except Exception:
+            normalized["is_day"] = 1
+
+    if not normalized.get("air_quality"):
+        try:
+            normalized["air_quality"] = get_air_quality_data(lat, lng)
+        except Exception:
+            normalized["air_quality"] = None
+
+    normalized["temp_c"] = temp_c
+    normalized["feels_like_c"] = feels_like_c
+    normalized["wind_speed_kmh"] = round(wind_speed_kmh, 1) if isinstance(wind_speed_kmh, (int, float)) else wind_speed_kmh
+    normalized["pressure_hpa"] = pressure_hpa
+    normalized["visibility_km"] = round(visibility_km, 1) if isinstance(visibility_km, (int, float)) else visibility_km
+    normalized["wind_direction_deg"] = wind_direction_deg
+    normalized["wind_direction_cardinal"] = normalized.get("wind_direction_cardinal") or degrees_to_cardinal(wind_direction_deg)
+    normalized["weather_severity"] = normalized.get("weather_severity") or calculate_weather_severity(
+        normalized.get("weather_code", 0),
+        normalized.get("wind_speed_kmh", 0),
+        normalized.get("visibility_km", 10)
+    )
+
+    return normalized
 
 def _get_fallback_weather(lat, lng):
     """Fallback weather function using original implementation"""
