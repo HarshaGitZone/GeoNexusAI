@@ -247,12 +247,13 @@ def _normalize_origin(origin: str) -> str:
         return ""
     return origin.strip().rstrip("/").lower()
 
+# Frontend URL configuration with local development default
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 # 1. Standardize Allowed Origins (no trailing slashes, lowercase)
 ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000", 
-    "https://geonexus-ai.vercel.app"
+    _normalize_origin(FRONTEND_URL),
+    "http://127.0.0.1:3000"  # Keep for local development compatibility
 ]
 
 # Optional env override for additional deployed frontend origins.

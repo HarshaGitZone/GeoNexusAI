@@ -59,5 +59,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Quick production test (lightweight)
+echo "🔍 Running production test..."
+python production_test.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Production test failed"
+    exit 1
+fi
+
 echo "🎉 All tests passed, starting server..."
 exec gunicorn app:app --workers 1 --threads 1 --timeout 120 --worker-class gthread --bind 0.0.0.0:$PORT

@@ -1,5 +1,10 @@
 GEOAI_MONGO_URI=mongodb+srv://USER:PASS@YOUR_CLUSTER_HOST/?retryWrites=true&w=majority
 
+# Frontend URL Configuration
+# For local development: http://localhost:3000
+# For production: https://your-frontend-domain.com
+FRONTEND_URL=http://localhost:3000
+
 # GeoGPT: Groq is primary, Gemini is backup
 GROQ_API_KEY=your_actual_groq_key
 OPENAI_API_KEY=your_actual_openai_key
