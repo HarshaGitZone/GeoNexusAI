@@ -1,1 +1,1 @@
-web: bash production_start.sh
+web: bash simple_start.sh
