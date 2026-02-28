@@ -1,6 +1,6 @@
 # 🌍 GeoNexusAI: Land Suitability Intelligence Platform
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Online-blue?style=for-the-badge&logo=vercel)](https://geonexusai.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Online-blue?style=for-the-badge&logo=vercel)](https://geo-nexus-ai.vercel.app)
 [![Video Demo](https://img.shields.io/badge/Video_Demo-Watch_Now-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=YOUR_DEMO_VIDEO)
 
 > **🚀 A cutting-edge AI-powered geospatial intelligence platform that analyzes land suitability using 23 comprehensive factors across 6 categories, leveraging satellite data, machine learning, and multi-LLM AI assistance.**
