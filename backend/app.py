@@ -381,7 +381,12 @@ ML_MODELS = {}
 
 # On Render, we only load XGBoost to stay under 512MB. 
 # Locally, we load the full ensemble for maximum accuracy.
-MODELS_TO_TRY = ["model_xgboost.pkl"] if IS_RENDER else ["model_rf.pkl", "model_xgboost.pkl", "model_gbm.pkl", "model_et.pkl", "model_lgbm.pkl"]
+if IS_RENDER:
+    MODELS_TO_TRY = ["model_xgboost.pkl"]
+    print("🏭 PRODUCTION MODE: XGBoost only for memory efficiency")
+else:
+    MODELS_TO_TRY = ["model_rf.pkl", "model_xgboost.pkl", "model_gbm.pkl", "model_et.pkl", "model_lgbm.pkl"]
+    print("🖥️ DEVELOPMENT MODE: Full ML ensemble loaded")
 
 for name in MODELS_TO_TRY:
     p = os.path.join(MODEL_PATH, name)

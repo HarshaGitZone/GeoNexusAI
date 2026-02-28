@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://geoaibackend-6x9b.onrender.com/:path*"
+      "destination": "https://geonexusai.onrender.com/:path*"
     }
   ],
   "headers": [
@@ -11,7 +11,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' http://localhost:5000 https://geoaibackend-6x9b.onrender.com https://unpkg.com https://cdnjs.cloudflare.com https://raw.githubusercontent.com https://api.maptiler.com; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com;"
+          "value": "default-src 'self'; connect-src 'self' http://localhost:5000 https://geonexusai.onrender.com https://unpkg.com https://cdnjs.cloudflare.com https://raw.githubusercontent.com https://api.maptiler.com; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com;"
         }
       ]
     }
