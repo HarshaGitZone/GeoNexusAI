@@ -1,0 +1,2308 @@
+/* GeoGPT Intelligence Assistant - Enhanced Multi-LLM Version */
+
+/* Main Container */
+/* Glassmorphic GeoGPT Container */
+.geogpt-polished-box {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 380px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+  animation: slideUp 0.3s ease-out;
+}
+
+[data-theme='light'] .geogpt-polished-box {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Glassmorphic Pill Button */
+.geogpt-pill-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  z-index: 9998;
+  animation: pulse 2s infinite;
+}
+
+[data-theme='light'] .geogpt-pill-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.geogpt-pill-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='light'] .geogpt-pill-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.gpt-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+[data-theme='light'] .gpt-label {
+  color: #1e293b;
+}
+
+/* Header */
+/* Glassmorphic Header - Enhanced Theme-Specific Design */
+.geogpt-chat-header {
+  background: linear-gradient(135deg, 
+    rgba(147, 197, 253, 0.15) 0%, 
+    rgba(134, 239, 172, 0.15) 50%, 
+    rgba(196, 181, 253, 0.15) 100%
+  );
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 
+    0 4px 20px rgba(147, 197, 253, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='light'] .geogpt-chat-header {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.2) 0%, 
+    rgba(16, 185, 129, 0.2) 50%, 
+    rgba(147, 51, 234, 0.2) 100%
+  );
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 
+    0 4px 20px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.geogpt-chat-header {
+  border-radius: 20px 20px 0 0;
+}
+
+/* Main Chat Container - Enhanced Theme-Specific Design */
+.geogpt-chat {
+  background: linear-gradient(135deg, 
+    rgba(147, 197, 253, 0.08) 0%, 
+    rgba(134, 239, 172, 0.08) 50%, 
+    rgba(196, 181, 253, 0.08) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(147, 197, 253, 0.4),
+    0 4px 20px rgba(134, 239, 172, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+[data-theme='light'] .geogpt-chat {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.12) 0%, 
+    rgba(16, 185, 129, 0.12) 50%, 
+    rgba(147, 51, 234, 0.12) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.3),
+    0 4px 20px rgba(16, 185, 129, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.gpt-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.provider-indicators {
+  display: flex;
+  gap: 6px;
+}
+
+.provider-mini-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: 10px;
+}
+
+[data-theme='light'] .provider-mini-indicator {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.provider-mini-icon {
+  font-size: 10px;
+}
+
+.provider-mini-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.provider-mini-dot.online {
+  background: #10b981;
+  box-shadow: 0 0 4px #10b981;
+}
+
+.provider-mini-dot.offline {
+  background: #64748b;
+}
+
+.gpt-status strong {
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+[data-theme='light'] .gpt-status strong {
+  color: #1e40af;
+}
+
+.current-provider {
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.close-gpt {
+  background: rgba(239, 68, 68, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: #ef4444;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 15px rgba(239, 68, 68, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='light'] .close-gpt {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  box-shadow: 
+    0 4px 15px rgba(239, 68, 68, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.close-gpt:hover {
+  background: rgba(239, 68, 68, 0.3);
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 20px rgba(239, 68, 68, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='light'] .close-gpt:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Messages Container - Enhanced Theme-Specific Design */
+.geogpt-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  max-height: calc(100% - 120px); /* Reserve space for input and quick questions */
+  background: linear-gradient(135deg, 
+    rgba(147, 197, 253, 0.05) 0%, 
+    rgba(134, 239, 172, 0.05) 50%, 
+    rgba(196, 181, 253, 0.05) 100%
+  );
+  border-radius: 10px;
+  margin: 8px 16px 4px 16px;
+}
+
+[data-theme='light'] .geogpt-messages {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.06) 0%, 
+    rgba(16, 185, 129, 0.06) 50%, 
+    rgba(147, 51, 234, 0.06) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.geogpt-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.geogpt-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.geogpt-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+[data-theme='light'] .geogpt-messages::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Message Bubbles - Enhanced Theme-Specific Design */
+.chat-msg {
+  display: flex;
+  max-width: 100%;
+}
+
+.chat-msg.user {
+  justify-content: flex-end;
+}
+
+.chat-msg.assistant {
+  justify-content: flex-start;
+}
+
+.msg-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  position: relative;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.chat-msg.user .msg-bubble {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.9) 0%, 
+    rgba(16, 185, 129, 0.9) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-bottom-right-radius: 4px;
+  box-shadow: 
+    0 4px 15px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='light'] .chat-msg.user .msg-bubble {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.9) 0%, 
+    rgba(16, 185, 129, 0.9) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.9);
+  box-shadow: 
+    0 4px 15px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.chat-msg.assistant .msg-bubble {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.12) 50%, 
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-bottom-left-radius: 4px;
+  box-shadow: 
+    0 4px 15px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='light'] .chat-msg.assistant .msg-bubble {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(16, 185, 129, 0.15) 50%, 
+    rgba(147, 51, 234, 0.15) 100%
+  );
+  color: #1e293b;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 4px 15px rgba(59, 130, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.msg-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.msg-provider-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.provider-icon {
+  font-size: 12px;
+}
+
+.provider-name {
+  font-weight: 600;
+}
+
+.confidence {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.response-time {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.msg-content {
+  line-height: 1.5;
+}
+
+.msg-content p {
+  margin: 0 0 8px 0;
+}
+
+.msg-content p:last-child {
+  margin-bottom: 0;
+}
+
+.msg-content code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+[data-theme='light'] .msg-content code {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.msg-content pre {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 11px;
+}
+
+[data-theme='light'] .msg-content pre {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Sources */
+.sources {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+[data-theme='light'] .sources {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sources-label {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.source-tag {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Comparison Button */
+.show-comparison-btn {
+  background: rgba(16, 185, 129, 0.2);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #10b981;
+  font-size: 11px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.show-comparison-btn:hover {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #3b82f6;
+  border-radius: 50%;
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+}
+
+.thinking-bubble {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Comparison Panel */
+.comparison-panel {
+  margin: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+[data-theme='light'] .comparison-panel {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.comparison-header h4 {
+  margin: 0;
+  color: #3b82f6;
+  font-size: 14px;
+}
+
+[data-theme='light'] .comparison-header h4 {
+  color: #1e40af;
+}
+
+.close-comparison {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.comparison-table {
+  font-size: 12px;
+}
+
+.comparison-table h4 {
+  margin: 0 0 8px 0;
+  color: #e2e8f0;
+  font-size: 13px;
+}
+
+[data-theme='light'] .comparison-table h4 {
+  color: #475569;
+}
+
+.comparison-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .comparison-table th,
+[data-theme='light'] .comparison-table td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.comparison-table th {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+[data-theme='light'] .comparison-table th {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.comparison-table td {
+  color: #e2e8f0;
+}
+
+[data-theme='light'] .comparison-table td {
+  color: #475569;
+}
+
+/* Quick Questions */
+.quick-questions {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .quick-questions {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.quick-questions-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+[data-theme='light'] .quick-questions-label {
+  color: #64748b;
+}
+
+.quick-questions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.quick-question-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: #e2e8f0;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+[data-theme='light'] .quick-question-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #64748b;
+}
+
+.quick-question-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Expanded Quick Questions Layout */
+.quick-questions-expanded {
+  margin: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  animation: slideDown 0.3s ease-out;
+}
+
+[data-theme='light'] .quick-questions-expanded {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.quick-questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+}
+
+[data-theme='light'] .quick-questions-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.quick-questions-header h5 {
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+[data-theme='light'] .quick-questions-header h5 {
+  color: #1e40af;
+}
+
+.close-quick-questions-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+[data-theme='light'] .close-quick-quick-questions-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.close-quick-questions-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  transform: scale(1.1);
+}
+
+[data-theme='light'] .close-quick-questions-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.quick-questions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0 8px 8px 8px;
+}
+
+.quick-question-btn-expanded {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.2) 0%, 
+    rgba(16, 185, 129, 0.2) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #ffffff;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.3;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='light'] .quick-question-btn-expanded {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.1) 0%, 
+    rgba(16, 185, 129, 0.1) 100%
+  );
+  color: #1e40af;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.quick-question-btn-expanded:hover {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.3) 0%, 
+    rgba(16, 185, 129, 0.3) 100%
+  );
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='light'] .quick-question-btn-expanded:hover {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.2) 0%, 
+    rgba(16, 185, 129, 0.2) 100%
+  );
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Inline Input Area - Enhanced Theme-Specific Design */
+.geogpt-input-area {
+  padding: 8px 16px 12px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.08) 50%, 
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 
+    inset 0 2px 10px rgba(255, 255, 255, 0.1),
+    0 -4px 20px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .geogpt-input-area {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(16, 185, 129, 0.15) 50%, 
+    rgba(147, 51, 234, 0.15) 100%
+  );
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    inset 0 2px 10px rgba(59, 130, 246, 0.08),
+    0 -4px 20px rgba(16, 185, 129, 0.12);
+}
+
+.input-wrapper-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-wrapper-inline input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme='light'] .input-wrapper-inline input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #1e293b;
+}
+
+.input-wrapper-inline input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme='light'] .input-wrapper-inline input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.input-wrapper-inline input:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+[data-theme='light'] .input-wrapper-inline input:focus {
+  border-color: rgba(59, 130, 246, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Input Area */
+.geogpt-input-area {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+[data-theme='light'] .geogpt-input-area {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-wrapper input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: white;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+[data-theme='light'] .input-wrapper input {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1e293b;
+}
+
+.input-wrapper input::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme='light'] .input-wrapper input::placeholder {
+  color: #94a3b8;
+}
+
+.input-wrapper input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-wrapper input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-button {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.send-button:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Enhanced GeoGPT with Extensible Sidebar */
+
+.geogpt-content {
+  display: flex;
+  height: calc(100% - 60px); /* Subtract header height */
+  overflow: hidden;
+}
+
+/* Extensible Sidebar */
+.geogpt-sidebar {
+  width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transition: width 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+[data-theme='light'] .geogpt-sidebar {
+  background: rgba(0, 0, 0, 0.03);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.geogpt-sidebar.extended {
+  width: 280px;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+}
+
+[data-theme='light'] .sidebar-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header h4 {
+  margin: 0;
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+[data-theme='light'] .sidebar-header h4 {
+  color: #1e40af;
+}
+
+.sidebar-collapse-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  color: #94a3b8;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+[data-theme='light'] .sidebar-collapse-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: #64748b;
+}
+
+.sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='light'] .sidebar-collapse-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-content {
+  padding: 0 16px 16px;
+  overflow-y: auto;
+  height: calc(100% - 60px);
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+}
+
+.sidebar-section h5 {
+  margin: 0 0 12px 0;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme='light'] .sidebar-section h5 {
+  color: #475569;
+}
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #e2e8f0;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-weight: 500;
+}
+
+[data-theme='light'] .sidebar-action-btn {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #64748b;
+}
+
+.sidebar-action-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(2px);
+}
+
+.sidebar-action-btn.site-analysis {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+[data-theme='light'] .sidebar-action-btn.site-analysis {
+  background: rgba(16, 185, 129, 0.05);
+  color: #059669;
+}
+
+.sidebar-action-btn.site-analysis:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* Main Chat Area */
+.geogpt-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.geogpt-content.sidebar-extended .geogpt-main {
+  max-width: calc(100% - 280px);
+}
+
+/* Beautiful Glassmorphic GPT Logo */
+.gpt-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  position: relative;
+}
+
+.gpt-circle {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(16, 185, 129, 0.3));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+  box-shadow: 
+    0 4px 15px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+[data-theme='light'] .gpt-circle {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 4px 15px rgba(59, 130, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.gpt-circle:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 20px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.gpt-g {
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  z-index: 1;
+  position: relative;
+}
+
+[data-theme='light'] .gpt-g {
+  color: #1e40af;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.gpt-pt {
+  color: #10b981;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-left: 1px;
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  position: relative;
+}
+
+[data-theme='light'] .gpt-pt {
+  color: #059669;
+  text-shadow: 0 0 6px rgba(16, 185, 129, 0.3);
+}
+
+/* Enhanced glow effect for the logo */
+.gpt-icon-glow {
+  position: relative;
+  animation: logoGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+  0%, 100% { 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% { 
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+[data-theme='light'] .sidebar-toggle-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: #64748b;
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='light'] .sidebar-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-toggle-btn.extended {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+/* Quick Questions Toggle Button */
+.quick-questions-toggle {
+  padding: 8px 16px;
+  text-align: center;
+}
+
+.show-quick-questions-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #3b82f6;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+[data-theme='light'] .show-quick-questions-btn {
+  background: rgba(59, 130, 246, 0.05);
+  color: #1e40af;
+}
+
+.show-quick-questions-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Chat Controls */
+.chat-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .geogpt-sidebar.extended {
+    width: 240px;
+  }
+  
+  .geogpt-content.sidebar-extended .geogpt-main {
+    max-width: calc(100% - 240px);
+  }
+  
+  .sidebar-action-btn {
+    font-size: 10px;
+    padding: 8px 10px;
+  }
+  
+  .sidebar-header h4 {
+    font-size: 12px;
+  }
+}
+
+
+
+
+/* Container for the entire chat area */
+.geogpt-main {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+}
+
+/* Updated Input Area to handle Quick Questions side-by-side */
+.geogpt-input-area {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Wrap input and rocket button */
+.input-wrapper-inline {
+    display: flex !important;
+    flex: 1 !important;
+    gap: 8px !important;
+}
+
+/* Reposition Quick Questions to the left of the input */
+.quick-questions-inline {
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.quick-questions-row {
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    max-width: 200px !important; /* Limits width to keep space for input */
+    scrollbar-width: none !important; /* Hides scrollbar for clean look */
+}
+
+.quick-questions-row::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Ensure the label is small and beside the buttons */
+.quick-questions-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    margin-right: 6px !important;
+}
+
+/* Compact the Quick Question buttons */
+.quick-question-btn-inline {
+    white-space: nowrap !important;
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    border-radius: 12px !important;
+    background: rgba(124, 58, 237, 0.1) !important;
+    color: #7c3aed !important;
+    border: 1px solid rgba(124, 58, 237, 0.2) !important;
+}
+
+/* Position the Toggle Button beside the rocket button when questions are hidden */
+.quick-questions-toggle-inline {
+    margin: 0 !important;
+}
+
+.show-quick-questions-btn-inline {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+}
+
+/* Ensure input expands to fill remaining space */
+.geogpt-input-area input {
+    flex: 1 !important;
+    min-width: 100px !important;
+}
+
+/* Rocket Send Button styling */
+.send-button {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+/* Reduce the gap between the message area and the input area */
+.geogpt-main {
+    gap: 4px !important; /* Minimal gap between components */
+}
+
+/* Tighten the Quick Questions container */
+.quick-questions-inline {
+    margin-bottom: -4px !important; /* Pulls the questions closer to the input below */
+    padding: 0 12px !important;
+}
+
+/* Adjust the input area padding to be more compact */
+.geogpt-input-area {
+    padding: 8px 12px !important; /* Thinner vertical padding */
+    gap: 8px !important;
+}
+
+/* Tighten the row spacing */
+.quick-questions-row {
+    gap: 4px !important;
+}
+
+/* Ensure the chat history doesn't push too far away */
+.geogpt-messages {
+    margin-bottom: 4px !important;
+}
+
+/* Match the input wrapper height for a aligned look */
+.input-wrapper-inline {
+    height: 38px !important;
+}
+
+/* Shrink the Quick Question buttons slightly to look better beside the input */
+.quick-question-btn-inline {
+    padding: 3px 8px !important;
+    font-size: 10.5px !important;
+}
+
+
+
+/* ============================================================
+   DARK THEME ONLY OVERRIDES (STRICT)
+   ============================================================ */
+
+/* 1. Main Container & Sidebar */
+[data-theme='dark'] .geogpt-polished-box {
+    background: #0f172a !important; /* Deep Midnight */
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme='dark'] .geogpt-sidebar {
+    background: #020617 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 2. Header & Status */
+[data-theme='dark'] .geogpt-chat-header {
+    background: linear-gradient(to right, #1e293b, #0f172a) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme='dark'] .gpt-status strong {
+    color: #3b82f6 !important;
+}
+
+/* 3. Logo Collision Fix (Dark Specific) */
+[data-theme='dark'] .gpt-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+[data-theme='dark'] .gpt-circle {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+[data-theme='dark'] .gpt-g {
+    color: #3b82f6 !important;
+    text-shadow: none !important;
+}
+
+[data-theme='dark'] .gpt-pt {
+    color: #10b981 !important;
+}
+
+/* 4. Chat Bubbles */
+[data-theme='dark'] .chat-msg.assistant .msg-bubble {
+    background: #1e293b !important; /* Professional Slate */
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme='dark'] .chat-msg.user .msg-bubble {
+    background: linear-gradient(135deg, #2563eb, #10b981) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* 5. Input Area & Quick Questions */
+[data-theme='dark'] .geogpt-input-area {
+    background: #0f172a !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme='dark'] .input-wrapper-inline input {
+    background: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+[data-theme='dark'] .quick-question-btn-inline {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: #93c5fd !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+[data-theme='dark'] .geogpt-messages {
+    background: transparent !important;
+}
+
+/* 6. Typography & Markdown (Dark) */
+[data-theme='dark'] .msg-content {
+    color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .sidebar-section h5 {
+    color: #94a3b8 !important;
+}
+
+/* Enhanced Quick Questions Styles */
+.quick-questions-expanded {
+  margin: 12px 16px;
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(16, 185, 129, 0.15) 50%,
+    rgba(139, 92, 246, 0.15) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  animation: slideDownGlow 0.4s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-questions-expanded::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    #3b82f6 0%, 
+    #10b981 50%, 
+    #8b5cf6 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes slideDownGlow {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.quick-questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border-radius: 16px 16px 0 0;
+}
+
+.quick-questions-header h5 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.close-quick-questions-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.close-quick-questions-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.quick-questions-grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.quick-question-btn-expanded {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-question-btn-expanded::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.quick-question-btn-expanded:hover::before {
+  left: 100%;
+}
+
+.quick-question-btn-expanded:hover {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.3) 0%, 
+    rgba(16, 185, 129, 0.3) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Toggle Button Styles */
+.quick-questions-toggle {
+  margin: 8px 16px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.show-quick-questions-btn {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.2) 0%, 
+    rgba(16, 185, 129, 0.2) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  color: #ffffff;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(15px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.show-quick-questions-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.3) 0%, 
+    rgba(16, 185, 129, 0.3) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Light theme styles */
+[data-theme='light'] .quick-questions-expanded {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.1) 0%, 
+    rgba(16, 185, 129, 0.1) 50%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='light'] .quick-questions-header h5 {
+  color: #1e293b;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+[data-theme='light'] .close-quick-questions-btn {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #1e293b;
+}
+
+[data-theme='light'] .quick-question-btn-expanded {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.05) 0%, 
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #1e293b;
+}
+
+[data-theme='light'] .quick-question-btn-expanded:hover {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+[data-theme='light'] .show-quick-questions-btn {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.15) 0%, 
+    rgba(16, 185, 129, 0.15) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #1e293b;
+}
+
+/* Bottom Quick Questions Button - Always Visible */
+.quick-questions-bottom-toggle {
+  margin-top: 12px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-questions-bottom-btn {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.25) 0%, 
+    rgba(16, 185, 129, 0.25) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(15px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  min-width: 200px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.quick-questions-bottom-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.35) 0%, 
+    rgba(16, 185, 129, 0.35) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.quick-questions-bottom-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Light theme for bottom button */
+[data-theme='light'] .quick-questions-bottom-toggle {
+  border-top-color: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme='light'] .quick-questions-bottom-btn {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.2) 0%, 
+    rgba(16, 185, 129, 0.2) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #1e293b;
+}
+
+[data-theme='light'] .quick-questions-bottom-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.3) 0%, 
+    rgba(16, 185, 129, 0.3) 100%
+  );
+} 
+
+
+/* --- GeoGPT Input Area Layout Fix --- */
+
+/* Force the form to stack elements vertically */
+.geogpt-input-area {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 12px 16px !important;
+}
+
+/* Ensure the input and send button stay on one line */
+.input-wrapper-inline {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    gap: 8px !important;
+}
+
+/* Move the Quick Questions toggle to its own line below the input */
+.quick-questions-bottom-toggle {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+}
+
+/* Professional styling for the bottom toggle button */
+.quick-questions-bottom-btn {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    color: #3b82f6 !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.quick-questions-bottom-btn:hover {
+    background: rgba(59, 130, 246, 0.2) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Dark Theme specific visibility check */
+[data-theme='dark'] .quick-questions-bottom-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #93c5fd !important;
+}
+
+/* Unified Compact Quick Questions System */
+.quick-questions-compact-unified {
+  margin: 6px 12px;
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.12) 0%, 
+    rgba(16, 185, 129, 0.12) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  animation: slideDownCompact 0.3s ease-out;
+  max-height: 160px;
+}
+
+@keyframes slideDownCompact {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-questions-header-unified {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-questions-title-unified {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.quick-questions-close-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.quick-questions-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.quick-questions-list-unified {
+  padding: 6px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.quick-question-item-unified {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  margin: 1px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-question-item-unified:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(2px);
+}
+
+/* Unified Toggle Button */
+.quick-questions-toggle-unified {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.quick-questions-toggle-btn-unified {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border: 1px solid rgba(59, 130, 246, 0.15) !important;
+  border-radius: 15px !important;
+  color: #93c5fd !important;
+  padding: 4px 12px !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.quick-questions-toggle-btn-unified:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+.quick-questions-toggle-btn-unified:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Light theme for unified system */
+[data-theme='light'] .quick-questions-compact-unified {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.08) 0%, 
+    rgba(16, 185, 129, 0.08) 100%
+  );
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+[data-theme='light'] .quick-questions-title-unified {
+  color: #475569;
+}
+
+[data-theme='light'] .quick-questions-close-btn {
+  color: #64748b;
+}
+
+[data-theme='light'] .quick-questions-close-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #334155;
+}
+
+[data-theme='light'] .quick-question-item-unified {
+  background: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.1);
+  color: #334155;
+}
+
+[data-theme='light'] .quick-question-item-unified:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme='light'] .quick-questions-toggle-btn-unified {
+  background: rgba(59, 130, 246, 0.06) !important;
+  border-color: rgba(59, 130, 246, 0.12) !important;
+  color: #3b82f6 !important;
+}
+
+[data-theme='light'] .quick-questions-toggle-btn-unified:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+
+/* --- GeoGPT Layout & Button Fix --- */
+
+/* 1. Ensure the form stacks and reduces gaps */
+.geogpt-input-area {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 4px 12px 8px !important; /* Extremely tight padding */
+    gap: 2px !important; /* Minimal gap between input row and button */
+}
+
+/* 2. Reset the wrapper to standard flow */
+.input-wrapper-inline {
+    display: flex !important;
+    width: 100% !important;
+    margin: 0 0 2px 0 !important;
+}
+
+/* 3. FIX: Prevent the button from becoming a squashed circle */
+.quick-questions-bottom-toggle {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: auto !important; /* Allow natural height */
+    margin: 0 !important;
+}
+
+.quick-questions-bottom-btn {
+    /* Reset dimensions causing the circular squash */
+    width: auto !important; 
+    height: auto !important;
+    min-width: 120px !important; 
+    min-height: unset !important;
+    
+    /* Compact Styling */
+    padding: 3px 12px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    white-space: nowrap !important; /* Prevent text wrapping */
+    
+    /* Aesthetics */
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    color: #3b82f6 !important;
+    cursor: pointer !important;
+}
+
+/* 4. Pull the entire section closer to the chat messages */
+.geogpt-messages {
+    margin-bottom: 0 !important;
+    padding-bottom: 4px !important;
+}
+
+/* --- GeoGPT Layout Compression & Button Fix --- */
+
+/* 1. Pull the input area closer to the messages */
+.geogpt-messages {
+    margin-bottom: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+/* 2. Compact Input Area */
+.geogpt-input-area {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 2px 12px 6px !important; /* Extremely minimal vertical padding */
+    gap: 0 !important; /* Remove gap between input and button */
+}
+
+/* 3. The Input Row */
+.input-wrapper-inline {
+    margin-bottom: 4px !important; /* Smallest possible gap */
+}
+
+/* 4. FIX: Restore the "Show Quick Questions" Button Shape */
+.quick-questions-bottom-toggle {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+}
+
+.quick-questions-bottom-btn {
+    /* Ensure proper dimensions */
+    width: auto !important;
+    height: auto !important;
+    min-width: 180px !important;
+    min-height: 32px !important;
+    max-width: none !important;
+    
+    /* Proper flexbox layout */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    
+    /* Text and spacing */
+    padding: 8px 20px !important;
+    border-radius: 16px !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    
+    /* Professional styling */
+    background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.2) 0%, 
+        rgba(16, 185, 129, 0.2) 100%
+    ) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 
+        0 3px 10px rgba(59, 130, 246, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.quick-questions-bottom-btn:hover {
+    background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.3) 0%, 
+        rgba(16, 185, 129, 0.3) 100%
+    ) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 
+        0 5px 15px rgba(59, 130, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Dark theme specific */
+[data-theme='dark'] .quick-questions-bottom-btn {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.08) 100%
+    ) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+    box-shadow: 
+        0 3px 10px rgba(255, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme='dark'] .quick-questions-bottom-btn:hover {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.12) 100%
+    ) !important;
+    box-shadow: 
+        0 5px 15px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+
+/* ============================================================
+   FINAL RESOLUTION: COMPACT INPUT AREA & PILL BUTTON
+   ============================================================ */
+
+/* 1. Force the container to stack vertically and kill gaps */
+.geogpt-input-area {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 2px 12px 6px !important; 
+    gap: 0 !important; 
+}
+
+/* 2. Ensure the chat input doesn't push the button away */
+.input-wrapper-inline {
+    display: flex !important;
+    margin-bottom: 4px !important;
+}
+
+/* 3. Pull the toggle container immediately under the input */
+.quick-questions-toggle-unified {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: auto !important; /* Prevents squashing to container height */
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 4. FIX: Restore Pill Shape and Single-Row Orientation */
+.quick-questions-toggle-btn-unified {
+    /* Reset geometry causing the circle */
+    width: auto !important; 
+    height: auto !important;
+    min-width: 160px !important; 
+    min-height: unset !important;
+    aspect-ratio: auto !important;
+    border-radius: 20px !important; /* Proper Pill Shape */
+    
+    /* Internal Content Layout */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 4px 16px !important;
+    white-space: nowrap !important; /* Forces full text on one line */
+    
+    /* Professional HUD Aesthetic */
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    color: #3b82f6 !important;
+    transition: all 0.2s ease !important;
+}
+
+.quick-questions-toggle-btn-unified:hover {
+    background: rgba(59, 130, 246, 0.2) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 5. Reduce message area margin to prevent overlap bombardment */
+.geogpt-messages {
+    margin-bottom: 0 !important;
+    padding-bottom: 2px !important;
+}

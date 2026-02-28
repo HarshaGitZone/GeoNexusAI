@@ -1,0 +1,27 @@
+GEOAI_MONGO_URI=mongodb+srv://USER:PASS@YOUR_CLUSTER_HOST/?retryWrites=true&w=majority
+
+# GeoGPT: Groq is primary, Gemini is backup
+GROQ_API_KEY=your_actual_groq_key
+OPENAI_API_KEY=your_actual_openai_key
+GEMINI_API_KEY=your_actual_gemini_key
+OPENAQ_API_KEY=your_actual_openaq_api_key
+
+# Enhanced Weather Service Configuration
+# WeatherAPI.com (Optional - for enhanced accuracy)
+# Get free API key from https://www.weatherapi.com/
+WEATHERAPI_KEY=your_weatherapi_key_here
+
+# Open-Meteo API (Free - no key required)
+# Already integrated as primary source
+
+# Additional Weather Services (Future enhancements)
+# OPENWEATHERMAP_KEY=your_openweathermap_key_here
+# ACCUWEATHER_KEY=your_accuweather_key_here
+
+# Logging Configuration
+LOG_LEVEL=INFO
+WEATHER_LOG_LEVEL=DEBUG
+
+PYTHONUNBUFFERED=1
+PYTHONDONTWRITEBYTECODE=1
+MALLOC_ARENA_MAX=2

@@ -1,0 +1,4852 @@
+/* --- 1. Interaction Logic (Ensures Visibility) --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40px; /* Large enough to catch mouse movement at the top */
+  z-index: 9998;
+  background: transparent;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%); /* Hidden state */
+  width: 90%;
+  max-width: 850px;
+  height: 64px;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* Force visible state when active class is present */
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* --- 2. The Glass Morphic Container --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+  border-radius: 20px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark Theme Palette */
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(30, 30, 35, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Light Theme Palette */
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* --- 3. Left Section: System & History --- */
+.nav-group.left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.system-data {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 14px;
+  border-radius: 12px;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+}
+
+[data-theme="light"] .system-data { background: rgba(0, 0, 0, 0.04); }
+
+.geo-label { color: #8b5cf6; font-weight: 800; font-size: 0.65rem; }
+.date-display { color: #94a3b8; }
+.time-display { color: #fff; font-weight: 700; }
+[data-theme="light"] .time-display { color: #1e293b; }
+
+.nav-icon-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.nav-icon-btn:hover { transform: scale(1.1) rotate(-5deg); }
+
+/* --- 4. Center Section: Branding --- */
+.nav-group.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-main {
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -1px;
+  color: #fff;
+}
+
+[data-theme="light"] .logo-main { color: #0f172a; }
+.logo-alt { color: #8b5cf6; }
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #8b5cf6;
+  position: relative;
+}
+
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  animation: pulse-ring 2.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* --- 5. Right Section: Tools --- */
+.nav-group.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: 1;
+}
+
+.text-tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.text-tool-btn:hover {
+  color: #fff;
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="light"] .text-tool-btn:hover { color: #8b5cf6; }
+
+.mode-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+}
+
+.weather-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  position: relative; /* Anchor for absolute positioning if needed, though we might use the container */
+}
+
+.weather-toggle.active {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #60a5fa;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+.weather-toggle:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Container for weather controls group */
+.weather-controls-group {
+  position: relative;
+  display: inline-block;
+}
+
+/* Container for the slider - Absolutely positioned to remove it from flow */
+.weather-controls {
+  position: absolute;
+  top: 120%; /* Push it below the navbar */
+  right: 60px; /* Align slightly to the left of the right edge (adjust as needed based on exact location) */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.95); /* distinct background */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10000;
+}
+
+/* Light theme support */
+[data-theme="light"] .weather-controls {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Show when hovering the toggle OR the controls themselves */
+.weather-toggle:hover + .weather-controls,
+.weather-controls:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.opacity-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.opacity-slider {
+  width: 100px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+[data-theme="light"] .opacity-slider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+.opacity-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.mode-toggle:hover {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+  transform: rotate(15deg);
+}
+
+/* --- 6. Mobile Logic (Always Visible) --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none;
+    width: 100%; max-width: none;
+    height: 60px;
+    border-radius: 0; opacity: 1; pointer-events: all;
+  }
+  .nav-content-shell { border-radius: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .desktop-only { display: none; }
+}
+
+
+
+
+
+
+/* --- Core Structure --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; width: 100%; height: 35px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  width: auto;
+  min-width: 600px; /* Much more compact */
+  height: 52px; /* Slightly shorter */
+  z-index: 9999;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- Glassmorphism & Themes --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 16px;
+  border-radius: 100px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* --- Left Section --- */
+.nav-group { display: flex; align-items: center; gap: 12px; }
+
+.compact-sys {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+[data-theme="light"] .compact-sys { background: rgba(0,0,0,0.05); color: #475569; }
+
+.time-val { font-weight: 800; color: #8b5cf6; }
+.date-val { color: #94a3b8; font-size: 0.65rem; }
+
+/* --- Brand Logo --- */
+.logo {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin: 0;
+  color: #fff;
+}
+[data-theme="light"] .logo { color: #0f172a; }
+.logo span { color: #8b5cf6; }
+
+.status-dot {
+  width: 6px; height: 6px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #8b5cf6;
+}
+
+/* --- Team Dropdown (The New Style) --- */
+.team-trigger-wrapper { position: relative; }
+
+.compact-team-pane {
+  position: absolute;
+  top: 140%;
+  right: 0;
+  width: 220px;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+[data-theme="light"] .compact-team-pane { background: #fff; color: #1e293b; border-color: #e2e8f0; }
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.compact-team-pane label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #8b5cf6;
+  margin-bottom: 4px;
+}
+
+.guide-section { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.guide-section p { font-size: 0.8rem; font-weight: 700; margin: 0; }
+
+.members-section span {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 3px;
+  opacity: 0.9;
+}
+
+/* --- Buttons & Symbols --- */
+.icon-btn {
+  background: none; border: none;
+  font-size: 1.1rem; cursor: pointer; color: #94a3b8;
+  transition: 0.2s;
+}
+
+.icon-btn:hover { color: #8b5cf6; transform: scale(1.1); }
+
+.team-btn {
+  background: transparent; border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #94a3b8; font-size: 0.65rem; font-weight: 800;
+  padding: 4px 10px; border-radius: 6px; cursor: pointer;
+}
+
+.team-btn:hover, .team-btn.active { background: #8b5cf6; color: white; }
+
+.mode-toggle {
+  background: none; border: none; cursor: pointer; font-size: 1.1rem;
+}
+
+/* --- History Dropdown --- */
+.history-pane-floating {
+  position: absolute; top: 60px; left: 0;
+  width: 200px; background: rgba(15, 23, 42, 0.95);
+  border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none; width: 100%; border-radius: 0; opacity: 1;
+  }
+}
+
+
+
+
+
+
+/* --- Root Layout --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; width: 100%; height: 35px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: auto;
+  min-width: 650px;
+  height: 54px;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- Glass Container --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  border-radius: 100px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.nav-group { display: flex; align-items: center; gap: 15px; }
+
+/* --- Left: Date & Time --- */
+.compact-sys {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 5px 15px;
+  border-radius: 50px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+}
+
+[data-theme="light"] .compact-sys { background: rgba(0,0,0,0.05); }
+
+.date-val { color: #94a3b8; font-weight: 500; }
+.time-val { color: #fff; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 10px; }
+[data-theme="light"] .time-val { color: #1e293b; border-left-color: rgba(0,0,0,0.1); }
+
+/* --- Center: Logo (Dot to the Left) --- */
+.brand-wrap { display: flex; align-items: center; gap: 10px; }
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+[data-theme="light"] .logo { color: #0f172a; }
+.logo span { color: #8b5cf6; }
+
+.status-dot {
+  width: 10px; height: 10px;
+  background: #8b5cf6;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #8b5cf6;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { opacity: 0.6; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+
+/* --- Right: Action Buttons --- */
+.icon-btn {
+  background: none; border: none; font-size: 1.2rem;
+  cursor: pointer; color: #94a3b8; transition: 0.3s;
+}
+.icon-btn:hover { color: #8b5cf6; transform: translateY(-2px); }
+
+.team-btn {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8b5cf6; font-size: 0.75rem; font-weight: 800;
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: 0.3s;
+}
+.team-btn:hover, .team-btn.active { background: #8b5cf6; color: white; }
+
+.mode-toggle { background: none; border: none; cursor: pointer; font-size: 1.2rem; }
+
+/* --- Team Panel Styling --- */
+.team-trigger-wrapper { position: relative; }
+
+.compact-team-pane {
+  position: absolute;
+  top: 60px; right: 0; width: 320px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px; padding: 20px;
+  opacity: 0; visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.guide-label { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+.guide-name { font-size: 0.95rem; font-weight: 800; color: #00d2ff; margin: 2px 0 12px 0; }
+.header-divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 12px; }
+.team-label { font-size: 0.75rem; color: #8b5cf6; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px; }
+
+.team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.member-tag {
+  background: rgba(255,255,255,0.05); padding: 8px;
+  border-radius: 8px; font-size: 0.75rem; color: #fff; text-align: center;
+}
+
+[data-theme="light"] .compact-team-pane { background: #fff; border-color: #e2e8f0; }
+[data-theme="light"] .member-tag { background: #f1f5f9; color: #1e293b; }
+[data-theme="light"] .guide-name { color: #2563eb; }
+
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none; width: 100%; border-radius: 0; opacity: 1;
+  }
+  .compact-team-pane { width: calc(100vw - 40px); right: -10px; }
+}
+
+
+
+
+
+
+
+
+
+/* --- Root Layout --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; width: 100%; height: 35px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: auto;
+  min-width: 650px;
+  height: 54px;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+
+.geo-navbar.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- The Glass Shell --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+  border-radius: 100px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.nav-group { display: flex; align-items: center; gap: 12px; }
+
+/* --- Left Elements --- */
+.compact-sys {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.date-val { color: #94a3b8; font-weight: 500; }
+.time-val { color: #fff; font-weight: 800; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; }
+
+/* --- Center Brand --- */
+.brand-wrap { display: flex; align-items: center; gap: 10px; }
+.logo { font-size: 1.3rem; font-weight: 900; color: #fff; margin: 0; }
+.logo span { color: #8b5cf6; }
+.status-dot { width: 8px; height: 8px; background: #8b5cf6; border-radius: 50%; box-shadow: 0 0 10px #8b5cf6; }
+
+/* --- Buttons & Tools --- */
+.icon-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #94a3b8; }
+.team-btn {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8b5cf6; font-size: 0.7rem; font-weight: 800;
+  padding: 5px 12px; border-radius: 8px; cursor: pointer;
+}
+
+/* --- Team Dropdown --- */
+.team-trigger-wrapper { position: relative; }
+.compact-team-pane {
+  position: absolute; top: 55px; right: 0; width: 280px;
+  background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px; padding: 15px; opacity: 0; visibility: hidden;
+  transform: translateY(10px); transition: 0.3s ease;
+}
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+.member-tag { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 6px; font-size: 0.7rem; text-align: center; color: white; }
+
+/* --- MOBILE OPTIMIZATIONS (COMPACT MODE) --- */
+@media (max-width: 767px) {
+  .geo-navbar.is-mobile {
+    top: 0; left: 0; transform: none; width: 100%; min-width: 100%;
+    height: 50px; border-radius: 0; opacity: 1; position: fixed;
+  }
+  
+  .nav-content-shell { padding: 0 10px; border-radius: 0; }
+  .nav-group { gap: 8px; }
+  .logo { font-size: 1.1rem; }
+  .team-btn { padding: 4px 8px; font-size: 0.65rem; }
+  
+  /* Create Gap between Navbar and Next Layer */
+  body { padding-top: 55px; } 
+  
+  /* Smaller Team Pane for Mobile */
+  .compact-team-pane { width: 240px; right: 5px; top: 45px; }
+}
+
+
+
+
+
+
+
+
+/* --- Team Dropdown Panel --- */
+.compact-team-pane {
+  position: absolute;
+  top: 65px;
+  right: 0;
+  width: 400px; /* Wider to match the 2x2 grid in your image */
+  background: rgba(22, 28, 45, 0.98); /* Deep dark blue-grey from image */
+  border-radius: 12px;
+  padding: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+}
+
+.compact-team-pane.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* --- Header Styling --- */
+.project-title {
+  color: #17a2b8; /* Cyan-blue title from image */
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 4px 0;
+}
+
+.guide-text {
+  color: #94a3b8; /* Muted guide text */
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.guide-text span {
+  color: #cbd5e1; /* Subtle highlight for name */
+  font-weight: 600;
+}
+
+.header-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 10px 0 20px 0;
+}
+
+/* --- Members Grid (2x2) --- */
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.member-card {
+  background: rgba(30, 41, 59, 0.7); /* Darker button-like background */
+  color: #ffffff; /* Highly highlighted names */
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Hover effect for the member cards */
+.member-card:hover {
+  background: #8b5cf6; /* Indigo highlight on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .compact-team-pane {
+    width: 320px;
+    right: -10px;
+  }
+  .team-grid {
+    grid-template-columns: 1fr; /* Stack members on very small screens */
+  }
+}
+
+
+
+
+
+
+
+
+
+/* --- Team Dropdown Panel --- */
+.team-trigger-wrapper {
+  position: relative;
+}
+
+.compact-team-pane {
+  position: absolute;
+  top: 45px; /* Adjust based on your navbar height */
+  right: 50%; /* Starts from the middle of the 'Team' button */
+  transform: translateX(50%) translateY(15px); /* Centers it and hides it lower */
+  width: 420px;
+  background: rgba(13, 17, 23, 0.9); /* Deep obsidian glass */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 10000;
+}
+
+.compact-team-pane.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(50%) translateY(0);
+}
+
+/* --- Premium Typography --- */
+.project-title {
+  color: #00d2ff; /* Crisp professional cyan */
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.guide-text {
+  color: #8b949e; /* Muted slate */
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 4px 0 0 0;
+  font-weight: 500;
+}
+
+.guide-text span {
+  color: #f0f6fc; /* Bright contrast for the name */
+  font-weight: 600;
+}
+
+.header-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  margin: 15px 0;
+}
+
+/* --- Grid with Professional Cards --- */
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.member-card {
+  background: rgba(255, 255, 255, 0.03); /* Subtle glass buttons */
+  color: #e6edf3;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-card:hover {
+  background: rgba(139, 92, 246, 0.15); /* Soft indigo glow */
+  border-color: #8b5cf6;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
+}
+
+/* --- Mobile Fix --- */
+@media (max-width: 767px) {
+  .compact-team-pane {
+    width: 280px;
+    right: 50%;
+    transform: translateX(50%) translateY(10px);
+  }
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
+
+.history-table-card {
+  width: 90%;
+  max-width: 800px;
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
+.history-table-container {
+  /* max-height: 400px; */
+  overflow-y: auto;
+  margin-top: 15px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  color: #e2e8f0;
+}
+
+.history-table th {
+  padding: 12px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  color: #8b5cf6;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.history-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.history-table .site-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #fff;
+}
+
+.score-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  color: white;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 40px !important;
+  color: #64748b;
+}
+
+/* Scrollbar for the table */
+.history-table-container::-webkit-scrollbar {
+  width: 6px;
+}
+.history-table-container::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 10px;
+}
+
+
+
+
+/* --- Navigation Core --- */
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 8px;
+  align-self: center;
+}
+
+[data-theme="light"] .nav-divider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+
+/* --- THEME COLORS --- */
+
+/* Dark Theme (Default) */
+[data-theme="dark"] .nav-content-shell {
+  background: rgba(15, 23, 42, 0.75);
+  color: white;
+}
+[data-theme="dark"] .logo { color: white; }
+[data-theme="dark"] .time-val { color: white; border-left-color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .icon-btn, [data-theme="dark"] .team-btn { color: #94a3b8; }
+
+/* Light Theme (Fixed Visibility) */
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .logo { color: #0f172a; }
+[data-theme="light"] .time-val { color: #1e293b; border-left-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .date-val { color: #64748b; }
+[data-theme="light"] .icon-btn { color: #475569; }
+[data-theme="light"] .team-btn { color: #475569; border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .compact-sys { background: rgba(0,0,0,0.05); }
+
+/* --- Elements Styling --- */
+.nav-group { display: flex; align-items: center; gap: 15px; }
+.brand-wrap { display: flex; align-items: center; gap: 10px; }
+.logo { font-size: 1.4rem; font-weight: 900; }
+.logo span { color: #8b5cf6; }
+.status-dot { width: 10px; height: 10px; background: #8b5cf6; border-radius: 50%; box-shadow: 0 0 10px #8b5cf6; }
+
+.compact-sys {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 12px; border-radius: 50px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+}
+
+.team-btn {
+  background: transparent; border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 5px 15px; border-radius: 8px; font-weight: 700; cursor: pointer;
+}
+
+.team-btn.active, .team-btn:hover { background: #8b5cf6 !important; color: white !important; }
+
+/* --- Team Pane Styling --- */
+.compact-team-pane {
+  position: absolute; top: 60px; right: 0; width: 400px;
+  border-radius: 12px; padding: 15px; opacity: 0; visibility: hidden;
+  transition: 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .compact-team-pane { background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(255,255,255,0.1); }
+[data-theme="light"] .compact-team-pane { background: white; border: 1px solid rgba(0,0,0,0.1); }
+
+.compact-team-pane.show { opacity: 1; visibility: visible; }
+.project-title { color: #17a2b8; text-align: center; }
+.team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+
+.member-card {
+  padding: 10px; border-radius: 8px; text-align: center; font-weight: 600;
+  background: rgba(128,128,128,0.1);
+}
+[data-theme="dark"] .member-card { color: white; }
+[data-theme="light"] .member-card { color: #1e293b; background: #f1f5f9; }
+
+/* --- History Pop-out --- */
+.history-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;
+}
+.history-card {
+  width: 800px; padding: 25px; border-radius: 15px;
+}
+[data-theme="dark"] .history-card { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; }
+[data-theme="light"] .history-card { background: white; color: #1e293b; }
+
+.history-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.history-table th { color: #8b5cf6; text-align: left; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.2); }
+.history-table td { padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.1); font-family: monospace; }
+
+
+
+/* --- Light Theme Visibility Fixes --- */
+[data-theme="light"] .nav-content-shell {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .logo { color: #0f172a; }
+[data-theme="light"] .time-val { color: #1e293b; border-left-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .date-val { color: #64748b; }
+[data-theme="light"] .icon-btn { color: #475569; }
+[data-theme="light"] .team-btn { color: #475569; border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .compact-sys { background: rgba(0,0,0,0.05); }
+
+/* --- Team Pane Visibility Fixes --- */
+[data-theme="light"] .compact-team-pane {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .project-title { color: #008ba3; } /* Slightly darker cyan for contrast */
+
+[data-theme="light"] .guide-text { color: #64748b; }
+
+/* FIXED: This ensures the Guide's Name is visible in Light Theme */
+[data-theme="light"] .guide-text span {
+  color: #1e293b; 
+  font-weight: 700;
+}
+
+[data-theme="light"] .member-card {
+  color: #1e293b; 
+  background: #f1f5f9;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* --- History Pop-out Visibility Fixes --- */
+[data-theme="light"] .history-card {
+  background: #ffffff;
+  color: #1e293b;
+}
+
+[data-theme="light"] .history-table th { color: #6d28d9; } /* Darker purple */
+[data-theme="light"] .history-table td { color: #334155; border-bottom: 1px solid rgba(0,0,0,0.05); }
+[data-theme="light"] .site-name-cell { color: #0f172a !important; }
+
+
+
+
+
+/* ============================================================
+   LIGHT THEME VISIBILITY FIXES
+   ============================================================ */
+
+/* Navbar Shell Visibility */
+[data-theme="light"] .nav-content-shell {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* System Info (Date/Time) Contrast */
+[data-theme="light"] .date-val { color: #475569 !important; }
+[data-theme="light"] .time-val { 
+    color: #0f172a !important; 
+    border-left-color: rgba(0, 0, 0, 0.2) !important; 
+}
+[data-theme="light"] .compact-sys { background: rgba(0, 0, 0, 0.06) !important; }
+
+/* Navigation Buttons and Icons */
+[data-theme="light"] .logo { color: #0f172a !important; }
+[data-theme="light"] .icon-btn { color: #334155 !important; }
+[data-theme="light"] .team-btn { 
+    color: #334155 !important; 
+    border-color: rgba(0, 0, 0, 0.2) !important; 
+}
+
+/* --- TEAM PANEL FIXES --- */
+[data-theme="light"] .compact-team-pane {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix: Guide Name and Text Visibility */
+[data-theme="light"] .guide-text { color: #475569 !important; }
+[data-theme="light"] .guide-text span, 
+[data-theme="light"] .guide-name { 
+    color: #0f172a !important; 
+    font-weight: 700 !important; 
+}
+
+/* Member Cards Visibility */
+[data-theme="light"] .member-card, 
+[data-theme="light"] .member-tag { 
+    background: #f1f5f9 !important; 
+    color: #1e293b !important; 
+    border: 1px solid rgba(0, 0, 0, 0.08) !important; 
+}
+
+/* --- ANALYSIS HISTORY MODAL FIXES --- */
+[data-theme="light"] .history-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .history-header h3 { color: #7c3aed !important; }
+[data-theme="light"] .history-table th { color: #64748b !important; }
+[data-theme="light"] .history-table td { color: #1e293b !important; }
+[data-theme="light"] .site-name-cell { color: #0f172a !important; font-weight: 700 !important; }
+
+
+
+
+
+
+/* ============================================================
+   ANALYSIS HISTORY MODAL - LIGHT THEME VISIBILITY
+   ============================================================ */
+
+/* Modal Overlay backdrop for Light Mode */
+[data-theme="light"] .modal-overlay {
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+/* History Card Background and Border */
+[data-theme="light"] .history-table-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Modal Header Text */
+[data-theme="light"] .modal-header h3 {
+    color: #7c3aed !important; /* Strong Purple for visibility */
+}
+
+[data-theme="light"] .modal-close {
+    color: #1e293b !important;
+}
+
+/* Table Header Contrast */
+[data-theme="light"] .history-table th {
+    color: #475569 !important; /* Slate grey headers */
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Table Body Row and Text Colors */
+[data-theme="light"] .history-table td {
+    color: #1e293b !important; /* Dark navy text for readability */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .history-table tr:hover {
+    background: rgba(0, 0, 0, 0.02) !important;
+}
+
+[data-theme="light"] .site-name {
+    color: #0f172a !important; /* Near black for Site Name column */
+    font-weight: 700 !important;
+}
+
+/* Empty Row text */
+[data-theme="light"] .empty-row {
+    color: #64748b !important;
+}
+
+/* Scrollbar styling for Light Mode */
+[data-theme="light"] .history-table-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+
+
+
+:root {
+  --accent-color: initial; /* Will be set by JavaScript */
+  --nav-bg-dark: rgba(15, 23, 42, 0.85);
+  --nav-bg-light: rgba(255, 255, 255, 0.9);
+}
+
+/* --- Floating Dock Logic --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 20px; z-index: 9998;
+}
+
+.geo-navbar {
+  position: fixed;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.geo-navbar.is-floating {
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  min-width: 680px;
+  opacity: 0;
+}
+
+.geo-navbar.is-floating.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.geo-navbar.is-mobile {
+  top: 0; left: 0; width: 100%; opacity: 1; transform: none;
+}
+
+/* --- The Glass Shell --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  height: 56px;
+  border-radius: 100px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  background: var(--nav-bg-dark);
+}
+
+[data-theme="light"] .nav-content-shell {
+  background: var(--nav-bg-light);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Logo & Accent --- */
+.logo { font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; }
+[data-theme="light"] .logo { color: #0f172a; }
+.logo span { color: var(--accent-color); transition: color 0.3s; }
+
+.status-dot {
+  width: 8px; height: 8px; 
+  background: var(--accent-color); 
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-color);
+}
+
+/* --- Palette Picker --- */
+.palette-wrapper { position: relative; display: flex; align-items: center; }
+
+.palette-dropdown {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+.palette-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.color-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.color-dot:hover { transform: scale(1.2); border-color: #fff; }
+
+/* --- Team Panel (New Appearance) --- */
+.compact-team-pane {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  width: 350px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid var(--accent-color);
+  border-radius: 16px;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: 0.3s ease;
+}
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.project-title { color: var(--accent-color); text-align: center; margin-bottom: 5px; }
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.member-card {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.member-card:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+/* --- Shared Components --- */
+.compact-sys {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,0.2);
+  padding: 4px 12px; border-radius: 50px;
+  font-family: monospace; font-size: 0.75rem;
+}
+
+.time-val { border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; font-weight: bold; }
+
+.team-btn {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 5px 15px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.team-btn:hover, .team-btn.active { background: var(--accent-color); color: white; }
+
+.icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94a3b8; }
+
+
+
+
+
+
+
+:root {
+  --accent-color: initial; /* Will be set by JavaScript */
+  --accent-glow: initial; /* Will be set by JavaScript */
+  --nav-bg: rgba(15, 23, 42, 0.85);
+  --nav-height: 64px;
+}
+
+/* --- Interaction Logic --- */
+.nav-trigger-zone {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 20px; z-index: 9998;
+}
+
+.nav-mobile-spacer {
+  height: 60px; /* Default single row height */
+  width: 100%;
+}
+
+/* Adjust spacer height for small screens with expanded navigation */
+@media (max-width: 1200px) {
+  .nav-mobile-spacer {
+    height: 90px; /* Two-row navigation height */
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-mobile-spacer {
+    height: 100px; /* Mobile navigation height */
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-mobile-spacer {
+    height: 120px; /* Small mobile navigation height */
+  }
+}
+
+.geo-navbar {
+  position: fixed;
+  z-index: 9999;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Floating Dock (Desktop) */
+.geo-navbar.is-floating {
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: auto;
+  min-width: 680px;
+  opacity: 0;
+}
+
+.geo-navbar.is-floating.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Mobile Fixed Mode */
+.geo-navbar.is-mobile {
+  top: 0; left: 0; width: 100%; 
+  height: var(--nav-height); 
+  transform: none; opacity: 1;
+}
+
+/* --- Container Shell --- */
+.nav-content-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: var(--nav-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.is-floating .nav-content-shell {
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Brand & Logo --- */
+.logo { font-size: 1.4rem; font-weight: 900; color: white; margin: 0; }
+.logo span { color: var(--accent-color); transition: color 0.3s; }
+.status-dot {
+  width: 8px; height: 8px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-color);
+}
+
+/* --- Palette Container --- */
+.palette-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.palette-bar {
+  display: flex;
+  gap: 8px;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.palette-bar.expanded {
+  width: 140px; /* Adjust based on colors */
+  opacity: 1;
+  margin-left: 10px;
+}
+
+.color-dot {
+  min-width: 18px; height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: transform 0.2s;
+}
+
+.color-dot:hover { transform: scale(1.2); border-color: white; }
+
+/* --- Team Dropdown --- */
+.team-trigger-wrapper { position: relative; }
+.team-btn {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 6px 16px; border-radius: 8px;
+  font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: 0.3s;
+}
+
+.team-btn.active, .team-btn:hover { background: var(--accent-color); color: white; }
+
+.compact-team-pane {
+  position: absolute; top: 55px; right: 0; width: 350px;
+  background: rgba(13, 17, 23, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--accent-color);
+  border-radius: 16px; padding: 20px;
+  opacity: 0; visibility: hidden; transform: translateY(10px);
+  transition: 0.3s ease;
+}
+
+.compact-team-pane.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+/* --- Mobile Specific Overrides --- */
+@media (max-width: 767px) {
+  .nav-group.center { flex: 1; justify-content: center; }
+  .logo { font-size: 1.1rem; }
+  .nav-group.left, .nav-group.right { flex: 0; }
+  .team-btn { padding: 4px 8px; font-size: 0.65rem; }
+}
+
+
+
+
+
+
+/* Container for the palette logic */
+.palette-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the dropdown under the button */
+}
+
+/* The actual dropdown bar */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 10px); /* Positions it exactly below the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px); /* Centered and slightly offset for animation */
+  background: rgba(15, 23, 42, 0.9); /* Dark glass effect */
+  backdrop-filter: blur(12px);
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column; /* Vertical stack */
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Expansion state */
+.palette-dropdown.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Individual Color Dots */
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s, border 0.2s;
+  border: 2px solid transparent;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+  border-color: white;
+}
+
+/* Optional: Decorative arrow pointing to the button */
+.palette-arrow {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; 
+  height: 0; 
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid rgba(15, 23, 42, 0.9);
+}
+
+/* Mobile Adjustment: If screen is small, maybe switch back to horizontal 
+   to save vertical space, or keep as is if preferred */
+@media (max-width: 768px) {
+  .palette-dropdown {
+    flex-direction: row; /* Horizontal only on mobile to avoid covering content */
+    top: auto;
+    bottom: calc(100% + 10px); /* Pop UP on mobile if nav is at bottom */
+  }
+}
+
+
+
+/* Container to keep the trigger and dropdown together */
+.palette-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* The Horizontal Bar - Centered Below */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 12px); /* Space below button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px); /* Centered and slightly offset */
+  
+  display: flex;
+  flex-direction: column; /* Two rows vertical */
+  gap: 6px;
+  
+  background: rgba(15, 23, 42, 0.85); /* Dark professional glass */
+  backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-radius: 12px; /* Rounded rectangle */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Animation trigger */
+.palette-dropdown.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Individual Rows */
+.palette-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Individual Color Dots */
+.color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-dot:hover {
+  transform: scale(1.3);
+  border-color: #fff;
+}
+
+/* Decorative arrow pointing up to the icon */
+.palette-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid rgba(15, 23, 42, 0.85);
+}
+
+
+
+
+/* Container for the icon and the bar */
+.palette-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Horizontal Bar Dropdown */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 12px); /* Centered below the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  
+  display: flex;
+  flex-direction: row; /* Force horizontal dots */
+  gap: 12px;
+  
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(12px);
+  padding: 10px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+/* Show State */
+.palette-dropdown.expanded {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid transparent;
+}
+
+.color-dot:hover {
+  transform: scale(1.3);
+  border-color: white;
+}
+
+
+
+
+
+
+/* --- HISTORY MODAL PALETTE INTEGRATION --- */
+
+/* Highlight the header text and borders with the chosen palette */
+.history-table thead th {
+    color: var(--accent-color) !important;
+    border-bottom: 2px solid var(--accent-color) !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+/* Site names in the table use the palette color */
+.site-name {
+    color: var(--sb-text);
+    font-weight: 600;
+}
+
+/* 4th Row: Direct Link Styling */
+.history-direct-link {
+    color: var(--accent-color) !important;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+/* Hover effect for the link flips to the palette color background */
+.history-direct-link:hover {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Table Row Borders */
+.history-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.history-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Scrollbar in History Table syncs with Palette */
+.history-table-container::-webkit-scrollbar-thumb {
+    background: var(--accent-color) !important;
+}
+
+
+
+
+/* ============================================================
+   ANALYSIS HISTORY MODAL: HIGH-VISIBILITY & THEME SYNC
+   ============================================================ */
+
+/* 1. Modal Header & Heading */
+.history-table-card .modal-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Centers the heading */
+    justify-content: center !important;
+    padding: 20px 10px !important;
+    border-bottom: 2px solid var(--accent-color) !important; /* Palette color */
+    position: relative;
+}
+
+.history-table-card .modal-header h3 {
+    font-size: 24px !important; /* Bigger heading */
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    margin: 0 !important;
+    text-align: center !important;
+    /* Theme-specific text color */
+    color: #000000 !important; 
+}
+
+/* Dark Theme Text Switch */
+[data-theme="dark"] .history-table-card .modal-header h3 {
+    color: #ffffff !important;
+}
+
+/* 2. Forced Palette for Table Headers (Fixed for Light Theme) */
+.history-table thead th {
+    background-color: transparent !important;
+    color: var(--accent-color) !important; /* Force palette color */
+    border-bottom: 2px solid var(--accent-color) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+/* 3. Direct Link Button (Palette Sync) */
+.history-direct-link {
+    color: var(--accent-color) !important;
+    border: 1.5px solid var(--accent-color) !important;
+    padding: 5px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+.history-direct-link:hover {
+    background-color: var(--accent-color) !important;
+    color: #ffffff !important; /* Contrast text on hover */
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 4. Score Badge Logic (Stays Functional) */
+.score-badge {
+    color: #ffffff !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+}
+
+/* 5. Modal Close Button Position */
+.modal-close {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 20px !important;
+    color: var(--sb-text-dim) !important;
+    cursor: pointer !important;
+}
+
+
+/* TopNav.css */
+.history-direct-link {
+    color: var(--accent-color) !important; /* Uses your palette color */
+    border: 1px solid var(--accent-color) !important;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.history-direct-link:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important; /* White text on palette background */
+    box-shadow: 0 0 8px var(--accent-glow);
+    transform: translateY(-1px);
+}
+
+
+
+
+
+/* =========================================================
+   TEAM DROPDOWN – FORCED CENTER ALIGNMENT (ALL SCREENS)
+   ========================================================= */
+
+/* Anchor */
+.team-trigger-wrapper {
+  position: relative !important;
+}
+
+/* Base dropdown */
+.compact-team-pane {
+  position: absolute !important;
+  top: calc(100% + 12px) !important;
+
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) translateY(8px) !important;
+
+  width: min(420px, 92vw) !important;
+  max-width: 92vw !important;
+
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: 1000 !important;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease !important;
+}
+
+/* Visible state */
+.compact-team-pane.show {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
+
+/* ===========================
+   MOBILE – VIEWPORT CENTERED
+   =========================== */
+@media (max-width: 768px) {
+  .compact-team-pane {
+    position: fixed !important;
+    top: 72px !important;
+
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+
+    width: 94vw !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+
+
+
+
+/* Table Cell Alignment */
+.history-table td {
+  padding: 12px 8px;
+  vertical-align: middle;
+}
+
+/* Score Badge Stacking */
+.score-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.score-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 11px;
+  min-width: 65px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.score-badge small {
+  opacity: 0.8;
+  margin-right: 2px;
+}
+
+/* Site Name Styling */
+.name-primary {
+  font-weight: bold;
+  color: #fff;
+  font-size: 13px;
+}
+
+.name-vs {
+  font-size: 10px;
+  color: var(--accent-color);
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* Coords Styling */
+.coord-line {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.coord-line span {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.sub-coord {
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* Modern Button */
+.view-btn-pro {
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--accent-color);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  transition: 0.3s;
+}
+
+.view-btn-pro:hover {
+  background: var(--accent-color);
+}
+
+
+
+
+/* ============================================================
+   LIGHT THEME: HISTORY TABLE TEXT VISIBILITY FIX
+   ============================================================ */
+
+/* Force Site Name (Location A) to be dark in Light Mode */
+[data-theme="light"] .history-table td .name-primary,
+[data-theme="light"] .history-table td .site-name span:first-child,
+[data-theme="light"] .history-table .site-name {
+    color: #0f172a !important; /* Deep Navy/Black */
+    font-weight: 700 !important;
+}
+
+/* Ensure the "vs Site B" text remains legible but distinct */
+[data-theme="light"] .history-table td .name-vs,
+[data-theme="light"] .history-table td span[style*="color: var(--accent-color)"] {
+    opacity: 1 !important;
+    filter: brightness(0.8); /* Slightly darkens the accent color for better contrast on white */
+}
+
+/* Ensure coordinates are also visible */
+[data-theme="light"] .history-table td div[style*="font-family: monospace"] {
+    color: #334155 !important;
+}
+
+/* ============================================================
+   FORCED VISIBILITY FOR SITE A NAME IN LIGHT MODE
+   ============================================================ */
+
+/* Targets the primary site name span in light mode */
+[data-theme="light"] .history-table .site-name div span:first-child {
+    color: #000000 !important; /* Pure black for maximum contrast */
+    opacity: 1 !important;
+    font-weight: 700 !important;
+}
+
+/* Fallback for the general site-name class in light mode */
+[data-theme="light"] .history-table .site-name {
+    color: #000000 !important;
+}
+
+/* Ensures comparison text "vs" remains visible but slightly muted */
+[data-theme="light"] .history-table .site-name div span:nth-child(2) {
+    color: var(--accent-color) !important;
+    filter: brightness(0.7); /* Darkens your chosen palette color for readability */
+    opacity: 0.9 !important;
+}
+
+
+
+.history-table-card {
+    min-width: 700px; /* Adjust based on your preference */
+}
+
+.history-table td {
+    padding: 12px 8px;
+    vertical-align: middle;
+}
+
+
+
+
+/* Small QR in table */
+.qr-mini-preview {
+    transition: transform 0.2s ease;
+}
+.qr-mini-preview:hover {
+    transform: scale(1.1);
+}
+
+/* Big QR Overlay */
+.qr-expanded-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+}
+
+.qr-expanded-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    color: black;
+    box-shadow: 0 0 30px var(--accent-color);
+}
+
+.qr-expanded-card p {
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+/* THE CARD - White in Light Mode, Black in Dark Mode */
+.qr-expanded-card {
+    background: var(--qr-bg, #ffffff);
+    color: var(--qr-text, #000000);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+
+
+
+.analysis-tag {
+    background: var(--accent-color);
+    color: white;
+    font-size: 10px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.comparison-title-wrap h4 {
+    color: var(--qr-text);
+    margin-top: 5px;
+    font-size: 20px;
+}
+
+/* Ensure the text doesn't overflow if names are long */
+.qr-info h4 {
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+
+
+
+.icon-btn.audio-toggle.active {
+    color: var(--accent-color);
+    text-shadow: 0 0 10px var(--accent-glow);
+    animation: audio-pulse 2s infinite ease-in-out;
+}
+
+.icon-btn.audio-toggle-b {
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    color: #a855f7;
+}
+
+.icon-btn.audio-toggle-b.active {
+    background: rgba(168, 85, 247, 0.2);
+    color: #a855f7;
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    animation: audio-pulse-b 2s infinite ease-in-out;
+}
+
+@keyframes audio-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes audio-pulse-b {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Ensure consistent sizing with your other nav icons */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+
+
+/* 5. Center group stays locked in the middle */
+.nav-group.center {
+  flex: 0 0 auto; /* Don't let the logo expand */
+  padding: 0 40px; /* Essential gap between logo and icons */
+  display: flex;
+  justify-content: center;
+}
+
+
+
+.date-val { font-size: 10px; font-weight: 700; color: var(--accent-color); }
+.time-val { font-size: 12px; font-family: monospace; }
+
+/* 1. Main Container: Force elements to hug the center logo */
+.nav-content-shell {
+  display: flex;
+  justify-content: center; /* Pulls everything inward */
+  align-items: center;
+  gap: 30px; /* Base gap between the Left, Center, and Right blocks */
+  width: 100%;
+}
+
+/* 2. Left Group: Compact and closer to logo */
+.nav-group.left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px; /* Tight spacing between icons */
+  flex: 1;
+}
+
+/* 3. Right Group: Mirror alignment */
+.nav-group.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex: 1;
+}
+
+/* 4. Center Logo: Fixed width to prevent shifting */
+.nav-group.center {
+  flex: 0 0 auto;
+  text-align: center;
+}
+
+/* 5. Date & Time: Force into a single row */
+.compact-sys {
+  display: flex;
+  flex-direction: row !important; /* Forces side-by-side */
+  align-items: center;
+  gap: 10px; /* Space between date and time */
+  margin-right: 15px; /* Separation from the first button */
+  white-space: nowrap; /* Prevents breaking into two lines */
+}
+
+.date-val, .time-val {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 6. Buttons: Uniform sizing for a "neat" look */
+.icon-btn, 
+.palette-trigger, 
+.mode-toggle,
+.weather-toggle,
+.audio-toggle {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+
+
+
+
+
+
+/* --- REFINE HISTORY SLIDER FOR MOBILE --- */
+@media (max-width: 850px) {
+  
+  /* 1. Force the Modal Card to occupy the full width but allow internal scrolling */
+  .history-table-card {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 10px auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important; /* Lock the card itself */
+  }
+
+  /* 2. Target the wrapper exactly as named in your JSX */
+  .history-table-container {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important; /* THIS IS THE SLIDER */
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important; /* Smooth swipe for touchscreens */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  /* 3. Force the table to be wide enough to require scrolling */
+  .history-table {
+    width: 100% !important;
+    min-width: 750px !important; /* Increased to ensure all columns (Scan, Score, Action) fit */
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+  }
+
+  /* 4. Cell styling to prevent text wrapping that makes rows too tall */
+  .history-table th, 
+  .history-table td {
+    white-space: nowrap !important; /* Keeps "Date & Time" in one line */
+    padding: 10px 15px !important;
+  }
+
+  /* 5. Visual Cue: Ensure the scrollbar is visible to the audience */
+  .history-table-container::-webkit-scrollbar {
+    height: 6px !important;
+    display: block !important;
+  }
+
+  .history-table-container::-webkit-scrollbar-thumb {
+    background: var(--accent-color, #06b6d4) !important;
+    border-radius: 10px !important;
+  }
+}
+
+
+/* --- CRITICAL LEFT-ALIGNMENT FIX FOR HISTORY SLIDER --- */
+@media (max-width: 850px) {
+  /* 1. Force the card to align to the left of the viewport */
+  .history-table-card {
+    display: block !important; /* Switch from flex to block to stop auto-centering logic */
+    width: 95vw !important;
+    margin: 20px auto !important; /* Centers the card box, but not the content inside */
+    text-align: left !important;
+  }
+
+  /* 2. Ensure the container starts at pixel 0 */
+  .history-table-container {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    /* This ensures that if the content is larger than the screen, it starts at the left */
+    justify-content: flex-start !important; 
+  }
+
+  /* 3. Force the table to behave like a standard block element */
+  .history-table {
+    display: table !important;
+    margin: 0 !important; /* Remove any auto-margins that might center it */
+    min-width: 800px !important; /* High min-width to ensure scrolling is triggered */
+    border-spacing: 0;
+  }
+
+  /* 4. Ensure the first column (Site) is locked to the left */
+  .history-table th:first-child, 
+  .history-table td:first-child {
+    padding-left: 15px !important;
+    text-align: left !important;
+  }
+
+  /* 5. Visual Cue: Glow on the left to indicate start */
+  .history-table-container {
+    background: linear-gradient(to right, rgba(6, 182, 212, 0.05), transparent 50px);
+  }
+}
+
+
+
+
+@media (max-width: 850px) {
+  /* Position the dropdown directly under the trigger */
+  .palette-wrapper {
+    position: relative !important;
+  }
+
+  .palette-dropdown {
+    position: absolute !important;
+    top: 110% !important; /* Moves it below the icon */
+    left: 0 !important;
+    transform: none !important; /* Remove any centering transforms */
+    display: flex !important;
+    flex-wrap: wrap !important; /* Wraps colors to new rows if needed */
+    width: 120px !important; /* Fixed width to prevent horizontal overflow */
+    background: rgba(0, 0, 0, 0.9) !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+    z-index: 1000 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+  }
+
+  /* Ensure the color dots are large enough to tap but compact */
+  .color-dot {
+    width: 24px !important;
+    height: 24px !important;
+    margin: 4px !important;
+  }
+}
+
+
+@media (max-width: 850px) {
+  /* Force the modal card to stop centering internally */
+  .history-table-card {
+    display: block !important; 
+    width: 96vw !important;
+    padding: 10px !important;
+    text-align: left !important;
+  }
+
+  /* Force the scroll container to anchor to the absolute left */
+  .history-table-container {
+    display: block !important; 
+    width: 100% !important;
+    overflow-x: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  /* Ensure the table itself does not have auto-margins */
+  .history-table {
+    margin: 0 !important;
+    min-width: 700px !important; /* Adjust based on your columns */
+    border-collapse: collapse !important;
+  }
+
+  /* Padding for the first column so it doesn't touch the glass edge */
+  .history-table th:first-child, 
+  .history-table td:first-child {
+    padding-left: 12px !important;
+  }
+}
+
+
+@media (max-width: 850px) {
+  .palette-wrapper {
+    position: relative !important;
+  }
+
+  .palette-dropdown {
+    position: absolute !important;
+    top: 45px !important; /* Clear height of your flat navbar */
+    left: 0 !important; /* Anchors to the left edge of the wrapper */
+    transform: none !important;
+    display: flex !important;
+    flex-direction: row !important; /* Keep colors in a neat row */
+    width: max-content !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
+   
+    z-index: 2000 !important;
+  }
+
+  .color-dot {
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 4px !important;
+  }
+}
+
+
+
+@media (max-width: 850px) {
+  /* 1. Force the Modal Card to align to the absolute left and span full width */
+  .history-table-card {
+    display: block !important; 
+    width: 100vw !important; /* Spans entire phone width */
+    max-width: 100vw !important;
+    margin: 0 !important; /* Removes auto-centering */
+    padding: 15px 5px !important; /* Minimal side padding */
+    border-radius: 0 !important; /* Fits flat against the screen */
+    position: fixed !important;
+    left: 0 !important;
+    top: 50px !important; /* Sits exactly below your flat navbar */
+  }
+
+  /* 2. Ensure the container has no internal gaps on the left */
+  .history-table-container {
+    display: block !important; 
+    width: 100% !important;
+    overflow-x: auto !important; /* Enables horizontal stretching */
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  /* 3. Let the table stretch as far as it needs to the right */
+  .history-table {
+    margin: 0 !important;
+    width: auto !important;
+    min-width: 850px !important; /* Higher min-width guarantees scrolling starts at the far right */
+    border-collapse: collapse !important;
+  }
+
+  /* 4. Column Anchor: Ensure the first column is visible at pixel 0 */
+  .history-table th:first-child, 
+  .history-table td:first-child {
+    padding-left: 15px !important;
+    text-align: left !important;
+    position: sticky !important; /* Optional: keeps site name visible while sliding */
+    left: 0;
+    background: #0a0a0a; /* Match your modal background */
+    z-index: 10;
+  }
+}
+
+
+@media (max-width: 850px) {
+  /* Ensure the Modal Card spans full width to provide a large viewport */
+  .history-table-card {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important; /* Remove padding to maximize horizontal space */
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Fixed Header: Ensures the title is always centered and visible */
+  .history-table-card .modal-header {
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    justify-content: center; /* Centers the "Analysis History" text */
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: #0d1117;
+    z-index: 30;
+    border-bottom: 1px solid var(--accent-color);
+  }
+
+  /* The Scroll Container */
+  .history-table-container {
+    display: block !important;
+    width: 100vw !important;
+    overflow-x: auto !important; /* Enable horizontal slider */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 !important;
+  }
+
+  /* Force the Table to expand fully to the right */
+  .history-table {
+    display: table !important; /* Required for horizontal overflow */
+    width: auto !important; 
+    min-width: 900px !important; /* Guarantees the right columns are "off-screen" at start */
+    margin: 0 !important;
+    border-collapse: collapse;
+  }
+
+  /* Row & Cell Visibility */
+  .history-table th, 
+  .history-table td {
+    white-space: nowrap !important; /* Prevents columns from squishing */
+    padding: 12px 15px !important;
+    text-align: left;
+  }
+
+  /* Ensure the first column is stuck to the left for context */
+  .history-table th:first-child, 
+  .history-table td:first-child {
+    position: sticky !important;
+    left: 0;
+    background: #0d1117 !important; /* Match background to hide overlapping text */
+    z-index: 20;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  }
+
+  /* Make sure the Action Button (Extreme Right) is fully visible */
+  .history-table td:last-child {
+    padding-right: 30px !important; /* Extra buffer so it's not cut off by the screen edge */
+  }
+}
+
+
+/* --- DUAL-AXIS SCROLLING & FIXED CENTERED HEADER --- */
+@media (max-width: 850px) {
+  /* 1. Modal Card: Occupies most of the screen vertically */
+  .history-table-card {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 85vh !important; /* Forces a height to enable vertical scroll */
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important; /* Keeps scroll inside the container */
+    border-radius: 0;
+  }
+
+  /* 2. Centered Header Logic */
+  .history-table-card .modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; /* Forces title to the absolute center */
+    padding: 15px !important;
+    background: #0d1117 !important;
+    border-bottom: 1px solid var(--accent-color);
+    flex: 0 0 auto; /* Keeps header size fixed */
+    position: relative; /* Context for absolute close button */
+  }
+
+  .history-table-card .modal-header h3 {
+    margin: 0 !important;
+    font-size: 1.1rem !important;
+    text-align: center !important;
+    color: #fff !important;
+    width: 100%;
+  }
+
+  /* 3. The Close Button: Anchored to the side so it doesn't push the title */
+  .history-table-card .modal-close {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+  }
+
+  /* 4. The Container: Handles both horizontal and vertical movement */
+  .history-table-container {
+    flex: 1 !important; /* Takes up remaining modal height */
+    width: 100vw !important;
+    overflow-x: auto !important; /* Horizontal slider for columns */
+    overflow-y: auto !important; /* Vertical slider for rows */
+    display: block !important;
+    -webkit-overflow-scrolling: touch;
+    border: none !important;
+  }
+
+  /* 5. Table Geometry: Prevent shrinking to force horizontal scroll */
+  .history-table {
+    min-width: 950px !important; /* Ensures right-side columns are hidden initially */
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+  }
+
+  /* 6. Sticky Row Header: Keep table headers visible while scrolling down */
+  .history-table thead tr {
+    position: sticky !important;
+    top: 0;
+    z-index: 40;
+    background: #161b22;
+  }
+
+  /* 7. Sticky First Column: Keep site name visible while scrolling right */
+  .history-table th:first-child, 
+  .history-table td:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    background: #0d1117 !important;
+    z-index: 35;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  }
+}
+
+
+/* --- ANALYSIS HISTORY HEADING CENTER FIX --- */
+@media (max-width: 850px) {
+  /* 1. Anchor the header to the screen viewport, not the table width */
+  .history-table-card .modal-header {
+    position: sticky !important;
+    left: 0 !important;   /* Critical: Locks title to phone screen center */
+    width: 100vw !important; /* Force width to match device screen */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: #0d1117 !important; /* Match your background color */
+    padding: 15px 0 !important;
+    z-index: 100 !important;
+    border-bottom: 2px solid var(--accent-color);
+  }
+
+  /* 2. Centering the text inside the anchored header */
+  .history-table-card .modal-header h3 {
+    margin: 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    font-size: 1.1rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px;
+    white-space: nowrap;
+    position: relative; /* Context for the 'X' button */
+  }
+
+  /* 3. Keep the 'X' button in the corner without affecting center alignment */
+  .history-table-card .modal-close {
+    position: absolute !important;
+    right: 15px !important;
+    margin: 0 !important;
+  }
+}
+
+
+/* --- Z-INDEX LAYER PRIORITY FIX --- */
+
+/* The dark background that covers the map */
+.modal-overlay {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85); /* Darken map more for contrast */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Set higher than Map (400) and Nav (1000) */
+  z-index: 9999 !important; 
+  backdrop-filter: blur(5px); /* Blurs the map layers behind the history */
+}
+
+/* The actual History Card */
+.history-table-card {
+  z-index: 10000 !important; /* One level higher than the overlay */
+  /* ... existing styles ... */
+}
+
+/* Ensure the Expanded QR also stays on top */
+.qr-expanded-overlay {
+  z-index: 10001 !important;
+}
+
+
+
+
+/* Sync the status dot with the palette color */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  /* Use the dynamic variable updated by your JS function */
+  background: var(--accent-color) !important; 
+  border-radius: 50%;
+  /* Updates the glow to match the color */
+  box-shadow: 0 0 12px var(--accent-color) !important;
+  animation: glow 2s infinite alternate;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Sync the 'AI' part of the logo with the palette color */
+.logo span {
+  color: var(--accent-color) !important;
+  transition: color 0.3s ease;
+}
+
+/* Keyframes for the glowing effect */
+@keyframes glow {
+  from { 
+    opacity: 0.6; 
+    transform: scale(0.9); 
+    box-shadow: 0 0 8px var(--accent-color);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1.1); 
+    box-shadow: 0 0 15px var(--accent-color);
+  }
+}
+.team-btn:hover , .team-btn.active{
+  /* color: var(--accent-color) !important; */
+  background: transparent !important;
+  background-color: var(--accent-color) !important;
+}
+
+
+/* --- TACTICAL NAV SEPARATOR --- */
+.nav-divider {
+  width: 1px;               /* Thin, precision line */
+  height: 24px;            /* Doesn't touch the edges of the bar */
+  margin: 0 8px;           /* Horizontal breathing room */
+  display: inline-block;
+  align-self: center;      /* Keeps it perfectly centered vertically */
+  transition: all 0.3s ease;
+}
+
+/* DARK THEME: Glassy Cyan/Emerald Line */
+[data-theme="dark"] .nav-divider {
+  background: linear-gradient(
+    to bottom,
+    rgba(16, 185, 129, 0) 0%,
+    rgba(16, 185, 129, 0.4) 50%,
+    rgba(16, 185, 129, 0) 100%
+  );
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* LIGHT THEME: Soft Slate/Blue Line */
+[data-theme="light"] .nav-divider {
+  background: linear-gradient(
+    to bottom,
+    rgba(59, 130, 246, 0) 0%,
+    rgba(59, 130, 246, 0.3) 50%,
+    rgba(59, 130, 246, 0) 100%
+  );
+}
+
+/* Optional: In Fullscreen, make separators slightly taller for focus */
+.results-tab-bar.fullscreen .nav-divider {
+  height: 32px;
+  opacity: 0.8;
+}
+
+
+
+
+
+
+/* ============================================================
+   TOPNAV REFINEMENT: FLOATING HUD GLASS
+   ============================================================ */
+
+.geo-navbar {
+    /* 1. Structural Transformation */
+    top: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-100%) !important; /* Start hidden for animation */
+    width: fit-content !important;
+    min-width: 600px;
+    height: 48px !important;
+    border-radius: 50px !important; /* Perfect Pill Shape */
+    
+    /* 2. Glass-Morphic Base */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 10%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    
+    /* 3. Palette-Synced Edge Glow */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 
+                inset 0 0 10px color-mix(in srgb, var(--accent-color), transparent 90%) !important;
+    
+    transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease !important;
+}
+
+.geo-navbar.is-visible {
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+/* 4. Segment Separation (Nav Dividers) */
+.nav-divider {
+    width: 1px !important;
+    height: 20px !important;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent) !important;
+    margin: 0 12px !important;
+}
+
+/* 5. The "Team" and "Audio" Buttons Sync */
+.team-btn, .icon-btn {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.team-btn.active, .icon-btn:hover {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+}
+
+/* 6. Logo HUD Style */
+.brand-wrap .logo {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase;
+}
+
+.brand-wrap .logo span {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 7. Adaptive Weather Sliders */
+.opacity-slider {
+    accent-color: var(--accent-color) !important;
+    height: 4px !important;
+}
+
+/* --- LIGHT THEME POLISH --- */
+[data-theme="light"] .geo-navbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+
+
+/* ============================================================
+   TOPNAV REFINEMENT: ENHANCED SCALE & DENSE CLUSTERING
+   ============================================================ */
+
+.geo-navbar {
+    height: 48px !important; /* Increased height to support larger icons */
+    padding: 0 16px !important;
+    gap: 12px !important; /* Tighter overall group spacing */
+    border-radius: 12px !important; /* Slightly sharper "Military" corners */
+}
+
+/* 1. Icon Sizing Upgrade */
+.icon-btn {
+    font-size: 18px !important; /* Upscaled icons for better visibility */
+    width: 38px !important;    /* Larger hit area */
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. Closer Grouping Logic */
+.nav-group {
+    gap: 6px !important; /* Reduces the "dead air" between related icons */
+}
+
+/* 3. Refined Nav Separators */
+.nav-divider {
+    height: 22px !important;
+    width: 1.5px !important;
+    margin: 0 4px !important; /* Pulls the groups closer to the dividers */
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 4. Logo Sync */
+.logo {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+    margin: 0 12px !important;
+}
+
+/* 5. Team Button Scale Sync */
+.team-btn {
+    height: 34px !important;
+    padding: 0 14px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+/* 6. Audio Label Optimization */
+.audio-toggle {
+    position: relative !important;
+}
+
+.audio-label {
+    position: absolute !important;
+    bottom: 2px !important;
+    right: 2px !important;
+    font-size: 8px !important;
+    font-weight: 900 !important;
+    color: var(--accent-color) !important;
+}
+
+/* ============================================================
+   TOPNAV: SINGLE-PILL CONSOLIDATION FIX
+   ============================================================ */
+
+.geo-navbar {
+    /* Ensure only one background exists */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 10%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    
+    /* Clean Single Border */
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 50px !important; /* Perfect Pill Shape */
+    
+    /* Pushes the shadow out from the pill only, not a box */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+    
+    /* Layout Logic */
+    height: 52px !important; /* Increased for the larger icons you wanted */
+    padding: 0 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important; /* Managed by groups below */
+}
+
+/* Remove any background or shadow from the inner shell */
+.nav-content-shell {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+}
+
+/* 2. Upscaled Icons & Dense Clustering */
+.icon-btn {
+    font-size: 20px !important; /* Larger icons as requested */
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important; /* Circular buttons for a technical feel */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 3. Tight Grouping */
+.nav-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important; /* Closer icons */
+}
+
+.nav-divider {
+    height: 20px !important;
+    width: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    margin: 0 8px !important; /* Tightens the space around separators */
+}
+
+
+/* ============================================================
+   TOPNAV: PRECISION GLASS & PALETTE SYNC
+   ============================================================ */
+
+/* 1. Base Icon Button Refinement */
+.icon-btn, .team-btn, .mode-toggle, .fs-toggle {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.5) !important; /* Muted idle state */
+    backdrop-filter: blur(5px) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. Enhanced Hover State: Palette Engagement */
+.icon-btn:hover, .team-btn:hover, .mode-toggle:hover, .fs-toggle:hover {
+    color: var(--accent-color) !important;
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+    border-color: var(--accent-color) !important;
+    /* The "Digital Aura" Glow */
+    box-shadow: 0 0 15px var(--accent-glow), 
+                inset 0 0 8px var(--accent-glow) !important;
+    transform: translateY(-2px) scale(1.05) !important;
+}
+
+/* 3. Active/On State: "Powered On" look */
+.icon-btn.active, .team-btn.active, .weather-toggle.active {
+    color: #ffffff !important;
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+}
+
+/* 4. Special Audio Sync (Site A & B) */
+.audio-toggle.active, .audio-toggle-b.active {
+    background: color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+}
+
+.audio-label {
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 5px var(--accent-glow) !important;
+}
+
+/* 5. Team Button Professional Polish */
+.team-btn {
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 800 !important;
+    border-radius: 6px !important;
+}
+
+/* 6. Palette Dropdown Dots */
+.palette-dropdown .color-dot {
+    width: 14px !important;
+    height: 14px !important;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease !important;
+}
+
+.palette-dropdown .color-dot:hover {
+    transform: scale(1.4);
+    border-color: #ffffff !important;
+    box-shadow: 0 0 10px inherit !important;
+}
+
+/* --- LIGHT THEME ADAPTATION --- */
+[data-theme="light"] .icon-btn, 
+[data-theme="light"] .team-btn {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: #64748b !important;
+}
+
+[data-theme="light"] .icon-btn:hover {
+    background: white !important;
+    color: var(--accent-color) !important;
+}
+
+
+
+/* ============================================================
+   TEAM PANE: ELITE GLASS-MORPHIC HUD
+   ============================================================ */
+
+/* 1. Main Floating Pane */
+.compact-team-pane {
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 10%) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+                inset 0 0 20px rgba(var(--accent-color-rgb), 0.05) !important;
+    padding: 20px !important;
+    width: 320px !important;
+    transform-origin: top !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 2. Professional Header Sync */
+.pane-header .project-title {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 10px var(--accent-glow) !important;
+    margin-bottom: 4px !important;
+}
+
+.guide-text {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 10px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin-bottom: 12px !important;
+}
+
+.guide-text span {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.header-divider {
+    height: 1px !important;
+    background: linear-gradient(90deg, var(--accent-color), transparent) !important;
+    margin-bottom: 15px !important;
+}
+
+/* 3. Team Grid & Member Cards */
+.team-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.member-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Hover Effect: Member Highlight */
+.member-card:hover {
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    transform: translateX(5px) !important;
+    box-shadow: -5px 0 15px var(--accent-glow) !important;
+}
+
+/* Tactical Indicator for each card */
+.member-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.member-card:hover::before {
+    opacity: 1;
+}
+
+/* --- LIGHT THEME POLISH --- */
+[data-theme="light"] .compact-team-pane {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .member-card {
+    background: rgba(0, 0, 0, 0.02) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+    color: #334155 !important;
+}
+
+
+/* ============================================================
+   TEAM PANE: DEPTH & OVERLAP CORRECTION
+   ============================================================ */
+
+.compact-team-pane {
+    /* 1. LAYER DOMINANCE: Set higher than Leaflet/Map UI (usually 1000) */
+    z-index: 9999 !important; 
+    
+    /* 2. SOLID GLASS SHIELD: Increased opacity to hide zoom controls behind it */
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 5%) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+
+    /* 3. PHYSICAL SEPARATION: Stronger shadow to lift it off the map surface */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 
+                0 0 20px rgba(var(--accent-color-rgb), 0.1) !important;
+    
+    /* Ensuring the pane doesn't shift when opened */
+    position: absolute !important;
+    top: calc(100% + 15px) !important;
+}
+
+/* 4. Ensure Team Cards are also physically "above" the frosted glass */
+.member-card {
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* --- LIGHT THEME DEPTH --- */
+[data-theme="light"] .compact-team-pane {
+    background: rgba(255, 255, 255, 0.98) !important; /* Almost solid to block map icons */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+
+
+/* 1. Force the entire Navbar wrapper to the top layer */
+.geo-navbar {
+    z-index: 99999 !important; /* Extremely high value to beat Leaflet/Map layers */
+    position: fixed !important; /* Ensures it ignores relative parent stacking */
+}
+
+/* 2. Target the Team Pane specifically to ensure it stays above the navbar's own background */
+.compact-team-pane {
+    z-index: 100000 !important; 
+    /* This MUST be higher than the .geo-navbar z-index */
+    
+    /* Hard-block background bleed */
+    background: var(--sb-bg, #0f172a) !important; 
+    /* If you still want glass, keep opacity very high (e.g., 0.98) */
+}
+
+/* 3. Disable pointer interaction on map elements when the pane is open */
+/* (Add this class to your map container when showTeam is true if possible) */
+.map-behind-pane-blur {
+    pointer-events: none !important;
+    filter: blur(4px) grayscale(0.5);
+    transition: all 0.4s ease;
+}
+
+
+.member-card {
+    /* "Cute" and professional style */
+    border-radius: 10px !important;
+    margin-bottom: 6px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    
+    /* Font Sync */
+    font-family: 'Roboto Mono', monospace !important;
+    color: var(--accent-color) !important;
+}
+
+.member-card:hover {
+    background: var(--accent-color) !important;
+    color: #000 !important; /* Contrast flip */
+    transform: scale(1.02) !important;
+}
+
+
+
+
+
+
+
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02) !important;
+}
+
+/* ============================================================
+   TOPNAV: ELITE SINGLE-LAYER HUD SYNC
+   ============================================================ */
+
+.geo-navbar {
+    /* POSITIONING */
+    position: fixed !important;
+    top: 15px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important; /* Total dominance over map UI */
+    
+    /* THE SHELL: Removing standard border to kill the "double layer" */
+    border: none !important; 
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 8%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border-radius: 100px !important;
+
+    /* THE STROKE: Using shadow instead of border for a crisp single line */
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.1), /* Sharp inner stroke */
+        0 10px 30px rgba(0, 0, 0, 0.5) !important; /* Outer depth */
+
+    height: 52px !important;
+    padding: 0 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* 2. THE SEPARATORS: Making them "Glow-Visible" */
+.nav-divider {
+    width: 1.5px !important;
+    height: 24px !important;
+    margin: 0 14px !important;
+    /* Gradient based on your palette color */
+    background: linear-gradient(
+        to bottom, 
+        transparent, 
+        color-mix(in srgb, var(--accent-color), transparent 50%), 
+        transparent
+    ) !important;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color), transparent 80%) !important;
+    opacity: 0.8 !important;
+}
+
+/* 3. LOGO HUD SYNC */
+.brand-wrap .logo {
+    font-family: 'Roboto Mono', monospace !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    color: #ffffff !important;
+}
+
+.brand-wrap .logo span {
+    color: var(--accent-color) !important;
+    text-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 4. LIGHT THEME REFINEMENT */
+[data-theme="light"] .geo-navbar {
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 
+        0 0 0 1px rgba(0, 0, 0, 0.05), 
+        0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .nav-divider {
+    background: linear-gradient(
+        to bottom, 
+        transparent, 
+        rgba(0, 0, 0, 0.1), 
+        transparent
+    ) !important;
+}
+/* 1. LOGO COLOR LOGIC: Ensuring visibility in all modes */
+.brand-wrap .logo {
+    color: #ffffff !important; /* Default for Dark Mode */
+    transition: color 0.3s ease !important;
+}
+
+[data-theme="light"] .brand-wrap .logo {
+    color: #1e293b !important; /* Dark Slate for Light Mode visibility */
+}
+
+
+
+/* ============================================================
+   TOPNAV: ULTRA-COMPACT MOBILE MATRIX
+   ============================================================ */
+/* ============================================================
+   TOPNAV: ATOMIC MOBILE COMPRESSION
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .geo-navbar {
+        width: 90% !important; /* Slightly narrower width */
+        padding: 3px 6px !important; /* Extremely tight vertical padding */
+        height: auto !important;
+        min-height: 36px !important; /* Lowered height baseline */
+        border-radius: 10px !important; /* Tighter corners save more usable area */
+        top: 6px !important;
+        gap: 2px !important;
+    }
+
+    .nav-content-shell {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 2px !important; /* Minimal gap between elements */
+    }
+
+    /* 1. Remove all Group Gaps */
+    .nav-group {
+        gap: 1px !important;
+        justify-content: center !important;
+    }
+
+    /* 2. Atomic Icon Scaling */
+    .icon-btn, .mode-toggle, .fs-toggle {
+        width: 26px !important; /* Shrunk from 30px */
+        height: 26px !important; /* Shrunk from 30px */
+        font-size: 12px !important; /* Clear but microscopic */
+        margin: 0 !important;
+        border-width: 0.5px !important; /* Thinner borders for the smaller scale */
+    }
+
+    /* 3. Extreme Logo Compression */
+    .brand-wrap {
+        width: 100% !important;
+        margin-bottom: 1px !important;
+        padding: 0 !important;
+        transform: scale(0.85); /* Scaled down to fit smaller bar height */
+    }
+
+    .logo {
+        font-size: 11px !important; /* Shrunk from 13px */
+        letter-spacing: 0.5px !important;
+    }
+
+    /* 4. Team Button - Micro Tab */
+    .team-btn {
+        height: 24px !important; /* Shrunk from 28px */
+        padding: 0 4px !important;
+        font-size: 7px !important; /* Shrunk from 8px */
+        font-weight: 900 !important;
+    }
+
+    /* 5. Audio Label - Sub-atomic */
+    .audio-label {
+        font-size: 5px !important;
+        bottom: -1px !important;
+        right: -1px !important;
+    }
+
+    /* 6. Enforced Removal of Spacers */
+    .nav-divider, .nav-mobile-spacer {
+        display: none !important;
+    }
+}
+
+/* 7. Super-Narrow Device Fix (Under 320px) */
+@media (max-width: 320px) {
+    .icon-btn {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 10px !important;
+    }
+    .geo-navbar {
+        width: 95% !important;
+        padding: 2px 4px !important;
+    }
+}
+[data-theme="light"] .brand-wrap .logo {
+    color: #0f172a !important; /* Darkest slate for high contrast */
+}
+
+
+
+
+/* ============================================================
+   TOPNAV: COMPACT CLUSTERING REFINEMENT
+   ============================================================ */
+
+.geo-navbar {
+    /* Reduce overall pill width by tightening internal padding */
+    padding: 0 12px !important;
+    height: 52px !important;
+    /* Reduce the major gap between the three main groups (Left, Center, Right) */
+    gap: 0 !important; 
+}
+
+.nav-content-shell {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important; /* Tightens the bridge between groups */
+}
+
+/* 1. TIGHTER INDIVIDUAL ICON SPACING */
+.nav-group {
+    display: flex !important;
+    align-items: center !important;
+    /* Significant reduction in dead air between icons */
+    gap: 2px !important; 
+}
+
+/* 2. COMPACT SEPARATORS */
+.nav-divider {
+    width: 1px !important;
+    height: 20px !important;
+    /* Pull groups closer to the vertical line */
+    margin: 0 6px !important; 
+    opacity: 0.15 !important;
+}
+
+/* 3. BUTTONS & TOGGLES */
+.icon-btn, .mode-toggle, .fs-toggle {
+    /* Maintain the size you liked but remove external margins */
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 !important; 
+}
+
+/* 4. BRAND WRAP (CENTER) */
+.brand-wrap {
+    /* Pull logo closer to the surrounding dividers */
+    padding: 0 8px !important;
+    margin: 0 !important;
+}
+
+.logo {
+    font-size: 15px !important;
+    letter-spacing: 1.5px !important;
+}
+
+/* 5. TEAM BUTTON COMPRESSION */
+.team-btn {
+    height: 38px !important;
+    padding: 0 12px !important;
+    margin: 0 2px !important;
+}
+
+/* 6. MOBILE OVERRIDE */
+@media (max-width: 768px) {
+    .nav-group {
+        gap: 1px !important;
+    }
+    .brand-wrap {
+        padding: 0 4px !important;
+    }
+}
+
+/* ============================================================
+   TOPNAV: COMMAND CENTER DENSITY & CHROMATIC SYNC
+   ============================================================ */
+
+.geo-navbar {
+    padding: 0 10px !important;
+    height: 48px !important;
+    gap: 0 !important;
+}
+
+/* 1. ULTRA-TIGHT CLUSTERING AROUND LOGO */
+.brand-wrap {
+    padding: 0 !important;
+    margin: 0 4px !important; /* Minimal breathing room */
+    position: relative;
+}
+
+/* Pull the adjacent groups slightly UNDER the logo's area */
+.nav-group.left {
+    margin-right: -8px !important; 
+}
+
+.nav-group.right {
+    margin-left: -8px !important;
+}
+
+/* 2. THE CHROMATIC TOGGLE (Matches Palette order) */
+.mode-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    /* Use a gradient border that cycles through your palette colors */
+    border: 2px solid transparent !important;
+    background-image: linear-gradient(var(--sb-bg), var(--sb-bg)), 
+                      linear-gradient(to right, #8b5cf6, #06b6d4, #10b981, #f43f5e, #f59e0b) !important;
+    background-origin: border-box !important;
+    background-clip: content-box, border-box !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.mode-toggle:hover {
+    transform: rotate(180deg) scale(1.1);
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 3. ICON PROXIMITY */
+.nav-group {
+    gap: 2px !important;
+}
+
+.icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+}
+
+/* 4. SEPARATOR REFINEMENT (Almost invisible but present) */
+.nav-divider {
+    width: 1px !important;
+    height: 18px !important;
+    margin: 0 4px !important;
+    background: color-mix(in srgb, var(--accent-color), transparent 85%) !important;
+}
+
+/* 5. LIGHT THEME LOGO & BUTTON SYNC */
+[data-theme="light"] .brand-wrap .logo {
+    color: #1a202c !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] .mode-toggle {
+    background-image: linear-gradient(#fff, #fff), 
+                      linear-gradient(to right, #8b5cf6, #06b6d4, #10b981, #f43f5e, #f59e0b) !important;
+}
+
+.status-dot {
+    box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-glow) !important;
+    animation: system-pulse 2.5s infinite ease-in-out !important;
+}
+@keyframes system-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.team-btn {
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px !important;
+    font-size: 10px !important;
+}
+.geo-navbar {
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), 
+                inset 0 1px 1px rgba(255,255,255,0.1) !important;
+}
+
+/* ============================================================
+   TOPNAV: REFINED CHROMATIC THEME TOGGLE
+   ============================================================ */
+
+.mode-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    /* Elegant single-pixel border instead of thick ring */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    overflow: hidden;
+}
+
+/* 2. THE HOVER EFFECT: Chromatic Expansion */
+.mode-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    border-color: var(--accent-color) !important;
+    background: rgba(var(--accent-color-rgb), 0.08) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 3. LIGHT THEME SYNC: Absolute Visibility */
+[data-theme="light"] .mode-toggle {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #475569 !important; /* Professional Slate */
+}
+
+[data-theme="light"] .mode-toggle:hover {
+    background: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 4. THE ICON REFINEMENT */
+.mode-toggle span, .mode-toggle i {
+    font-size: 18px !important;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.mode-toggle:active span {
+    transform: scale(0.8);
+}
+
+
+/* ============================================================
+   TOPNAV: INTERACTIVE SCALING & ICON PROTECTION
+   ============================================================ */
+
+/* 1. ATTRACTIVE HOVER POP */
+.icon-btn, .mode-toggle, .fs-toggle, .team-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.icon-btn:hover, .mode-toggle:hover, .fs-toggle:hover {
+    /* Slightly larger in a minor attractive way */
+    transform: scale(1.15) translateY(-2px) !important;
+    z-index: 10;
+    
+    /* Soft glow sync with palette */
+    box-shadow: 0 5px 15px var(--accent-glow) !important;
+    color: var(--accent-color) !important;
+}
+
+/* 2. GLOBE ICON PROTECTION: No Palette Border */
+.icon-btn a[href="/wild-facts"], 
+.icon-btn:has(span[title="Wild World Facts"]),
+.icon-btn:nth-child(2) { /* Targeting the globe position */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
+/* Specific fix for the Globe in History/Facts */
+.icon-btn:hover:has(.emoji-globe), 
+.icon-btn[title*="Facts"]:hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    color: inherit !important; /* Prevents text color shift to palette color */
+}
+
+/* 3. TEAM BUTTON HOVER REFINEMENT */
+.team-btn:hover {
+    transform: scale(1.05) translateY(-1px) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 12px var(--accent-glow) !important;
+}
+
+/* ============================================================
+   TOPNAV: ICON POP & SELECTIVE BORDER REMOVAL
+   ============================================================ */
+
+/* 1. UNIVERSAL HOVER POP: Larger & Minor Attractive Way */
+.icon-btn, .mode-toggle, .fs-toggle {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.icon-btn:hover, .mode-toggle:hover, .fs-toggle:hover {
+    transform: scale(1.18) translateY(-2px) !important; /* Slightly larger attractive pop */
+    z-index: 50;
+}
+
+/* 2. SPECIFIC ICON PROTECTION: NO PALETTE BORDERS */
+/* Targets the History (Clock) and Facts (Globe) buttons */
+.icon-btn:hover:has(span[title*="History"]), 
+.icon-btn:hover:has(span[title*="Facts"]),
+.icon-btn.active[onClick*="History"],
+.icon-btn:has(a[href="/wild-facts"]):hover {
+    border-color: rgba(255, 255, 255, 0.15) !important; /* Neutral glass border only */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; /* Neutral shadow */
+    color: inherit !important; /* Prevents text color from changing to palette color */
+}
+
+/* 3. FUNCTIONAL ICON SYNC (Weather/Audio/Palette) */
+/* These icons keep the palette glow to show they are "Active Systems" */
+.weather-toggle:hover, .audio-toggle:hover, .palette-trigger:hover {
+    color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 15px var(--accent-glow) !important;
+}
+
+/* 4. LOGO & TOGGLE HARMONIZATION */
+[data-theme="light"] .brand-wrap .logo {
+    color: #1e293b !important; /* High contrast for light theme */
+}
+
+.mode-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important; /* Perfectly circular like palette dots */
+}
+
+
+
+/* ============================================================
+   ANALYSIS HISTORY: ELITE MODAL DOMINANCE
+   ============================================================ */
+
+/* 1. THE OVERLAY: Absolute Depth Fix */
+.modal-overlay {
+    position: fixed !important;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    /* Highest Z-Index to beat map zoom (usually 1000-2000) */
+    z-index: 100000 !important; 
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(12px) !important; /* Blurs map behind history */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 2. THE CARD: Precision Glass HUD */
+.history-table-card.glass-morphic {
+    width: 90% !important;
+    max-width: 900px !important;
+    max-height: 85vh !important;
+    background: color-mix(in srgb, var(--sb-bg, #0f172a), transparent 5%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 
+                inset 0 0 20px rgba(255, 255, 255, 0.02) !important;
+    overflow: hidden;
+    position: relative;
+    z-index: 100001 !important;
+}
+
+/* 3. TACTICAL TABLE REFINEMENT */
+.history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Breathing room between rows */
+    padding: 0 20px;
+}
+
+.history-table thead th {
+    font-family: 'Roboto Mono', monospace !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--accent-color);
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-table tbody tr {
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+}
+
+.history-table tbody tr:hover {
+    background: rgba(var(--accent-color-rgb), 0.1) !important;
+    transform: scale(1.01);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.history-table td {
+    padding: 12px 15px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+
+
+
+/* =========================================================
+   FORCE NAV HEIGHT TO EXPAND WHEN IT WRAPS INTO 2 ROWS
+   (Add this at the END of TopNav.css)
+========================================================= */
+
+/* When JS adds: needs-second-row */
+.geo-navbar.needs-second-row {
+  height: auto !important;
+  min-height: 120px !important; /* 2-row safe height */
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+/* Make the inner shell also expand */
+.geo-navbar.needs-second-row .nav-content-shell {
+  height: auto !important;
+  min-height: 120px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+/* Ensure groups can wrap cleanly */
+.geo-navbar.needs-second-row .nav-group {
+  flex-wrap: wrap !important;
+  height: auto !important;
+}
+
+
+/* Left goes top row */
+.geo-navbar.needs-second-row .nav-group.left {
+  order: 0;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* Right goes bottom row */
+.geo-navbar.needs-second-row .nav-group.right {
+  order: 2;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* Make separators not break layout in 2 rows */
+.geo-navbar.needs-second-row .nav-divider {
+  display: none !important;
+}
+
+/* Mobile extra safety */
+@media (max-width: 768px) {
+  .geo-navbar.needs-second-row {
+    min-height: 135px !important;
+  }
+
+  .geo-navbar.needs-second-row .nav-content-shell {
+    min-height: 135px !important;
+  }
+}
+/* =========================================================
+   TIGHTER 2-ROW NAV (LESS HEIGHT)
+   Add at END of TopNav.css
+========================================================= */
+
+.geo-navbar.needs-second-row {
+  height: auto !important;
+  min-height: unset !important;        /* remove big forced height */
+  padding-top: 6px !important;         /* tighter */
+  padding-bottom: 6px !important;
+}
+
+.geo-navbar.needs-second-row .nav-content-shell {
+  min-height: unset !important;
+  height: auto !important;
+  row-gap: 6px !important;             /* reduce vertical gap */
+  flex-wrap: wrap !important;
+}
+
+/* Make the 3 groups stack tighter */
+.geo-navbar.needs-second-row .nav-group.left,
+.geo-navbar.needs-second-row .nav-group.center,
+.geo-navbar.needs-second-row .nav-group.right {
+  width: 100% !important;
+  justify-content: center !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/* Remove separators in wrap mode */
+.geo-navbar.needs-second-row .nav-divider {
+  display: none !important;
+}
+
+/* OPTIONAL: shrink button sizes slightly in 2-row mode */
+.geo-navbar.needs-second-row .icon-btn,
+.geo-navbar.needs-second-row .team-btn,
+.geo-navbar.needs-second-row .mode-toggle {
+  transform: scale(0.92);
+}
+
+/* OPTIONAL: reduce shadow "spread" feeling */
+.geo-navbar.needs-second-row {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18) !important;
+}
+/* =========================================================
+   FORCE GEOAI LOGO CENTER (2-ROW MODE)
+========================================================= */
+
+.geo-navbar.needs-second-row .nav-group.center {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.geo-navbar.needs-second-row .brand-wrap {
+  width: fit-content !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.geo-navbar.needs-second-row .logo {
+  text-align: center !important;
+}
+
+
+
+
+/* ============================================================
+   LIGHT THEME: HISTORY TABLE BOX RESET
+   ============================================================ */
+
+/* 1. Header Reset: Changing dark header to white/off-white */
+html:root body[data-theme="light"] .history-table thead th {
+    background-color: #ffffff !important;
+    color: #475569 !important; /* Slate gray for professional labels */
+    border-bottom: 2px solid #e2e8f0 !important; /* Subtle gray divider */
+}
+
+/* 2. Sidebar Reset: Changing the dark 'SITE' column to white */
+html:root body[data-theme="light"] .history-table td.site-name {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+/* 3. Site Text Color: Ensuring names are legible on white */
+html:root body[data-theme="light"] .history-table td.site-name span {
+    color: #0f172a !important; /* Deep navy for the primary site name */
+}
+
+/* 4. Comparison Row Tint: Softening the background for compared sites */
+html:root body[data-theme="light"] .history-row-comp {
+    background-color: #f8fafc !important; /* Very light gray to distinguish from white */
+}
+
+html:root body[data-theme="light"] .history-row-comp td.site-name {
+    background-color: #f8fafc !important;
+}
+
+/* 5. Header Title Alignment */
+html:root body[data-theme="light"] .modal-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid var(--accent-color) !important;
+}
+
+
+/* ============================================================
+   LIGHT THEME: HISTORY MODAL TOTAL BOX & TEXT RESET
+   ============================================================ */
+
+/* 1. Reset the Sidebar Column (SITE) and Top Header (thead) */
+html:root body[data-theme="light"] .history-table td.site-name,
+html:root body[data-theme="light"] .history-table thead th {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+}
+
+/* 2. FORCE TEXT TO BLACK: Targeting the main header and labels */
+html:root body[data-theme="light"] .modal-header h3,
+html:root body[data-theme="light"] .history-table thead th {
+    color: #000000 !important; /* Pure Black for maximum authority */
+    font-weight: 800 !important;
+}
+
+/* 3. SITE NAME & TEXT COLOR: Ensuring all text in boxes is black */
+html:root body[data-theme="light"] .history-table td.site-name span,
+html:root body[data-theme="light"] .history-table td {
+    color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* 4. COMPARISON ROW ADJUSTMENT: Very subtle gray to maintain visibility */
+html:root body[data-theme="light"] .history-row-comp,
+html:root body[data-theme="light"] .history-row-comp td.site-name {
+    background-color: #f9fafb !important;
+}
+
+/* 5. TABLE BORDERS: Clean dividers for the white boxes */
+html:root body[data-theme="light"] .history-table td,
+html:root body[data-theme="light"] .history-table th {
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+/* 6. MODAL OVERLAY & CARD: Ensuring the main container is pure white */
+html:root body[data-theme="light"] .history-table-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* 1. Main Card: Allow it to contain the scroll but don't hardcode height */
+.history-table-card {
+    height: auto !important;
+    max-height: 85vh !important; /* Limits height so it doesn't leave the screen */
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important; /* Keeps the rounded corners sharp */
+}
+
+/* 2. The Internal Container: THIS is where the scroll happens */
+.history-table-container {
+    flex: 1 1 auto !important;  /* 🚀 KEY: This forces the container to fill the card */
+    overflow-y: auto !important; /* Enables vertical scrolling */
+    overflow-x: auto !important; /* Keeps horizontal scrolling for mobile */
+    min-height: 0;               /* Critical for flex-scroll behavior */
+}
+
+/* 3. Sticky Header: Keep labels visible while scrolling (Professional Touch) */
+.history-table thead th {
+    position: sticky !important;
+    top: 0;
+    z-index: 10;
+    background: inherit; /* Matches your white/dark background logic */
+}
+
+
+
+
+
+/* Base styles for the palette dropdown */
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: none; /* Controlled by .expanded class in JS */
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.palette-dropdown.expanded {
+  display: flex;
+}
+
+/* Ensure the two rows are clearly separated */
+.palette-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap; /* Keep 8 colors per row as defined in JS */
+}
+
+.color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+  border-color: #fff;
+}
+
+/* 📱 MOBILE SPECIFIC REFINEMENT */
+@media (max-width: 768px) {
+  .palette-wrapper {
+    position: static; /* Allows the dropdown to reference the whole nav width if needed */
+  }
+
+  .palette-dropdown {
+    /* Center the dropdown under the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 90vw; /* Prevent overflow on very narrow screens */
+    padding: 15px;
+  }
+
+  .color-dot {
+    width: 28px; /* Slightly bigger for easier touch on mobile */
+    height: 28px;
+  }
+
+  /* If 8 colors per row is too wide for small screens, 
+     we allow them to wrap while maintaining row integrity */
+  .palette-row {
+    flex-wrap: wrap; 
+    max-width: 220px; /* Forces roughly 4-5 dots per sub-row */
+    justify-content: center;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* 🛠️ FIX: Dynamic Container Height */
+.geo-navbar {
+  /* Remove any fixed height: 60px or similar */
+  height: auto !important; 
+  min-height: 50px;
+  
+  /* Ensure padding handles the internal spacing */
+  padding: 10px 15px !important;
+  
+  /* Background styling to ensure it covers the expanded area */
+  background: rgba(15, 15, 20, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* Force flex to wrap content if needed */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  /* Transition for smooth expansion */
+  transition: all 0.3s ease-in-out;
+}
+
+/* 🛠️ FIX: Content Shell alignment */
+.nav-content-shell {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping to 2nd row */
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px; /* Vertical and horizontal spacing between icons */
+}
+
+/* 📱 MOBILE REFINEMENT */
+@media (max-width: 768px) {
+  .geo-navbar.is-mobile {
+    /* Ensure the container width doesn't squish icons */
+    width: 95%; 
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px;
+    
+    /* Extra padding for mobile touch density */
+    padding: 12px 10px !important; 
+  }
+
+  /* If the buttons are forced into two rows, 
+     this ensures they don't touch each other */
+  .nav-group {
+    padding: 4px 0;
+  }
+}
+
+
+
+/* --- COMPACT TWO-ROW ARCHITECTURE --- */
+@media (max-width: 1200px) {
+  .geo-navbar.is-visible {
+    padding: 10px 15px !important;
+    height: auto !important; /* Allow growth for two rows */
+  }
+
+  .nav-content-shell {
+    display: grid !important;
+    grid-template-areas: 
+      "brand tools-a"
+      "tools-b tools-b" !important;
+    grid-template-columns: auto 1fr !important;
+    gap: 12px 8px !important;
+    align-items: center !important;
+  }
+
+  /* ROW 1 LEFT: Heading */
+  .nav-group.center {
+    grid-area: brand !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+  }
+
+  .logo {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+  }
+
+  /* ROW 1 RIGHT: Core Utilities */
+  .nav-group.left {
+    grid-area: tools-a !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+  }
+
+  /* ROW 2: Expanded Tools (Weather, Comparison, Palette) */
+  .nav-group.right {
+    grid-area: tools-b !important;
+    justify-content: center !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    width: 100% !important;
+  }
+}
+
+/* --- ICON REFINEMENT --- */
+@media (max-width: 600px) {
+  .icon-btn, .team-btn, .mode-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+    border-radius: 50% !important; /* Forces uniform circular look */
+  }
+  
+  .nav-divider {
+    display: none !important; /* Removes clutter on tiny screens */
+  }
+}
+
+/* --- TACTICAL COMPACTION FOR SMALLER SCREENS --- */
+@media (max-width: 1200px) {
+    /* 1. Reduce the overall navbar padding and height */
+    .geo-navbar.is-compact {
+        padding: 8px 12px !important;
+        height: auto !important;
+    }
+
+    /* 2. Tighten the Grid Shell */
+    .geo-navbar.is-compact .nav-content-shell {
+        display: grid !important;
+        /* Vertical gap reduced to 4px to pull rows together */
+        grid-template-areas: 
+            "brand tools-a"
+            "tools-b tools-b" !important;
+        grid-template-columns: auto 1fr !important;
+        gap: 4px 8px !important; 
+        align-items: center !important;
+    }
+
+    /* 3. Reduce gap between Brand and Row 1 Icons */
+    .geo-navbar.is-compact .nav-group.center {
+        grid-area: brand !important;
+        justify-content: flex-start !important;
+        margin-right: 10px !important; /* Tightens space to the buttons */
+        padding: 0 !important;
+    }
+
+    .geo-navbar.is-compact .logo {
+        font-size: 15px !important;
+        margin: 0 !important;
+    }
+
+    /* 4. Align Tools-A (First Row) tightly to the brand */
+    .geo-navbar.is-compact .nav-group.left {
+        grid-area: tools-a !important;
+        justify-content: flex-start !important; /* Pulls tools toward the brand */
+        gap: 4px !important; /* Tighter button-to-button spacing */
+    }
+
+    /* 5. Second Row Refinement */
+    .geo-navbar.is-compact .nav-group.right {
+        grid-area: tools-b !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 2px !important; /* Minimal vertical separation */
+        padding-top: 4px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+        gap: 8px !important;
+    }
+
+    /* 6. Icon Compaction */
+    .icon-btn, .team-btn, .weather-toggle {
+        transform: scale(0.9) !important; /* Slightly smaller for density */
+        margin: 0 !important;
+    }
+    
+    .nav-divider {
+        margin: 0 4px !important;
+        height: 16px !important; /* Shorter dividers */
+    }
+}
+
+
+/* ============================================================
+   MOBILE COMPACT GRID: 0px to 600px ONLY
+   ============================================================ */
+@media (max-width: 600px) {
+    /* 1. Tighten the overall navbar shell */
+    .geo-navbar.is-compact {
+        padding: 4px 8px !important;
+        height: auto !important;
+    }
+
+    /* 2. Grid Overhaul: Zero vertical gap */
+    .geo-navbar.is-compact .nav-content-shell {
+        display: grid !important;
+        grid-template-areas: 
+            "brand tools-a"
+            "tools-b tools-b" !important;
+        grid-template-columns: auto 1fr !important;
+        gap: 0px 4px !important; /* Eliminates the gap between Row 1 and Row 2 */
+        align-items: center !important;
+    }
+
+    /* 3. Anchoring Brand to Extreme Left */
+    .geo-navbar.is-compact .nav-group.center {
+        grid-area: brand !important;
+        justify-content: flex-start !important;
+        margin-right: 4px !important; /* Pulls first set of icons close to brand */
+        padding: 0 !important;
+    }
+
+    .geo-navbar.is-compact .logo {
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    /* 4. Pull Row 1 Tools Close to Brand */
+    .geo-navbar.is-compact .nav-group.left {
+        grid-area: tools-a !important;
+        justify-content: flex-start !important;
+        gap: 2px !important;
+        margin-bottom: -4px !important; /* Pulls Row 2 UP to remove empty space */
+    }
+
+    /* 5. Row 2: Centered Tools with No Extra Top Padding */
+    .geo-navbar.is-compact .nav-group.right {
+        grid-area: tools-b !important;
+        justify-content: center !important;
+        margin-top: 0px !important;
+        padding-top: 0px !important;
+        border-top: none !important; /* Removing border to minimize vertical gap */
+    }
+
+    /* 6. Scaling for mobile density */
+    .geo-navbar.is-compact .icon-btn, 
+    .geo-navbar.is-compact .team-btn {
+        transform: scale(0.85) !important;
+        margin: -1px !important;
+    }
+}
+
+/* ============================================================
+   LARGER SCREENS: 601px and Above
+   Ensures the current single-row layout remains exactly as is.
+   ============================================================ */
+@media (min-width: 601px) {
+    .nav-content-shell {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
+    }
+}
+
+
+
+
+/* ============================================================
+   MOBILE COMPACT GRID: 0px to 600px
+   ============================================================ */
+@media (max-width: 600px) {
+    /* 1. Expand bar height and tighten padding */
+    .geo-navbar.is-compact {
+        padding: 6px 12px !important;
+        height: auto !important;
+        max-width: 95% !important;
+    }
+
+    /* 2. Grid Architecture: Brand & Tools share Row 1 */
+    .geo-navbar.is-compact .nav-content-shell {
+        display: grid !important;
+        grid-template-areas: 
+            "brand tools-a"
+            "tools-b tools-b" !important;
+        grid-template-columns: auto 1fr !important;
+        gap: 2px 8px !important; /* Minimal vertical gap to pull rows together */
+        align-items: center !important;
+    }
+
+    /* ROW 1 LEFT: Branding */
+    .geo-navbar.is-compact .nav-group.center {
+        grid-area: brand !important;
+        justify-content: flex-start !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .geo-navbar.is-compact .logo {
+        font-size: 14px !important;
+        letter-spacing: 1px !important;
+        white-space: nowrap !important;
+    }
+
+    /* ROW 1 RIGHT: Core Utilities (History, Team, Audio A) */
+    .geo-navbar.is-compact .nav-group.left {
+        grid-area: tools-a !important;
+        justify-content: flex-end !important; /* Align to the right edge of Row 1 */
+        gap: 4px !important;
+    }
+
+    /* ROW 2: Expanded Utilities (Weather, Palette, Mode) */
+    .geo-navbar.is-compact .nav-group.right {
+        grid-area: tools-b !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 4px !important;
+        padding-top: 4px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+        gap: 8px !important;
+    }
+
+    /* 3. Scale buttons down for high-density fit */
+    .geo-navbar.is-compact .icon-btn, 
+    .geo-navbar.is-compact .team-btn {
+        transform: scale(0.85) !important;
+    }
+
+    /* Remove dividers to save horizontal space */
+    .geo-navbar.is-compact .nav-divider {
+        display: none !important;
+    }
+}
+/* ============================================================
+   MOBILE CENTERED HUD: 0px to 600px
+   ============================================================ */
+@media (max-width: 600px) {
+    /* 1. Navbar Shell: Focus on Content */
+    .geo-navbar.is-compact {
+        width: fit-content !important; /* Pulls the entire bar inward */
+        max-width: 95% !important;
+        margin: 0 auto !important;
+        padding: 5px 12px !important;
+        height: auto !important;
+    }
+
+    .geo-navbar.is-compact .nav-content-shell {
+        display: grid !important;
+        /* Tight two-row stack */
+        grid-template-areas: 
+            "brand tools-a"
+            "tools-b tools-b" !important;
+        grid-template-columns: auto auto !important; /* Forces items to touch */
+        justify-content: center !important; /* Centers the whole unit */
+        gap: 0px 8px !important; /* ZERO vertical gap between rows */
+    }
+
+    /* 2. Row 1: Brand + Primary Icons */
+    .geo-navbar.is-compact .nav-group.center {
+        grid-area: brand !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin: 0 !important;
+        padding-right: 4px !important; /* Minimal gap between GEOAI and first icon */
+    }
+
+    .geo-navbar.is-compact .logo {
+        font-size: 14px !important;
+        white-space: nowrap !important;
+    }
+
+    .geo-navbar.is-compact .nav-group.left {
+        grid-area: tools-a !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        gap: 4px !important; /* Tight icon-to-icon spacing */
+        margin-bottom: -2px !important; /* Pulls row 2 upward */
+    }
+
+    /* 3. Row 2: Secondary Tools */
+    .geo-navbar.is-compact .nav-group.right {
+        grid-area: tools-b !important;
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+        gap: 10px !important;
+    }
+
+    /* 4. Compact Scaling */
+    .geo-navbar.is-compact .icon-btn, 
+    .geo-navbar.is-compact .team-btn,
+    .geo-navbar.is-compact .mode-toggle {
+        transform: scale(0.85) !important;
+        margin: 0 !important;
+    }
+
+    .geo-navbar.is-compact .nav-divider {
+        display: none !important; /* Removes bulk */
+    }
+}
+
+
+
+/* ============================================================
+   MOBILE PALETTE & WEATHER SLIDER FIX: Below 600px
+   ============================================================ */
+@media (max-width: 600px) {
+    /* 🎨 PALETTE DROPDOWN REFINEMENT */
+    .palette-dropdown {
+        position: absolute !important;
+        top: 45px !important; 
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 140px !important; /* Fixed width to force 4x4 grid */
+        background: rgba(15, 23, 42, 0.95) !important; /* Deep glass */
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 8px !important;
+        border-radius: 12px !important;
+        display: none; /* Reset display logic */
+        flex-direction: column !important;
+        gap: 6px !important;
+        z-index: 10000 !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .palette-dropdown.expanded {
+        display: flex !important; /* Matches your JS toggle */
+    }
+
+    .palette-row {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important; /* 4 dots per line */
+        gap: 8px !important;
+        justify-items: center !important;
+    }
+
+    .color-dot {
+        width: 22px !important;
+        height: 22px !important;
+        margin: 0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* 🌡️ WEATHER INTENSITY SLIDER FIX */
+    .weather-controls-group {
+        position: relative !important;
+    }
+
+    .weather-controls {
+        position: absolute !important;
+        top: 45px !important; /* Sit exactly below the icon */
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 160px !important; /* Narrower for mobile */
+        opacity: 0;
+        visibility: hidden;
+        background: rgba(15, 23, 42, 0.98) !important;
+        padding: 10px !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        flex-direction: column !important; /* Stack label and slider */
+        align-items: center !important;
+        gap: 5px !important;
+        z-index: 10001 !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Force visibility when toggle is active or hovered */
+    .weather-toggle:hover + .weather-controls,
+    .weather-controls:hover,
+    .weather-toggle.active + .weather-controls {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .opacity-slider {
+        width: 120px !important; /* Shorter slider to avoid edge clipping */
+    }
+}
+

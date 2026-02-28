@@ -1,0 +1,24 @@
+.factor-item { margin-bottom: 15px; width: 100%; }
+.factor-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
+.factor-label { font-size: 0.85rem; font-weight: 600; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+.current-val { font-family: 'Inter', monospace; font-weight: 700; font-size: 0.9rem; }
+.trend-indicator { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; }
+.trend-indicator.up { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.trend-indicator.down { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+.bar-track { height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; position: relative; overflow: visible; }
+.bar-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+.history-ghost-marker { position: absolute; top: -4px; height: 16px; width: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.8); z-index: 2; }
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Add this line below to make the bars "glow" */
+  box-shadow: 0 0 10px var(--bar-glow-color); 
+}
+
+/* Add a hover effect to the Factor Item */
+.factor-item:hover .bar-fill {
+  filter: brightness(1.2);
+}
