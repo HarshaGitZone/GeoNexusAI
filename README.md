@@ -19,12 +19,11 @@
 - [🌐 Frontend Components](#-frontend-components)
 - [⚙️ Backend Services](#️-backend-services)
 - [🚀 Deployment](#-deployment)
-- [📦 Installation](#-installation)
+- [📦 Local Development](#-local-development)
 - [🔧 Configuration](#-configuration)
 - [🧪 Testing](#-testing)
 - [📈 Performance](#-performance)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- [⚠️ Disclaimer](#️-disclaimer)
 
 ---
 
