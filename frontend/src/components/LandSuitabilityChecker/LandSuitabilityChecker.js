@@ -870,7 +870,7 @@ const FactorsSection = memo(({
 
                 {/* Use a simple Marker instead of LocationMarker to keep it static */}
 
-                <Marker position={[nLat, nLng]} />
+                {isValidCoords && <Marker position={[nLat, nLng]} />}
 
               </MapContainer>
 
@@ -1250,10 +1250,16 @@ const TacticalMapController = ({
   // Convert inputs to numbers safely for rendering
 
   const posA = [parseFloat(latA), parseFloat(lngA)];
+
   const posB = [parseFloat(latB), parseFloat(lngB)];
+
   const posLive = [parseFloat(currentLat), parseFloat(currentLng)];
 
-  // ... (rest of the code remains the same)
+  // Helper function to validate coordinates
+
+  const isValidPosition = (pos) => Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
+
+
 
   // ðŸš€ THE FIXED RETURN: Properly contained within the function braces
 
@@ -1261,44 +1267,29 @@ const TacticalMapController = ({
 
     <>
 
-      {/* ðŸ”µ SITE A: Visible only if Tactical Mode is ON */}
-
-      {isTacticalMode && Number.isFinite(posA[0]) && (
-
+      {/* 🔵 SITE A: Visible only if Tactical Mode is ON */}
+      {isTacticalMode && isValidPosition(posA) && (
         <Marker position={posA} icon={createIcon('blue')}>
-
           <Popup>Site A: Analyzed Target</Popup>
-
         </Marker>
-
       )}
 
 
 
-      {/* ðŸ”´ SITE B: Visible only if Tactical Mode is ON */}
-
-      {isTacticalMode && Number.isFinite(posB[0]) && (
-
+      {/* 🔴 SITE B: Visible only if Tactical Mode is ON */}
+      {isTacticalMode && isValidPosition(posB) && (
         <Marker position={posB} icon={createIcon('red')}>
-
           <Popup>Site B: Comparison Target</Popup>
-
         </Marker>
-
       )}
 
 
 
-      {/* ðŸŸ¢ LIVE POINTER: Always visible */}
-
-      {Number.isFinite(posLive[0]) && (
-
+      {/* 🟢 LIVE POINTER: Always visible */}
+      {isValidPosition(posLive) && (
         <Marker position={posLive} icon={createIcon('green')}>
-
           <Popup>Current Selection (Neutral)</Popup>
-
         </Marker>
-
       )}
 
     </>
@@ -3270,17 +3261,17 @@ useEffect(() => {
             <div className="evidence-driver-grid">
               <div className="evidence-driver-col">
                 <div className="evidence-driver-heading">Top Positive Drivers</div>
-                {topPositiveDrivers.slice(0, 5).map((d, i) => (
+                {(topPositiveDrivers || []).slice(0, 5).map((d, i) => (
                   <div key={`pos-${i}`} className="evidence-driver-row">
-                    {(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) -> +{Number(d.contribution_points || 0).toFixed(2)}
+                    {String(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) {'->'} +{Number(d.contribution_points || 0).toFixed(2)}
                   </div>
                 ))}
               </div>
               <div className="evidence-driver-col">
                 <div className="evidence-driver-heading">Top Risk Drivers</div>
-                {topRiskDrivers.slice(0, 5).map((d, i) => (
+                {(topRiskDrivers || []).slice(0, 5).map((d, i) => (
                   <div key={`risk-${i}`} className="evidence-driver-row risk">
-                    {(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) value {Number(d.value || 0).toFixed(1)}/100
+                    {String(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) value {Number(d.value || 0).toFixed(1)}/100
                   </div>
                 ))}
               </div>
@@ -3368,7 +3359,7 @@ useEffect(() => {
                               <h5 className="factor-name">{factorLabels[factorKey] || factorKey.replace(/_/g, ' ').toUpperCase()}</h5>
                               <div className="factor-weighting-info">
                                 <span className="factor-score">{numericValue.toFixed(1)}/100</span>
-                                <span className="weight-breakdown">{factorWeight}% of cat -> {globalWeight}% global</span>
+                                <span className="weight-breakdown">{Number(factorWeight || 0).toFixed(1)}% of cat {'->'} {Number(globalWeight || 0).toFixed(2)}% global</span>
                               </div>
                             </div>
                             <div className={`factor-status-badge ${factorColor}`}>

@@ -453,6 +453,11 @@
   font-weight: 700;
 }
 
+/* Degree Symbol */
+.degree::after {
+  content: "°";
+}
+
 /* Default styles for non-compact cards */
 .weather-card {
   padding: 20px;

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import './WeatherCard.css';
 
 const WeatherCard = ({ weather }) => {
@@ -25,12 +25,22 @@ const WeatherCard = ({ weather }) => {
 
   const getLocationTime = () => {
     try {
+      if (weather.timezone && weather.timezone !== 'auto') {
+        return new Intl.DateTimeFormat([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: weather.timezone
+        }).format(new Date());
+      }
+
       if (typeof weather.local_time === 'string') {
         const m = weather.local_time.match(/T(\d{2}:\d{2})/);
         if (m?.[1]) {
           return m[1];
         }
       }
+
       if (weather.local_time || weather.timestamp) {
         const dt = new Date(weather.local_time || weather.timestamp);
         if (!Number.isNaN(dt.getTime())) {
@@ -40,6 +50,7 @@ const WeatherCard = ({ weather }) => {
     } catch (_) {
       // Fall through to system time
     }
+
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
@@ -48,11 +59,13 @@ const WeatherCard = ({ weather }) => {
       if (weather.timezone && weather.timezone !== 'auto') {
         const hourText = new Intl.DateTimeFormat('en-US', {
           hour: '2-digit',
-          hour12: false
+          hour12: false,
+          timeZone: weather.timezone
         }).format(new Date());
         const hour = Number(hourText);
         if (!Number.isNaN(hour)) return hour;
       }
+
       if (typeof weather.local_time === 'string') {
         const m = weather.local_time.match(/T(\d{2}):\d{2}/);
         if (m?.[1]) {
@@ -63,15 +76,19 @@ const WeatherCard = ({ weather }) => {
     } catch (_) {
       // Fallback below
     }
-    const now = new Date();
-    return now.getHours();
+
+    return new Date().getHours();
   };
 
   const localTimeStr = getLocationTime();
   const localHour = getLocationHour();
-  const isDay = typeof weather.is_day === 'boolean' 
-    ? weather.is_day 
-    : (localHour >= 6 && localHour < 18);
+  const isDay = typeof weather.is_day === 'boolean'
+    ? weather.is_day
+    : weather.is_day === 1
+      ? true
+      : weather.is_day === 0
+        ? false
+        : (localHour >= 6 && localHour < 18);
 
   const getUVLevel = (uvIndex) => {
     if (!uvIndex) return { level: 'Low', color: '#10b981' };
@@ -100,7 +117,7 @@ const WeatherCard = ({ weather }) => {
       <div className="weather-header">
         <div className="title-stack">
           <h3>Atmospheric</h3>
-          <p className="subtitle">{weather.timezone || 'Tracking'} • {localTimeStr}</p>
+          <p className="subtitle">{weather.timezone || 'Tracking'} � {localTimeStr}</p>
         </div>
         <div className="weather-icon-main">{weather.icon || 'N/A'}</div>
       </div>
@@ -108,8 +125,8 @@ const WeatherCard = ({ weather }) => {
       <div className="weather-grid-compact">
         <div className="weather-item-primary">
           <span className="w-label">TEMP</span>
-          <span className="w-value-primary">{Number(tempC).toFixed(1)}<span className="degree"></span>C</span>
-          <span className="w-subtitle">Feels {feelsLikeC != null ? <>{Number(feelsLikeC).toFixed(1)}<span className="degree"></span>C</> : 'N/A'}</span>
+          <span className="w-value-primary">{Number(tempC).toFixed(1)}�C</span>
+          <span className="w-subtitle">Feels {feelsLikeC != null ? `${Number(feelsLikeC).toFixed(1)}�C` : 'N/A'}</span>
         </div>
         <div className="weather-item">
           <span className="w-label">CONDITIONS</span>
@@ -168,7 +185,7 @@ const WeatherCard = ({ weather }) => {
       <div className="weather-footer compact">
         <span className="live-pulse"></span>
         <span className="live-text">
-          LIVE • {isDay ? 'DAY' : 'NIGHT'} • {localTimeStr}
+          LIVE � {isDay ? 'DAY' : 'NIGHT'} � {localTimeStr}
         </span>
       </div>
     </div>

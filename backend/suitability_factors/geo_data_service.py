@@ -527,3 +527,227 @@ class GeoDataService:
             "metadata_proof": provenance,
             "timestamp": datetime.now().isoformat()
         }
+
+    @staticmethod
+    def get_land_intelligence_parallel(lat: float, lng: float) -> Dict[str, Any]:
+        """
+        Executes all 20+ adapters concurrently using ThreadPoolExecutor.
+        Has an absolute 10-second timeout to prevent Render 502 Bad Gateway.
+        """
+        from concurrent.futures import ThreadPoolExecutor
+        import logging
+        import time
+
+        from .physical_terrain.terrain_ruggedness import get_terrain_ruggedness
+        from .physical_terrain.land_stability import get_land_stability
+        from .environmental.biodiversity_index import get_biodiversity_sensitivity
+        from .environmental.heat_island_potential import get_heat_island_potential
+        from .hydrology.groundwater_recharge import get_groundwater_recharge_potential
+        from .risk_resilience.multi_hazard_risk import get_multi_hazard_risk
+        from .risk_resilience.climate_change_stress import get_climate_change_stress
+        from .risk_resilience.recovery_capacity import get_recovery_capacity
+        from .risk_resilience.long_term_habitability import get_long_term_habitability
+
+        def safe_exec(func, *args, fallback=None):
+            try:
+                res = func(*args)
+                return res if res is not None else fallback
+            except Exception as e:
+                logging.getLogger(__name__).error(f"Parallel fetch error in {func.__name__}: {e}")
+                return fallback
+
+        def fetch_pollution():
+            try:
+                ctx = GeoDataService._fetch_pollution_metrics(lat, lng)
+                score, pm25, details = estimate_pollution_score(ctx)
+                return {"value": score, "pm25": pm25, "details": details}
+            except Exception as e:
+                logging.getLogger(__name__).error(f"Pollution parallel error: {e}")
+                return {"value": 50, "pm25": None, "details": {}}
+
+        executor = ThreadPoolExecutor(max_workers=20)
+        fut_water = executor.submit(safe_exec, get_water_utility, lat, lng, fallback={"value": 50})
+        fut_pollution = executor.submit(fetch_pollution)
+        fut_slope = executor.submit(safe_exec, get_slope_analysis, lat, lng, fallback={"value": 50})
+        fut_elevation = executor.submit(safe_exec, get_elevation_data, lat, lng, fallback={"value": 50})
+        fut_rainfall = executor.submit(safe_exec, get_rainfall_analysis, lat, lng, fallback={"value": 50})
+        fut_drainage = executor.submit(safe_exec, get_drainage_analysis, lat, lng, fallback={"value": 50})
+        fut_landuse = executor.submit(safe_exec, infer_landuse_score, lat, lng, fallback={"value": 50})
+        fut_infra = executor.submit(safe_exec, get_infrastructure_score, lat, lng, fallback={"value": 50})
+        fut_population = executor.submit(safe_exec, get_population_data, lat, lng, fallback={"value": 50})
+        fut_ruggedness = executor.submit(safe_exec, get_terrain_ruggedness, lat, lng, fallback={"value": 50})
+        fut_stability = executor.submit(safe_exec, get_land_stability, lat, lng, fallback={"value": 50})
+        fut_biodiversity = executor.submit(safe_exec, get_biodiversity_sensitivity, lat, lng, fallback={"value": 50})
+        fut_heat_island = executor.submit(safe_exec, get_heat_island_potential, lat, lng, fallback={"value": 50})
+        fut_groundwater = executor.submit(safe_exec, get_groundwater_recharge_potential, lat, lng, fallback={"value": 50})
+        fut_multi_hazard = executor.submit(safe_exec, get_multi_hazard_risk, lat, lng, fallback={"value": 50})
+        fut_climate_change = executor.submit(safe_exec, get_climate_change_stress, lat, lng, fallback={"value": 50})
+        fut_recovery = executor.submit(safe_exec, get_recovery_capacity, lat, lng, fallback={"value": 50})
+        fut_habitability = executor.submit(safe_exec, get_long_term_habitability, lat, lng, fallback={"value": 50})
+        fut_thermal_comfort = executor.submit(safe_exec, get_thermal_comfort_analysis, lat, lng, fallback={"value": 50})
+        fut_thermal_intensity = executor.submit(safe_exec, get_thermal_intensity, lat, lng, fallback={"value": 50})
+        fut_ndvi = executor.submit(safe_exec, get_ndvi_data, lat, lng, fallback={"value": 50})
+
+        start_time = time.time()
+        
+        def get_res(fut, fallback):
+            remaining = max(0.01, 10.0 - (time.time() - start_time))
+            try:
+                return fut.result(timeout=remaining)
+            except Exception as e:
+                logging.getLogger(__name__).error(f"Parallel fetch timeout/error: {e}")
+                return fallback
+
+        water_data = get_res(fut_water, {"value": 50})
+        pollution_data = get_res(fut_pollution, {"value": 50, "pm25": None, "details": {}})
+        slope_data = get_res(fut_slope, {"value": 50})
+        elevation_data = get_res(fut_elevation, {"value": 50})
+        rainfall_data = get_res(fut_rainfall, {"value": 50})
+        drainage_data = get_res(fut_drainage, {"value": 50})
+        raw_landuse = get_res(fut_landuse, {"value": 50})
+        raw_infra = get_res(fut_infra, {"value": 50})
+        raw_population = get_res(fut_population, {"value": 50})
+        ruggedness_data = get_res(fut_ruggedness, {"value": 50})
+        stability_data = get_res(fut_stability, {"value": 50})
+        biodiversity_data = get_res(fut_biodiversity, {"value": 50})
+        heat_island_data = get_res(fut_heat_island, {"value": 50})
+        groundwater_data = get_res(fut_groundwater, {"value": 50})
+        multi_hazard_data = get_res(fut_multi_hazard, {"value": 50})
+        climate_change_data = get_res(fut_climate_change, {"value": 50})
+        recovery_data = get_res(fut_recovery, {"value": 50})
+        habitability_data = get_res(fut_habitability, {"value": 50})
+        thermal_comfort_data = get_res(fut_thermal_comfort, {"value": 50})
+        thermal_intensity_data = get_res(fut_thermal_intensity, {"value": 50})
+        ndvi_data = get_res(fut_ndvi, {"value": 50})
+        
+        executor.shutdown(wait=False, cancel_futures=True)
+
+        is_on_water = (
+            water_data.get("value") == 0.0
+            and water_data.get("distance_km") is not None
+            and float(water_data.get("distance_km", 1)) < 0.02
+        )
+
+        if is_on_water:
+            slope_data = {
+                "value": 0.0, "label": "N/A", "unit": "%", "source": "N/A"
+            }
+            elevation_data_water = {
+                "value": 0.0, "label": "N/A", "unit": "m", "source": "N/A"
+            }
+            population_data = {
+                "value": 0.0, "density": 0, "label": "N/A", "source": "N/A"
+            }
+        else:
+            elevation_data_water = None
+
+        if isinstance(raw_population, tuple):
+            pop_score = raw_population[0]
+            pop_meta = raw_population[1] if len(raw_population) > 1 else {}
+        elif isinstance(raw_population, dict):
+            pop_score = raw_population.get("value", 50)
+            pop_meta = raw_population
+        else:
+            pop_score = raw_population
+            pop_meta = {}
+
+        if not is_on_water:
+            population_data = {
+                "value": float(pop_score),
+                "density": pop_meta.get("density"),
+                "label": pop_meta.get("label", "Moderate Density"),
+                "source": pop_meta.get("source", "WorldPop")
+            }
+
+        if isinstance(raw_infra, tuple):
+            infra_score = raw_infra[0]
+            infra_meta = raw_infra[1] if len(raw_infra) > 1 else {}
+        elif isinstance(raw_infra, dict):
+            infra_score = raw_infra.get("value", 50)
+            infra_meta = raw_infra
+        else:
+            infra_score = raw_infra
+            infra_meta = {}
+
+        if isinstance(raw_landuse, tuple):
+            lu_score = raw_landuse[0]
+            lu_meta = raw_landuse[1] if len(raw_landuse) > 1 else {}
+        elif isinstance(raw_landuse, dict):
+            lu_score = raw_landuse.get("value", 50)
+            lu_meta = raw_landuse
+        else:
+            lu_score = raw_landuse
+            lu_meta = {}
+
+        infrastructure_data = {
+            "value": float(infra_score),
+            "source": infra_meta.get("source", "OpenStreetMap")
+        }
+
+        landuse_data = {
+            "value": float(lu_score),
+            "label": lu_meta.get("label", "Unknown"),
+            "source": lu_meta.get("source", "OpenStreetMap")
+        }
+
+        raw_results = {
+            "physical": {
+                "slope": slope_data,
+                "elevation": elevation_data_water if is_on_water else elevation_data,
+                "ruggedness": ruggedness_data,
+                "stability": stability_data
+            },
+            "environmental": {
+                "vegetation": ndvi_data,
+                "soil": {
+                    "value": estimate_soil_quality_score({
+                        "slope": slope_data.get("value"),
+                        "rain_mm_60d": rainfall_data.get("rain_mm_60d")
+                    })
+                },
+                "pollution": pollution_data,
+                "biodiversity": biodiversity_data,
+                "heat_island": heat_island_data
+            },
+            "hydrology": {
+                "flood": {
+                    "value": estimate_flood_risk({
+                        "rain_mm_60d": rainfall_data.get("rain_mm_60d"),
+                        "water_distance_km": water_data.get("distance_km")
+                    })
+                },
+                "water": water_data,
+                "drainage": drainage_data,
+                "groundwater": groundwater_data
+            },
+            "climatic": {
+                "rainfall": rainfall_data,
+                "thermal": thermal_comfort_data,
+                "intensity": thermal_intensity_data
+            },
+            "socio_econ": {
+                "infrastructure": infrastructure_data,
+                "landuse": landuse_data,
+                "population": population_data
+            },
+            "risk_resilience": {
+                "multi_hazard": multi_hazard_data,
+                "climate_change": climate_change_data,
+                "recovery": recovery_data,
+                "habitability": habitability_data
+            }
+        }
+
+        provenance = {
+            "physical": {"source": "NASA SRTM v3.0"},
+            "environmental": {"source": "ESA Sentinel-2/5P & OpenAQ"},
+            "hydrology": {"source": "HydroSHEDS / OSM"},
+            "socio_econ": {"source": "WorldPop / OSM"},
+            "climatic": {"source": "Open-Meteo / Sentinel-3"}
+        }
+
+        return {
+            "raw_factors": raw_results,
+            "metadata_proof": provenance,
+            "timestamp": datetime.now().isoformat()
+        }
