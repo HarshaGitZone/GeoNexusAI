@@ -3123,6 +3123,53 @@ def _build_snapshot_fallback(lat: float, lon: float) -> dict:
         "professional_summary": "Fallback snapshot returned due to upstream service timeout.",
         "fallback": True
     }
+
+
+def _build_snapshot_render_safe(lat: float, lon: float, timeout: int = 2) -> dict:
+    """
+    Lightweight snapshot payload for Render-safe mode.
+    Uses a single reverse-geocode call and avoids expensive downstream analyses.
+    """
+    base = _build_snapshot_fallback(lat, lon)
+    try:
+        res = requests.get(
+            NOMINATIM_URL,
+            params={
+                "lat": lat,
+                "lon": lon,
+                "format": "jsonv2",
+                "zoom": 10,
+                "addressdetails": 1
+            },
+            headers={"User-Agent": "GeoNexusAI-RenderSafeSnapshot"},
+            timeout=timeout
+        )
+        res.raise_for_status()
+        data = res.json() or {}
+        addr = data.get("address", {}) or {}
+
+        country = addr.get("country", "Global")
+        state = addr.get("state") or addr.get("province") or addr.get("state_district") or "N/A"
+        city = addr.get("city") or addr.get("town") or addr.get("village") or addr.get("hamlet") or "Location Snapshot"
+        district = addr.get("district") or addr.get("county") or "N/A"
+        postcode = addr.get("postcode", "N/A")
+
+        base["identity"] = {
+            "name": city,
+            "hierarchy": f"{state}, {country}",
+            "continent": base.get("identity", {}).get("continent", "Global"),
+            "full_address": f"{city}, {district}, {state}, {country}",
+            "postal_code": postcode
+        }
+        base["professional_summary"] = (
+            f"Render-safe snapshot for {city}. "
+            "Detailed contextual analyses are deferred for stability."
+        )
+        base["fallback"] = False
+    except Exception:
+        # Keep base fallback payload
+        pass
+    return base
 @app.route("/snapshot_identity", methods=["POST","OPTIONS"])
 def snapshot_identity_route():
 
@@ -3134,8 +3181,11 @@ def snapshot_identity_route():
         lat = float(data.get("latitude"))
         lon = float(data.get("longitude"))
 
-        # Fetch enriched geospatial data (lightweight mode in Render)
-        snapshot_timeout = 5 if RENDER_SAFE_MODE else 10
+        # Render-safe path: fast snapshot only, avoid heavy chained analyses.
+        if RENDER_SAFE_MODE:
+            return jsonify(_build_snapshot_render_safe(lat, lon, timeout=2))
+
+        snapshot_timeout = 10
         snapshot = get_snapshot_identity(lat, lon, timeout=snapshot_timeout)
         if not isinstance(snapshot, dict) or snapshot.get("error"):
             snapshot = _build_snapshot_fallback(lat, lon)

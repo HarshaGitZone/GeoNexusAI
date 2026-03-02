@@ -17,6 +17,11 @@ fi
 
 echo "✅ Environment OK"
 
-# Start server directly with minimal configuration
-echo "🌐 Starting server on port ${PORT:-10000}"
-exec python app.py
+# Start via gunicorn for production stability on Render.
+echo "🌐 Starting gunicorn on port ${PORT:-10000}"
+exec gunicorn app:app \
+  --workers 1 \
+  --threads 2 \
+  --worker-class gthread \
+  --timeout 120 \
+  --bind 0.0.0.0:${PORT:-10000}

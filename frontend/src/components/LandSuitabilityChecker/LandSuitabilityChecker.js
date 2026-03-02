@@ -1687,6 +1687,9 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
   useEffect(() => { scrollToBottom(); }, [chatHistory, scrollToBottom]);
 
+  const isVercelDeployed =
+    typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
+
   const fetchSnapshot = useCallback(async (tLat, tLng) => {
     try {
       const res = await fetch(`${API_BASE}/snapshot_identity`, {
@@ -1831,16 +1834,15 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
     try {
 
-      // FIXED: Parallel fetch for both suitability and snapshot identity for Site B
-   
-
+      // Deployed path: run snapshot after suitability to reduce concurrent backend pressure.
+      const siteBSuitabilityPromise = performAnalysis(tLat, tLng);
+      const siteBSnapshotPromise = isVercelDeployed
+        ? siteBSuitabilityPromise.then(() => fetchSnapshot(tLat, tLng))
+        : fetchSnapshot(tLat, tLng);
 
       const [suitResult, snapData] = await Promise.all([
-
-        performAnalysis(tLat, tLng),
-
-        fetchSnapshot(tLat, tLng)
-
+        siteBSuitabilityPromise,
+        siteBSnapshotPromise
       ]);
 
 
@@ -1884,7 +1886,7 @@ localStorage.setItem("geo_last_analysis_time_b", nowB);
 
     }
 
-  }, [resolveLocationName, performAnalysis, fetchSnapshot, locationBName]);
+  }, [resolveLocationName, performAnalysis, fetchSnapshot, locationBName, isVercelDeployed]);
 
 
 
@@ -2083,23 +2085,28 @@ if (e && e.preventDefault) e.preventDefault();
 
 
 
-    // Build the list of parallel tasks
+    // Keep local behavior unchanged; deploy path delays snapshot until suitability resolves per site.
+    const siteASuitabilityPromise = performAnalysis(lat, lng);
+    const siteASnapshotPromise = isVercelDeployed
+      ? siteASuitabilityPromise.then(() => fetchSnapshot(lat, lng))
+      : fetchSnapshot(lat, lng);
 
     const tasks = [
-
-      performAnalysis(lat, lng),
-
-      fetchSnapshot(lat, lng)
-
+      siteASuitabilityPromise,
+      siteASnapshotPromise
     ];
 
 
 
     if (activeCompareMode) {
 
-      tasks.push(performAnalysis(bLatInput, bLngInput));
+      const siteBSuitabilityPromise = performAnalysis(bLatInput, bLngInput);
+      const siteBSnapshotPromise = isVercelDeployed
+        ? siteBSuitabilityPromise.then(() => fetchSnapshot(bLatInput, bLngInput))
+        : fetchSnapshot(bLatInput, bLngInput);
 
-      tasks.push(fetchSnapshot(bLatInput, bLngInput));
+      tasks.push(siteBSuitabilityPromise);
+      tasks.push(siteBSnapshotPromise);
 
     }
 
@@ -2279,6 +2286,7 @@ if (e && e.preventDefault) e.preventDefault();
     analyzedCoords.lat,
 
     analyzedCoords.lng,
+    isVercelDeployed,
     setSiteATime, setSiteBTime
 
   ]);
