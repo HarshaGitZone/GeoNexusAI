@@ -155,67 +155,250 @@ class ParallelAPIExecutor:
             return {"value": 50, "source": "Infrastructure fallback"}
     
     async def _fetch_pollution(self, lat: float, lng: float):
-        return {"value": 70, "source": "Pollution fallback"}
+        """Real pollution data from OpenAQ"""
+        try:
+            # Use the real pollution fetch from GeoDataService
+            from suitability_factors.geo_data_service import GeoDataService
+            ctx = GeoDataService._fetch_pollution_metrics(lat, lng)
+            from suitability_factors.environmental.pollution_index import estimate_pollution_score
+            score, pm25, details = estimate_pollution_score(ctx)
+            return {"value": score, "pm25": pm25, "details": details, "source": "OpenAQ"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Pollution API error: {e}")
+            return {"value": 50, "source": "Pollution fallback"}
     
     async def _fetch_water(self, lat: float, lng: float):
-        return {"value": 60, "source": "Water fallback"}
+        """Real water utility data"""
+        try:
+            from suitability_factors.hydrology.water_utility import get_water_utility
+            result = get_water_utility(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Water analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Water API error: {e}")
+            return {"value": 50, "source": "Water fallback"}
     
     async def _fetch_elevation(self, lat: float, lng: float):
-        return {"value": 40, "source": "Elevation fallback"}
+        """Real elevation data from NASA SRTM"""
+        try:
+            from suitability_factors.physical_terrain.elevation_adapter import get_elevation_data
+            result = get_elevation_data(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "NASA SRTM"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Elevation API error: {e}")
+            return {"value": 50, "source": "Elevation fallback"}
     
     async def _fetch_slope(self, lat: float, lng: float):
-        return {"value": 50, "source": "Slope fallback"}
+        """Real slope analysis from terrain data"""
+        try:
+            from suitability_factors.physical_terrain.slope_analysis import get_slope_analysis
+            result = get_slope_analysis(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Terrain analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Slope API error: {e}")
+            return {"value": 50, "source": "Slope fallback"}
     
     async def _fetch_ruggedness(self, lat: float, lng: float):
-        return {"value": 45, "source": "Ruggedness fallback"}
+        """Real terrain ruggedness analysis"""
+        try:
+            from suitability_factors.physical_terrain.terrain_ruggedness import get_terrain_ruggedness
+            result = get_terrain_ruggedness(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Terrain ruggedness analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Ruggedness API error: {e}")
+            return {"value": 50, "source": "Ruggedness fallback"}
     
     async def _fetch_stability(self, lat: float, lng: float):
-        return {"value": 55, "source": "Stability fallback"}
+        """Real land stability analysis"""
+        try:
+            from suitability_factors.physical_terrain.land_stability import get_land_stability
+            result = get_land_stability(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Land stability analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Stability API error: {e}")
+            return {"value": 50, "source": "Stability fallback"}
     
     async def _fetch_flood(self, lat: float, lng: float):
-        return {"value": 65, "source": "Flood fallback"}
+        """Real flood risk analysis"""
+        try:
+            from suitability_factors.hydrology.flood_hazard import estimate_flood_risk
+            # Need context for flood analysis
+            from suitability_factors.hydrology.water_utility import get_water_utility
+            from suitability_factors.Climatic.rainfall_suitability import get_rainfall_analysis
+            
+            water_data = get_water_utility(lat, lng)
+            rainfall_data = get_rainfall_analysis(lat, lng)
+            
+            hydrology_ctx = {
+                "rain_mm_60d": rainfall_data.get("value"),
+                "water_distance_km": water_data.get("distance_km")
+            }
+            
+            result = estimate_flood_risk(hydrology_ctx)
+            return result if isinstance(result, dict) else {"value": result, "source": "Flood risk analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Flood API error: {e}")
+            return {"value": 50, "source": "Flood fallback"}
     
     async def _fetch_drainage(self, lat: float, lng: float):
-        return {"value": 60, "source": "Drainage fallback"}
+        """Real drainage analysis"""
+        try:
+            from suitability_factors.hydrology.drainage_density import get_drainage_analysis
+            result = get_drainage_analysis(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Drainage analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Drainage API error: {e}")
+            return {"value": 50, "source": "Drainage fallback"}
     
     async def _fetch_groundwater(self, lat: float, lng: float):
-        return {"value": 55, "source": "Groundwater fallback"}
+        """Real groundwater recharge analysis"""
+        try:
+            from suitability_factors.hydrology.groundwater_recharge import get_groundwater_recharge_potential
+            result = get_groundwater_recharge_potential(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Groundwater analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Groundwater API error: {e}")
+            return {"value": 50, "source": "Groundwater fallback"}
     
     async def _fetch_vegetation(self, lat: float, lng: float):
-        return {"value": 70, "source": "Vegetation fallback"}
+        """Real vegetation/NDVI data from Sentinel-2"""
+        try:
+            from suitability_factors.environmental.vegetation_ndvi import get_ndvi_data
+            result = get_ndvi_data(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Sentinel-2 NDVI"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Vegetation API error: {e}")
+            return {"value": 50, "source": "Vegetation fallback"}
     
     async def _fetch_biodiversity(self, lat: float, lng: float):
-        return {"value": 65, "source": "Biodiversity fallback"}
+        """Real biodiversity sensitivity analysis"""
+        try:
+            from suitability_factors.environmental.biodiversity_index import get_biodiversity_sensitivity
+            result = get_biodiversity_sensitivity(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Biodiversity analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Biodiversity API error: {e}")
+            return {"value": 50, "source": "Biodiversity fallback"}
     
     async def _fetch_heat_island(self, lat: float, lng: float):
-        return {"value": 60, "source": "Heat island fallback"}
+        """Real heat island potential analysis"""
+        try:
+            from suitability_factors.environmental.heat_island_potential import get_heat_island_potential
+            result = get_heat_island_potential(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Heat island analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Heat island API error: {e}")
+            return {"value": 50, "source": "Heat island fallback"}
     
     async def _fetch_rainfall(self, lat: float, lng: float):
-        return {"value": 70, "source": "Rainfall fallback"}
+        """Real rainfall analysis"""
+        try:
+            from suitability_factors.Climatic.rainfall_suitability import get_rainfall_analysis
+            result = get_rainfall_analysis(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Rainfall analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Rainfall API error: {e}")
+            return {"value": 50, "source": "Rainfall fallback"}
     
     async def _fetch_thermal(self, lat: float, lng: float):
-        return {"value": 65, "source": "Thermal fallback"}
+        """Real thermal comfort analysis"""
+        try:
+            from suitability_factors.Climatic.thermal_comfort import get_thermal_comfort_analysis
+            result = get_thermal_comfort_analysis(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Thermal comfort analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Thermal API error: {e}")
+            return {"value": 50, "source": "Thermal fallback"}
     
     async def _fetch_comfort(self, lat: float, lng: float):
-        return {"value": 70, "source": "Comfort fallback"}
+        """Real thermal intensity analysis"""
+        try:
+            from suitability_factors.Climatic.thermal_intensity import get_thermal_intensity
+            result = get_thermal_intensity(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Thermal intensity analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Comfort API error: {e}")
+            return {"value": 50, "source": "Comfort fallback"}
     
     async def _fetch_landuse(self, lat: float, lng: float):
-        return {"value": 60, "source": "Landuse fallback"}
+        """Real land use analysis"""
+        try:
+            from suitability_factors.socio_economic.landuse_status import infer_landuse_score
+            result = infer_landuse_score(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Land use analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Landuse API error: {e}")
+            return {"value": 50, "source": "Landuse fallback"}
     
     async def _fetch_population(self, lat: float, lng: float):
-        return {"value": 50, "source": "Population fallback"}
+        """Real population density analysis"""
+        try:
+            from suitability_factors.socio_economic.population_density import get_population_data
+            result = get_population_data(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Population analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Population API error: {e}")
+            return {"value": 50, "source": "Population fallback"}
     
     async def _fetch_multi_hazard(self, lat: float, lng: float):
-        return {"value": 45, "source": "Multi-hazard fallback"}
+        """Real multi-hazard risk analysis"""
+        try:
+            from suitability_factors.risk_resilience.multi_hazard_risk import get_multi_hazard_risk
+            result = get_multi_hazard_risk(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Multi-hazard analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Multi-hazard API error: {e}")
+            return {"value": 50, "source": "Multi-hazard fallback"}
     
     async def _fetch_climate_change(self, lat: float, lng: float):
-        return {"value": 55, "source": "Climate change fallback"}
+        """Real climate change stress analysis"""
+        try:
+            from suitability_factors.risk_resilience.climate_change_stress import get_climate_change_stress
+            result = get_climate_change_stress(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Climate change analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Climate change API error: {e}")
+            return {"value": 50, "source": "Climate change fallback"}
     
     async def _fetch_recovery(self, lat: float, lng: float):
-        return {"value": 60, "source": "Recovery fallback"}
+        """Real recovery capacity analysis"""
+        try:
+            from suitability_factors.risk_resilience.recovery_capacity import get_recovery_capacity
+            result = get_recovery_capacity(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Recovery capacity analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Recovery API error: {e}")
+            return {"value": 50, "source": "Recovery fallback"}
     
     async def _fetch_habitability(self, lat: float, lng: float):
-        return {"value": 50, "source": "Habitability fallback"}
+        """Real long-term habitability analysis"""
+        try:
+            from suitability_factors.risk_resilience.long_term_habitability import get_long_term_habitability
+            result = get_long_term_habitability(lat, lng)
+            return result if isinstance(result, dict) else {"value": result, "source": "Habitability analysis"}
+        except Exception as e:
+            if "Cannot connect to host" not in str(e) and "getaddrinfo failed" not in str(e):
+                logger.warning(f"Habitability API error: {e}")
+            return {"value": 50, "source": "Habitability fallback"}
     
     def _get_fallback(self, factor_name: str) -> Dict:
         """Get fallback value for failed API calls"""

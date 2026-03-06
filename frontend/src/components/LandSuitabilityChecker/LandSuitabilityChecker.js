@@ -2027,7 +2027,7 @@ localStorage.setItem("geo_last_analysis_time_b", nowB);
 //     hour12: false
 // });
 if (e && e.preventDefault) e.preventDefault();
-  const now = new Date().toLocaleString('en-GB', {
+  const getNowTimestamp = () => new Date().toLocaleString('en-GB', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
@@ -2151,18 +2151,19 @@ if (e && e.preventDefault) e.preventDefault();
       if (results[0].status === 'fulfilled') {
 
         const analysisData = results[0].value;
+        const completedAtA = getNowTimestamp();
 
         setResult(analysisData);
         setAnalysisComplete(true);
       //  setAnalysisTime(now);
-    setSiteATime(now);
+    setSiteATime(completedAtA);
     
-    localStorage.setItem("geo_last_analysis_time_a", now);
+    localStorage.setItem("geo_last_analysis_time_a", completedAtA);
     
     setAnalyzedCoords({ lat, lng });
 
         // setAnalysisTime(now);
-        localStorage.setItem("geo_last_analysis_time", now);
+        localStorage.setItem("geo_last_analysis_time", completedAtA);
         // const coordsA = { lat, lng };
 
         setAnalyzedCoords({ lat, lng });
@@ -2250,11 +2251,12 @@ if (e && e.preventDefault) e.preventDefault();
         if (results[2] && results[2].status === 'fulfilled') {
 
           const compareData = results[2].value;
+          const completedAtB = getNowTimestamp();
 
           setCompareResult(compareData);
           // Set Site B Timestamp
-        setSiteBTime(now);
-        localStorage.setItem("geo_last_analysis_time_b", now);
+        setSiteBTime(completedAtB);
+        localStorage.setItem("geo_last_analysis_time_b", completedAtB);
           setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
 
         }
