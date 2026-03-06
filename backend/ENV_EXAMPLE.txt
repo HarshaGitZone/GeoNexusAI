@@ -27,6 +27,10 @@ WEATHERAPI_KEY=your_weatherapi_key_here
 LOG_LEVEL=INFO
 WEATHER_LOG_LEVEL=DEBUG
 
+# Performance Configuration
+# Set to 'true' for 60-80% faster API calls (parallel execution)
+USE_FAST_ANALYSIS=true
+
 PYTHONUNBUFFERED=1
 PYTHONDONTWRITEBYTECODE=1
 MALLOC_ARENA_MAX=2

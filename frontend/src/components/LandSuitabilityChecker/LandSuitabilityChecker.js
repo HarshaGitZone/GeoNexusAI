@@ -1691,30 +1691,58 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
     typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
 
   const fetchSnapshot = useCallback(async (tLat, tLng) => {
-    try {
-      const res = await fetch(`${API_BASE}/snapshot_identity`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ latitude: parseFloat(tLat), longitude: parseFloat(tLng) })
-      });
-      const text = await res.text();
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${text}`);
-      }
+    const fallbackSnapshot = {
+      identity: {
+        name: "Location Snapshot",
+        hierarchy: "Fallback",
+        continent: "Global",
+        full_address: "Address resolution unavailable",
+        postal_code: "N/A"
+      },
+      hazards_analysis: {},
+      terrain_context: "Inland/Unknown",
+      professional_summary: "Snapshot temporarily unavailable. Fallback data returned.",
+      fallback: true
+    };
+
+    const maxAttempts = isVercelDeployed ? 2 : 1;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        return JSON.parse(text);
-      } catch {
-        return { error: "Invalid snapshot response", raw: text };
+        const res = await fetch(`${API_BASE}/snapshot_identity`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ latitude: parseFloat(tLat), longitude: parseFloat(tLng) })
+        });
+        const text = await res.text();
+
+        if (!res.ok) {
+          const isTransient = [502, 503, 504].includes(res.status);
+          if (isTransient && attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 600));
+            continue;
+          }
+          console.warn(`Snapshot request failed (HTTP ${res.status}). Using fallback snapshot.`);
+          return fallbackSnapshot;
+        }
+
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { ...fallbackSnapshot, error: "Invalid snapshot response" };
+        }
+      } catch (err) {
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          continue;
+        }
+        console.warn("Snapshot request failed due network/upstream issue. Using fallback snapshot.");
+        return fallbackSnapshot;
       }
-    } catch (err) {
-
-      console.error("Snapshot error:", err);
-
-      return null;
-
     }
 
-  }, []);
+    return fallbackSnapshot;
+  }, [isVercelDeployed]);
 
 
 

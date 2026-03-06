@@ -428,22 +428,22 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
         # --------------------------------------------------
         classification = "Generic Buildable Land"
         return {
-            "score": 70.0,
+            "score": 45.0,
             "classification": classification,
             "buildable_probability": _buildable_probability(classification),
             "ndvi_index": 0.40,
             "ndvi_range": "0.35 – 0.45",
-            "confidence": 78.0,
+            "confidence": 55.0,
             "is_terrestrial": True,
             "dataset_source": "Sentinel-2 NDVI + Regional Baselines",
             "dataset_date": "2025-2026",
-            "reason": "No dominant land-use detected. Assuming generic buildable land."
+            "reason": "No dominant land-use detected. Returning conservative unknown-land baseline."
         }
 
     except Exception:
         classification = "Unknown (API Error)"
         return {
-            "score": 70.0,
+            "score": 35.0,
             "classification": classification,
             "buildable_probability": _buildable_probability(classification),
             "ndvi_index": None,
@@ -451,5 +451,5 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
             "is_terrestrial": True,
             "dataset_source": "Fallback – Overpass API Error",
             "dataset_date": "2025-2026",
-            "reason": "Land-use data unavailable. Defaulting to generic buildable land."
+            "reason": "Land-use data unavailable due API error. Conservative non-buildable-biased fallback applied."
         }

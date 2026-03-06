@@ -157,13 +157,21 @@ def get_water_utility(
             );
             out center 1;
             """
-            resp = requests.post(
-                OVERPASS_URLS[0],
-                data={"data": query},
-                headers=_HEADERS,
-                timeout=12
-            )
-            elements = resp.json().get("elements")
+            elements = None
+            for overpass_url in OVERPASS_URLS:
+                try:
+                    resp = requests.post(
+                        overpass_url,
+                        data={"data": query},
+                        headers=_HEADERS,
+                        timeout=12
+                    )
+                    resp.raise_for_status()
+                    elements = (resp.json() or {}).get("elements")
+                    if elements:
+                        break
+                except Exception:
+                    continue
 
             if elements:
                 el = elements[0]
@@ -205,12 +213,12 @@ def get_water_utility(
     # 4. VERIFIED LAND FALLBACK
     # --------------------------------------------------
     return {
-        "value": 50.0,
+        "value": 35.0,
         "distance_km": None,
-        "normalized_water_risk": 0.5,
+        "normalized_water_risk": 0.65,
         "details": {
             "source": "Safety Fallback",
-            "confidence": 0.4,
-            "detail": "No major water bodies detected within 5 km. Status unverified."
+            "confidence": 0.3,
+            "detail": "Water status unverified (upstream timeout/error). Conservative penalty applied."
         }
     }

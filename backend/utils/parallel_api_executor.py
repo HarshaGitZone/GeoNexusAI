@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 class ParallelAPIExecutor:
     """Execute multiple API calls in parallel for massive speedup"""
     
-    def __init__(self, max_concurrent: int = 8):
+    def __init__(self, max_concurrent: int = 12):
         self.max_concurrent = max_concurrent
         self.session = None
     
     async def __aenter__(self):
-        connector = aiohttp.TCPConnector(limit=self.max_concurrent)
-        timeout = aiohttp.ClientTimeout(total=60.0, connect=20.0)
+        connector = aiohttp.TCPConnector(limit=self.max_concurrent, limit_per_host=self.max_concurrent)
+        timeout = aiohttp.ClientTimeout(total=30.0, connect=10.0)
         self.session = aiohttp.ClientSession(
             connector=connector,
             timeout=timeout
