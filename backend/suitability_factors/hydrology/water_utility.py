@@ -104,17 +104,21 @@ def get_water_utility(
     longitude: float
 ) -> Dict[str, Optional[float]]:
     """
-    Multi-layer water detection and proximity assessment.
+    Enhanced water detection and proximity assessment.
     
     Layers:
     1. Ocean/Sea detection (highest priority)
     2. Major rivers/lakes (country-level)
     3. Local waterways (proximity-based)
+    4. Groundwater and water facilities (NEW)
     
     Scoring Philosophy:
     - ON water body: 0.0 (unsuitable for construction)
-    - NEAR water body: 85-100 (excellent for development)
-    - FAR from water: 20-40 (limited water access)
+    - NEAR water body: 90-100 (excellent for development)
+    - GOOD groundwater/facilities: 80-95 (very good for development)
+    - MODERATE water access: 60-80 (good for development)
+    - FAR from water: 40-60 (limited but acceptable water access)
+    - NO water detected: 50 (neutral baseline)
     """
 
     # --------------------------------------------------
@@ -133,7 +137,7 @@ def get_water_utility(
         else:
             # Near ocean - excellent for coastal development
             distance = ocean_result["distance_km"]
-            score = _calculate_proximity_score(distance, "ocean")
+            score = _calculate_enhanced_proximity_score(distance, "ocean")
             return {
                 "value": score,
                 "distance_km": round(distance, 3),
@@ -158,7 +162,7 @@ def get_water_utility(
         else:
             # Near major river/lake - excellent for development
             distance = major_water_result["distance_km"]
-            score = _calculate_proximity_score(distance, "major")
+            score = _calculate_enhanced_proximity_score(distance, "major")
             return {
                 "value": score,
                 "distance_km": round(distance, 3),
@@ -183,7 +187,7 @@ def get_water_utility(
         else:
             # Near local waterway - good for development
             distance = local_water_result["distance_km"]
-            score = _calculate_proximity_score(distance, "local")
+            score = _calculate_enhanced_proximity_score(distance, "local")
             return {
                 "value": score,
                 "distance_km": round(distance, 3),
@@ -193,17 +197,31 @@ def get_water_utility(
             }
 
     # --------------------------------------------------
-    # LAYER 4: VERIFIED LAND FALLBACK
+    # LAYER 4: GROUNDWATER AND WATER FACILITIES (NEW)
+    # --------------------------------------------------
+    groundwater_result = _detect_groundwater_and_facilities(latitude, longitude)
+    if groundwater_result["found"]:
+        score = groundwater_result["score"]
+        return {
+            "value": score,
+            "distance_km": groundwater_result.get("distance_km"),
+            "normalized_water_risk": round(1.0 - (score / 100.0), 3),
+            "water_type": "groundwater_facilities",
+            "details": groundwater_result
+        }
+
+    # --------------------------------------------------
+    # LAYER 5: ENHANCED LAND FALLBACK
     # --------------------------------------------------
     return {
-        "value": 25.0,
+        "value": 50.0,  # Increased from 25.0 - more reasonable baseline
         "distance_km": None,
-        "normalized_water_risk": 0.75,
+        "normalized_water_risk": 0.50,
         "water_type": "no_water_nearby",
         "details": {
             "source": "No Water Features Detected",
             "confidence": 0.8,
-            "detail": "No water bodies detected within reasonable proximity. Limited water access."
+            "detail": "No water bodies detected within reasonable proximity. Assuming moderate water access."
         }
     }
 
@@ -431,58 +449,224 @@ def _detect_local_water_features(lat: float, lng: float) -> Dict:
     return {"found": False, "on_water": False, "distance_km": None, "name": None}
 
 
-def _calculate_proximity_score(distance_km: float, water_type: str) -> float:
+def _calculate_enhanced_proximity_score(distance_km: float, water_type: str) -> float:
     """
-    Calculate proximity score with water-friendly philosophy.
+    Enhanced proximity score with more generous scoring for good water access.
     Closer to water = higher score (better for development).
     """
     if water_type == "ocean":
         # Ocean proximity - very valuable for coastal development
         if distance_km < 0.5:
-            return 95.0
+            return 100.0  # Perfect coastal access
         elif distance_km < 1.0:
-            return 90.0
+            return 95.0   # Excellent coastal access
         elif distance_km < 2.0:
-            return 85.0
+            return 90.0   # Very good coastal access
         elif distance_km < 5.0:
-            return 75.0
+            return 85.0   # Good coastal access
         elif distance_km < 10.0:
-            return 65.0
+            return 75.0   # Moderate coastal access
         elif distance_km < 20.0:
-            return 50.0
+            return 65.0   # Acceptable coastal access
         else:
-            return 35.0
+            return 55.0   # Distant coastal access
             
     elif water_type == "major":
         # Major rivers/lakes - excellent for development
         if distance_km < 0.2:
-            return 100.0
+            return 100.0  # Direct water access
         elif distance_km < 0.5:
-            return 95.0
+            return 95.0   # Excellent water access
         elif distance_km < 1.0:
-            return 90.0
+            return 90.0   # Very good water access
         elif distance_km < 2.0:
-            return 85.0
+            return 85.0   # Good water access
         elif distance_km < 3.0:
-            return 75.0
+            return 80.0   # Moderate water access
         elif distance_km < 5.0:
-            return 65.0
+            return 70.0   # Acceptable water access
         else:
-            return 50.0
+            return 60.0   # Distant water access
             
     else:  # local
         # Local waterways - good for development
         if distance_km < 0.1:
-            return 95.0
+            return 95.0   # Perfect local water access
         elif distance_km < 0.3:
-            return 85.0
+            return 90.0   # Excellent local water access
         elif distance_km < 0.7:
-            return 75.0
+            return 85.0   # Very good local water access
         elif distance_km < 1.5:
-            return 65.0
+            return 75.0   # Good local water access
         elif distance_km < 3.0:
-            return 55.0
+            return 65.0   # Moderate local water access
         elif distance_km < 5.0:
-            return 45.0
+            return 55.0   # Acceptable local water access
         else:
-            return 30.0
+            return 45.0   # Distant local water access
+
+def _detect_groundwater_and_facilities(lat: float, lng: float) -> Dict:
+    """Detect groundwater indicators and water facilities for enhanced scoring."""
+    try:
+        # Enhanced water facilities search
+        facilities_query = f"""
+        [out:json][timeout:15];
+        (
+          node["amenity"="water_point"](around:3000,{lat},{lng});
+          node["amenity"="drinking_water"](around:3000,{lat},{lng});
+          node["amenity"="fountain"](around:2000,{lat},{lng});
+          node["man_made"="water_tower"](around:5000,{lat},{lng});
+          node["man_made"="reservoir_covered"](around:5000,{lat},{lng});
+          node["landuse"="reservoir"](around:5000,{lat},{lng});
+          node["waterway"="stream"](around:2000,{lat},{lng});
+          node["waterway"="ditch"](around:1000,{lat},{lng});
+          node["natural"="spring"](around:3000,{lat},{lng});
+          way["landuse"="reservoir"](around:5000,{lat},{lng});
+          way["waterway"="stream"](around:2000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        for overpass_url in OVERPASS_URLS:
+            try:
+                resp = requests.post(
+                    overpass_url,
+                    data={"data": facilities_query},
+                    headers=_HEADERS,
+                    timeout=12
+                )
+                resp.raise_for_status()
+                elements = (resp.json() or {}).get("elements", [])
+                
+                if elements:
+                    # Count different types of water facilities
+                    water_points = len([e for e in elements 
+                                     if e.get("tags", {}).get("amenity") == "water_point"])
+                    drinking_water = len([e for e in elements 
+                                        if e.get("tags", {}).get("amenity") == "drinking_water"])
+                    fountains = len([e for e in elements 
+                                   if e.get("tags", {}).get("amenity") == "fountain"])
+                    water_towers = len([e for e in elements 
+                                      if e.get("tags", {}).get("man_made") == "water_tower"])
+                    reservoirs = len([e for e in elements 
+                                    if e.get("tags", {}).get("landuse") == "reservoir"])
+                    streams = len([e for e in elements 
+                                  if e.get("tags", {}).get("waterway") == "stream"])
+                    springs = len([e for e in elements 
+                                  if e.get("tags", {}).get("natural") == "spring"])
+                    
+                    total_facilities = water_points + drinking_water + fountains + water_towers + reservoirs + streams + springs
+                    
+                    # Enhanced scoring based on facility count and type
+                    if total_facilities >= 10:
+                        score = 95.0  # Excellent water infrastructure
+                    elif total_facilities >= 7:
+                        score = 90.0  # Very good water infrastructure
+                    elif total_facilities >= 5:
+                        score = 85.0  # Good water infrastructure
+                    elif total_facilities >= 3:
+                        score = 80.0  # Moderate water infrastructure
+                    elif total_facilities >= 2:
+                        score = 75.0  # Basic water infrastructure
+                    else:
+                        score = 70.0  # Minimal water infrastructure
+                    
+                    # Bonus points for critical facilities
+                    if water_towers >= 1:
+                        score = min(100.0, score + 3)  # Water tower bonus
+                    if reservoirs >= 1:
+                        score = min(100.0, score + 2)  # Reservoir bonus
+                    if springs >= 1:
+                        score = min(100.0, score + 2)  # Spring bonus
+                    if drinking_water >= 2:
+                        score = min(100.0, score + 2)  # Drinking water bonus
+                    
+                    return {
+                        "found": True,
+                        "score": score,
+                        "distance_km": None,  # Facilities are distributed
+                        "total_facilities": total_facilities,
+                        "water_points": water_points,
+                        "drinking_water": drinking_water,
+                        "water_towers": water_towers,
+                        "reservoirs": reservoirs,
+                        "springs": springs,
+                        "source": "Water Facilities Detection",
+                        "detail": f"Found {total_facilities} water facilities: {water_points} water points, {drinking_water} drinking water, {water_towers} water towers"
+                    }
+            except Exception:
+                continue
+                
+    except Exception:
+        pass
+    
+    # If no facilities found, check regional groundwater potential
+    groundwater_score = _estimate_groundwater_potential(lat, lng)
+    if groundwater_score > 60:
+        return {
+            "found": True,
+            "score": groundwater_score,
+            "distance_km": None,
+            "groundwater_potential": True,
+            "source": "Groundwater Estimation",
+            "detail": f"Estimated good groundwater potential: {groundwater_score}/100"
+        }
+    
+    return {"found": False, "score": None}
+
+def _estimate_groundwater_potential(lat: float, lng: float) -> float:
+    """Estimate groundwater potential based on geographic factors."""
+    try:
+        region = _get_geographic_region(lat, lng)
+        
+        # Groundwater potential by region (simplified estimation)
+        groundwater_potential = {
+            "north_america": 75.0,  # Good aquifers
+            "europe": 80.0,           # Excellent groundwater
+            "south_asia": 85.0,       # Very good groundwater (Indus, Ganges)
+            "east_asia": 70.0,        # Variable groundwater
+            "southeast_asia": 75.0,   # Good groundwater
+            "south_america": 80.0,    # Excellent groundwater (Amazon basin)
+            "africa": 65.0,           # Variable groundwater
+            "oceania": 70.0,          # Moderate groundwater
+            "other": 60.0             # Unknown
+        }
+        
+        base_potential = groundwater_potential.get(region, 60.0)
+        
+        # Adjust for climate (simplified)
+        if abs(lat) < 30:  # Tropical regions
+            base_potential += 5  # Higher rainfall = better recharge
+        elif abs(lat) > 60:  # Polar regions
+            base_potential -= 10  # Limited recharge
+        
+        # Adjust for proximity to water bodies
+        # If we're in this function, no surface water was found nearby
+        # So we slightly reduce the score
+        base_potential -= 5
+        
+        return max(40, min(90, base_potential))
+        
+    except Exception:
+        return 60.0  # Moderate default
+
+def _get_geographic_region(lat: float, lng: float) -> str:
+    """Determine geographic region for groundwater estimation."""
+    if 60 <= lat <= 80 and -10 <= lng <= 40:
+        return "europe"
+    elif 25 <= lat <= 50 and -130 <= lng <= -60:
+        return "north_america"
+    elif -55 <= lat <= 15 and -80 <= lng <= -35:
+        return "south_america"
+    elif -35 <= lat <= 37 and 10 <= lng <= 50:
+        return "africa"
+    elif 5 <= lat <= 50 and 60 <= lng <= 150:
+        return "south_asia"
+    elif 20 <= lat <= 50 and 100 <= lng <= 150:
+        return "east_asia"
+    elif -10 <= lat <= 20 and 95 <= lng <= 140:
+        return "southeast_asia"
+    elif -10 <= lat <= -45 and 110 <= lng <= 180:
+        return "oceania"
+    else:
+        return "other"

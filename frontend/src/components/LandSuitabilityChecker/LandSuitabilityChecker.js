@@ -1415,12 +1415,13 @@ const [siteBTime, setSiteBTime] = useState(() => localStorage.getItem("geo_last_
 
   };
 
-
   const [isTacticalMode, setIsTacticalMode] = useState(false);
 
   const [mapMode, setMapMode] = useState("2D"); // "2D" or "3D"
 
   const [active3DStyle, setActive3DStyle] = useState("satellite");
+
+  const [areControlsCollapsed, setAreControlsCollapsed] = useState(false); // Controls collapse state
 
   const initialAnalysisRef = useRef(false); // Flag to prevent double execution on mount
 
@@ -5097,7 +5098,7 @@ useEffect(() => {
 
 
 
-            <div className="engine-switch-container">
+            <div className={`engine-switch-container ${areControlsCollapsed ? 'collapsed' : ''}`}>
 
               <button
 
@@ -5133,9 +5134,20 @@ useEffect(() => {
 
             </div>
 
+            {/* Standalone toggle button that never collapses */}
+            <div className="standalone-toggle-container">
+              <button 
+                className="collapse-controls-btn" 
+                onClick={() => setAreControlsCollapsed(!areControlsCollapsed)}
+                title={areControlsCollapsed ? "Show Controls" : "Hide Controls"}
+              >
+                {areControlsCollapsed ? "◀" : "▶"}
+              </button>
+            </div>
 
 
-            <div className="map-variety-picker">
+
+            <div className={`map-variety-picker ${areControlsCollapsed ? 'collapsed' : ''}`}>
 
               <label className="picker-header">🗺️ Map Variety</label>
 
@@ -5195,7 +5207,7 @@ useEffect(() => {
                 </select>
               )}
             </div>
-            <div className="tactical-mode-toggle-container">
+            <div className={`tactical-mode-toggle-container ${areControlsCollapsed ? 'collapsed' : ''}`}>
               <div className="toggle-row-content">
                 <span className="toggle-label">Geo-Triad</span>
                 <label className="switch-attractive">

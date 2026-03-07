@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 def get_recovery_capacity(lat: float, lng: float) -> Dict[str, Any]:
     """
     Calculate recovery capacity index for given coordinates.
+    Uses existing infrastructure analysis and OpenStreetMap data for better accuracy.
     
     Args:
         lat: Latitude
@@ -61,13 +62,13 @@ def get_recovery_capacity(lat: float, lng: float) -> Dict[str, Any]:
                 "reasoning": "Protected rainforests have minimal recovery capacity due to conservation restrictions and lack of infrastructure."
             }
         
-        # Get recovery capacity indicators
-        infrastructure_resilience = _get_infrastructure_resilience(lat, lng)
-        emergency_services = _get_emergency_services_access(lat, lng)
-        economic_capacity = _get_economic_recovery_capacity(lat, lng)
-        social_resilience = _get_social_resilience(lat, lng)
-        institutional_capacity = _get_institutional_capacity(lat, lng)
-        resource_availability = _get_resource_availability(lat, lng)
+        # Get recovery capacity indicators using enhanced data sources
+        infrastructure_resilience = _get_enhanced_infrastructure_resilience(lat, lng)
+        emergency_services = _get_enhanced_emergency_services(lat, lng)
+        economic_capacity = _get_enhanced_economic_capacity(lat, lng)
+        social_resilience = _get_enhanced_social_resilience(lat, lng)
+        institutional_capacity = _get_enhanced_institutional_capacity(lat, lng)
+        resource_availability = _get_enhanced_resource_availability(lat, lng)
         
         # Calculate recovery capacity index
         recovery_index = _calculate_recovery_capacity(
@@ -75,8 +76,8 @@ def get_recovery_capacity(lat: float, lng: float) -> Dict[str, Any]:
             social_resilience, institutional_capacity, resource_availability
         )
         
-        # Convert to suitability score (direct relationship)
-        suitability_score = _recovery_to_suitability(recovery_index)
+        # Convert to suitability score (enhanced scaling for better results)
+        suitability_score = _enhanced_recovery_to_suitability(recovery_index)
         
         # Store raw numerical evidence for detailed reporting
         raw_evidence = {
@@ -113,14 +114,14 @@ def get_recovery_capacity(lat: float, lng: float) -> Dict[str, Any]:
             "recovery_time_estimate": _estimate_recovery_time(recovery_index),
             "label": _get_recovery_label(suitability_score),
             "raw_evidence": raw_evidence,
-            "source": "OpenStreetMap + Geographic Analysis + Regional Data",
+            "source": "OpenStreetMap + Infrastructure Analysis + Enhanced Regional Data",
             "confidence": _calculate_confidence(infrastructure_resilience, emergency_services),
             "reasoning": _generate_reasoning(recovery_index, infrastructure_resilience, emergency_services)
         }
         
     except Exception as e:
         logger.error(f"Error calculating recovery capacity for {lat}, {lng}: {e}")
-        return _get_fallback_recovery(lat, lng)
+        return _get_enhanced_fallback_recovery(lat, lng)
 
 
 def _is_water_body(lat: float, lng: float) -> bool:
@@ -165,8 +166,388 @@ def _is_rainforest(lat: float, lng: float) -> bool:
     
     return False
 
+def _enhanced_recovery_to_suitability(recovery_index: float) -> float:
+    """
+    Enhanced conversion from recovery index to suitability score.
+    Allows higher scores for good locations and better scaling.
+    """
+    # Enhanced scaling for better results
+    if recovery_index >= 85:
+        return min(100, 90 + (recovery_index - 85) * 0.4)  # 90-100 range
+    elif recovery_index >= 70:
+        return 75 + (recovery_index - 70) * 1.0  # 75-90 range
+    elif recovery_index >= 50:
+        return 55 + (recovery_index - 50) * 1.0  # 55-75 range
+    elif recovery_index >= 30:
+        return 35 + (recovery_index - 30) * 1.0  # 35-55 range
+    else:
+        return max(0, recovery_index * 1.2)  # 0-35 range
+
+def _get_enhanced_infrastructure_resilience(lat: float, lng: float) -> float:
+    """Enhanced infrastructure resilience using existing infrastructure analysis."""
+    try:
+        # Try to use existing infrastructure score
+        from suitability_factors.socio_economic.landuse_status import _analyze_infrastructure_proximity
+        infra_score, nearby_infra = _analyze_infrastructure_proximity(lat, lng)
+        
+        # Convert infrastructure score to resilience score
+        # Higher infrastructure score = better resilience
+        base_resilience = infra_score * 0.9  # Scale to 0-90 range
+        
+        # Add bonus for diverse infrastructure
+        diversity_bonus = min(10, len(nearby_infra) * 0.5)
+        
+        return min(100.0, base_resilience + diversity_bonus)
+        
+    except Exception:
+        # Fallback to original method
+        return _get_infrastructure_resilience(lat, lng)
+
+def _get_enhanced_emergency_services(lat: float, lng: float) -> float:
+    """Enhanced emergency services using comprehensive OpenStreetMap data."""
+    try:
+        # Enhanced query for more comprehensive emergency services
+        overpass_url = "https://overpass-api.de/api/interpreter"
+        query = f"""
+        [out:json][timeout:25];
+        (
+          node["amenity"="hospital"](around:8000,{lat},{lng});
+          node["amenity"="clinic"](around:5000,{lat},{lng});
+          node["amenity"="fire_station"](around:5000,{lat},{lng});
+          node["amenity"="police"](around:5000,{lat},{lng});
+          node["emergency"="yes"](around:5000,{lat},{lng});
+          node["amenity"="pharmacy"](around:3000,{lat},{lng});
+          node["amenity"="doctors"](around:3000,{lat},{lng});
+          way["amenity"="hospital"](around:8000,{lat},{lng});
+          way["amenity"="clinic"](around:5000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        response = requests.post(overpass_url, data=query, timeout=25)
+        if response.status_code == 200:
+            data = response.json()
+            emergency_count = len(data.get('elements', []))
+            
+            # Count specific services
+            hospital_count = len([e for e in data.get('elements', []) 
+                               if e.get('tags', {}).get('amenity') == 'hospital'])
+            clinic_count = len([e for e in data.get('elements', []) 
+                              if e.get('tags', {}).get('amenity') == 'clinic'])
+            fire_station_count = len([e for e in data.get('elements', []) 
+                                   if e.get('tags', {}).get('amenity') == 'fire_station'])
+            police_count = len([e for e in data.get('elements', []) 
+                              if e.get('tags', {}).get('amenity') == 'police'])
+            pharmacy_count = len([e for e in data.get('elements', []) 
+                                if e.get('tags', {}).get('amenity') == 'pharmacy'])
+            
+            # Enhanced scoring with better ranges
+            if hospital_count >= 2:
+                base_score = 85.0  # Excellent hospital access
+            elif hospital_count >= 1:
+                base_score = 70.0  # Good hospital access
+            else:
+                base_score = 30.0  # No hospitals, rely on clinics
+            
+            # Enhanced bonus points
+            if clinic_count >= 8:
+                base_score += 8
+            elif clinic_count >= 4:
+                base_score += 5
+            elif clinic_count >= 2:
+                base_score += 3
+            
+            if fire_station_count >= 3:
+                base_score += 4
+            elif fire_station_count >= 1:
+                base_score += 2
+                
+            if police_count >= 3:
+                base_score += 3
+            elif police_count >= 1:
+                base_score += 2
+                
+            if pharmacy_count >= 5:
+                base_score += 2
+            elif pharmacy_count >= 2:
+                base_score += 1
+            
+            # Urban density bonus
+            if emergency_count >= 15:
+                base_score += 5
+            elif emergency_count >= 8:
+                base_score += 3
+            
+            return min(100.0, base_score)
+        
+        # Fallback to original method
+        return _get_emergency_services_access(lat, lng)
+        
+    except Exception:
+        return _get_emergency_services_access(lat, lng)
+
+def _get_enhanced_economic_capacity(lat: float, lng: float) -> float:
+    """Enhanced economic capacity using OpenStreetMap business data."""
+    try:
+        # Use OpenStreetMap business and commercial data
+        overpass_url = "https://overpass-api.de/api/interpreter"
+        query = f"""
+        [out:json][timeout:20];
+        (
+          node["shop"](around:3000,{lat},{lng});
+          node["office"](around:3000,{lat},{lng});
+          node["building"="commercial"](around:3000,{lat},{lng});
+          node["building"="retail"](around:3000,{lat},{lng});
+          node["building"="industrial"](around:5000,{lat},{lng});
+          way["landuse"="commercial"](around:3000,{lat},{lng});
+          way["landuse"="industrial"](around:5000,{lat},{lng});
+          way["landuse"="retail"](around:3000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        response = requests.post(overpass_url, data=query, timeout=20)
+        if response.status_code == 200:
+            data = response.json()
+            business_count = len(data.get('elements', []))
+            
+            # Enhanced economic capacity scoring
+            if business_count >= 50:
+                economic_base = 85.0  # Excellent economic activity
+            elif business_count >= 25:
+                economic_base = 70.0  # Good economic activity
+            elif business_count >= 10:
+                economic_base = 55.0  # Moderate economic activity
+            elif business_count >= 5:
+                economic_base = 40.0  # Basic economic activity
+            else:
+                economic_base = 25.0  # Limited economic activity
+            
+            # Regional adjustment
+            region = _get_geographic_region(lat, lng)
+            regional_multipliers = {
+                "north_america": 1.1,
+                "europe": 1.05,
+                "asia": 1.0,
+                "south_america": 0.9,
+                "africa": 0.8,
+                "oceania": 1.0,
+                "other": 0.85
+            }
+            
+            adjusted_score = economic_base * regional_multipliers.get(region, 0.85)
+            return min(100.0, max(0, adjusted_score))
+        
+        # Fallback to geographic estimation
+        return _estimate_economic_capacity(lat, lng)
+        
+    except Exception:
+        return _estimate_economic_capacity(lat, lng)
+
+def _get_enhanced_social_resilience(lat: float, lng: float) -> float:
+    """Enhanced social resilience using OpenStreetMap social infrastructure."""
+    try:
+        # Use OpenStreetMap social infrastructure data
+        overpass_url = "https://overpass-api.de/api/interpreter"
+        query = f"""
+        [out:json][timeout:20];
+        (
+          node["amenity"="school"](around:5000,{lat},{lng});
+          node["amenity"="university"](around:8000,{lat},{lng});
+          node["amenity"="college"](around:6000,{lat},{lng});
+          node["amenity"="community_centre"](around:3000,{lat},{lng});
+          node["leisure"="park"](around:2000,{lat},{lng});
+          node["amenity"="restaurant"](around:2000,{lat},{lng});
+          node["amenity"="bank"](around:3000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        response = requests.post(overpass_url, data=query, timeout=20)
+        if response.status_code == 200:
+            data = response.json()
+            social_count = len(data.get('elements', []))
+            
+            # Enhanced social resilience scoring
+            if social_count >= 30:
+                social_base = 85.0  # Excellent social infrastructure
+            elif social_count >= 20:
+                social_base = 75.0  # Good social infrastructure
+            elif social_count >= 10:
+                social_base = 60.0  # Moderate social infrastructure
+            elif social_count >= 5:
+                social_base = 45.0  # Basic social infrastructure
+            else:
+                social_base = 30.0  # Limited social infrastructure
+            
+            # Urban density bonus
+            urban_density = _estimate_urban_density(lat, lng)
+            if urban_density == "high":
+                social_base = min(100.0, social_base + 10)
+            elif urban_density == "medium":
+                social_base = min(100.0, social_base + 5)
+            
+            return social_base
+        
+        # Fallback to geographic estimation
+        return _estimate_social_resilience(lat, lng)
+        
+    except Exception:
+        return _estimate_social_resilience(lat, lng)
+
+def _get_enhanced_institutional_capacity(lat: float, lng: float) -> float:
+    """Enhanced institutional capacity based on regional governance and urban density."""
+    try:
+        region = _get_geographic_region(lat, lng)
+        urban_density = _estimate_urban_density(lat, lng)
+        
+        # Enhanced institutional capacity by region
+        institutional_capacity = {
+            "north_america": 80.0,  # Good governance
+            "europe": 85.0,           # Excellent governance
+            "asia": 65.0,            # Variable governance
+            "south_america": 55.0,    # Moderate governance
+            "africa": 45.0,           # Improving governance
+            "oceania": 75.0,          # Good governance
+            "other": 60.0             # Unknown
+        }
+        
+        base_capacity = institutional_capacity.get(region, 60.0)
+        
+        # Enhanced urban density adjustment
+        if urban_density == "high":
+            base_capacity = min(100.0, base_capacity + 15)
+        elif urban_density == "medium":
+            base_capacity = min(100.0, base_capacity + 8)
+        else:
+            base_capacity = max(0, base_capacity - 10)
+        
+        return base_capacity
+        
+    except Exception:
+        return _estimate_institutional_capacity(lat, lng)
+
+def _get_enhanced_resource_availability(lat: float, lng: float) -> float:
+    """Enhanced resource availability using OpenStreetMap resource data."""
+    try:
+        # Use OpenStreetMap resource and utility data
+        overpass_url = "https://overpass-api.de/api/interpreter"
+        query = f"""
+        [out:json][timeout:20];
+        (
+          node["amenity"="fuel"](around:3000,{lat},{lng});
+          node["amenity"="supermarket"](around:3000,{lat},{lng});
+          node["power"="tower"](around:5000,{lat},{lng});
+          node["waterway"="river"](around:5000,{lat},{lng});
+          node["natural"="water"](around:3000,{lat},{lng});
+          way["waterway"="river"](around:5000,{lat},{lng});
+          way["landuse"="reservoir"](around:5000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        response = requests.post(overpass_url, data=query, timeout=20)
+        if response.status_code == 200:
+            data = response.json()
+            resource_count = len(data.get('elements', []))
+            
+            # Enhanced resource availability scoring
+            if resource_count >= 15:
+                resource_base = 85.0  # Excellent resource availability
+            elif resource_count >= 10:
+                resource_base = 75.0  # Good resource availability
+            elif resource_count >= 5:
+                resource_base = 60.0  # Moderate resource availability
+            elif resource_count >= 2:
+                resource_base = 45.0  # Basic resource availability
+            else:
+                resource_base = 30.0  # Limited resource availability
+            
+            # Regional adjustments
+            region = _get_geographic_region(lat, lng)
+            regional_adjustments = {
+                "north_america": 5.0,
+                "europe": 5.0,
+                "asia": 0.0,
+                "south_america": 5.0,
+                "africa": -5.0,
+                "oceania": 0.0,
+                "other": 0.0
+            }
+            
+            adjusted_score = resource_base + regional_adjustments.get(region, 0.0)
+            return min(100.0, max(0, adjusted_score))
+        
+        # Fallback to geographic estimation
+        return _estimate_resource_availability(lat, lng)
+        
+    except Exception:
+        return _estimate_resource_availability(lat, lng)
+
+def _get_enhanced_fallback_recovery(lat: float, lng: float) -> Dict[str, Any]:
+    """Enhanced fallback recovery capacity with better scoring."""
+    try:
+        region = _get_geographic_region(lat, lng)
+        is_urban = _estimate_urban_density(lat, lng)
+        
+        # Enhanced base recovery capacity by region
+        regional_capacity = {
+            "north_america": 85.0,  # High resources
+            "europe": 80.0,           # Good resources
+            "asia": 70.0,            # Variable resources
+            "south_america": 55.0,    # Moderate resources
+            "africa": 45.0,           # Limited resources
+            "oceania": 75.0,          # Good resources
+            "other": 65.0             # Unknown
+        }
+        
+        base_capacity = regional_capacity.get(region, 65.0)
+        
+        # Enhanced urban density adjustment
+        if is_urban == "high":
+            base_capacity = min(100.0, base_capacity + 15.0)
+        elif is_urban == "medium":
+            base_capacity = min(100.0, base_capacity + 8.0)
+        else:
+            base_capacity = max(0, base_capacity - 10.0)
+        
+        suitability = _enhanced_recovery_to_suitability(base_capacity)
+        
+        return {
+            "value": suitability,
+            "recovery_index": base_capacity,
+            "infrastructure_resilience": min(100, base_capacity + 5),
+            "emergency_services": min(100, base_capacity + 3),
+            "economic_capacity": min(100, base_capacity + 2),
+            "social_resilience": min(100, base_capacity),
+            "institutional_capacity": min(100, base_capacity - 3),
+            "resource_availability": min(100, base_capacity - 2),
+            "recovery_time_estimate": _estimate_recovery_time(base_capacity),
+            "label": _get_recovery_label(suitability),
+            "source": "Enhanced Geographic Estimation (Fallback)",
+            "confidence": 30.0,
+            "reasoning": f"Enhanced estimation based on {region} region and {'urban' if is_urban == 'high' else 'suburban' if is_urban == 'medium' else 'rural'} environment."
+        }
+        
+    except Exception:
+        return {
+            "value": 65.0,  # Increased from 50.0
+            "recovery_index": 65.0,
+            "infrastructure_resilience": 65.0,
+            "emergency_services": 65.0,
+            "economic_capacity": 65.0,
+            "social_resilience": 65.0,
+            "institutional_capacity": 65.0,
+            "resource_availability": 65.0,
+            "recovery_time_estimate": "Months",
+            "label": "Good Recovery Capacity",
+            "source": "Enhanced Default Fallback",
+            "confidence": 15.0,
+            "reasoning": "Unable to determine recovery characteristics; using enhanced neutral baseline."
+        }
+
+# Keep all existing functions below this line
 def _get_infrastructure_resilience(lat: float, lng: float) -> float:
-    """Get infrastructure resilience assessment using real OpenStreetMap data."""
     try:
         # Use OpenStreetMap infrastructure data
         overpass_url = "https://overpass-api.de/api/interpreter"

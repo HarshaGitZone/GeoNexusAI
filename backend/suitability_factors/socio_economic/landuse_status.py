@@ -243,19 +243,20 @@ OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 def _buildable_probability(classification: str) -> float:
     """
     Probability that land is legally buildable.
-    This is NOT suitability, only permissibility.
+    Binary approach: Protected areas = 0, Good areas = high probability.
     """
     mapping = {
-        "Dense Forest": 0.05,
-        "Wetland/Conservation Area": 0.10,
-        "Water Body": 0.0,
-        "Urban/Developed Area": 0.95,
-        "Agricultural Land": 0.70,
-        "Grassland/Meadow": 0.60,
-        "Generic Buildable Land": 0.65,
-        "Unknown (API Error)": 0.50,
+        "Dense Forest": 0.0,  # Completely protected
+        "Wetland/Conservation Area": 0.05,  # Almost completely protected
+        "Water Body": 0.0,  # Completely impossible
+        "Urban/Developed Area": 0.95,  # Very high probability
+        "Agricultural Land": 0.80,  # High probability with permits
+        "Grassland/Meadow": 0.75,  # Good probability
+        "Generic Buildable Land": 0.75,  # Good probability
+        "Suburban/Mixed Use": 0.85,  # High probability
+        "Unknown (API Error)": 0.60,  # Moderate fallback
     }
-    return mapping.get(classification, 0.6)
+    return mapping.get(classification, 0.7)  # Default to good probability
 
 
 def infer_landuse_score(latitude: float, longitude: float) -> Tuple[float, dict]:
@@ -310,7 +311,7 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
     infrastructure_score, nearby_infra = _analyze_infrastructure_proximity(latitude, longitude)
 
     # --------------------------------------------------
-    # 3. PROTECTED / FOREST DETECTION (100m)
+    # 3. PROTECTED / FOREST DETECTION (100m) - Less Strict
     # --------------------------------------------------
     protected_query = f"""
     [out:json][timeout:15];
@@ -338,10 +339,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
 
                 if landuse == "forest" or natural in ("wood", "forest"):
                     classification = "Dense Forest"
+                    # Changed to 0.0 - completely unsuitable for development
                     return {
-                        "score": 10.0,
+                        "score": 0.0,
                         "classification": classification,
-                        "buildable_probability": _buildable_probability(classification),
+                        "buildable_probability": 0.0,  # Zero buildable probability
                         "ndvi_index": 0.75,
                         "ndvi_range": "0.6 – 0.9",
                         "confidence": 96.0,
@@ -350,15 +352,16 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "dataset_date": "2025-2026",
                         "infrastructure_score": infrastructure_score,
                         "nearby_infrastructure": nearby_infra,
-                        "reason": f"Dense forest detected within 100m. Legally non-buildable. Infrastructure score: {infrastructure_score:.0f}/100."
+                        "reason": f"Dense forest detected within 100m. Completely protected - no development allowed. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
                 if landuse in ("wetland", "conservation"):
                     classification = "Wetland/Conservation Area"
+                    # Changed to 5.0 - almost completely unsuitable 
                     return {
-                        "score": 15.0,
+                        "score": 5.0,
                         "classification": classification,
-                        "buildable_probability": _buildable_probability(classification),
+                        "buildable_probability": 0.05,  # Almost zero buildable probability
                         "ndvi_index": 0.55,
                         "ndvi_range": "0.4 – 0.6",
                         "confidence": 94.0,
@@ -367,17 +370,17 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "dataset_date": "2025-2026",
                         "infrastructure_score": infrastructure_score,
                         "nearby_infrastructure": nearby_infra,
-                        "reason": f"Protected environmental land detected within 100m. Infrastructure score: {infrastructure_score:.0f}/100."
+                        "reason": f"Protected wetland/conservation area detected within 100m. Extremely restricted development. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
         # --------------------------------------------------
-        # 4. BUILDABLE LAND DETECTION (500m)
+        # 4. BUILDABLE LAND DETECTION (500m) - Expanded
         # --------------------------------------------------
         fallback_query = f"""
         [out:json][timeout:15];
         (
-          way["landuse"~"^(residential|commercial|industrial|farmland|farmyard|orchard|meadow)$"](around:500,{latitude},{longitude});
-          relation["landuse"~"^(residential|commercial|industrial|farmland|farmyard|orchard|meadow)$"](around:500,{latitude},{longitude});
+          way["landuse"~"^(residential|commercial|industrial|farmland|farmyard|orchard|meadow|rural|suburban|mixed)$"](around:500,{latitude},{longitude});
+          relation["landuse"~"^(residential|commercial|industrial|farmland|farmyard|orchard|meadow|rural|suburban|mixed)$"](around:500,{latitude},{longitude});
         );
         out tags 3;
         """
@@ -391,13 +394,13 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                 landuse = tags.get("landuse", "").lower()
 
                 if landuse in ("residential", "commercial", "industrial", "retail"):
-                    # Boost score based on infrastructure
-                    enhanced_score = min(95.0, 85.0 + (infrastructure_score / 20.0))
+                    # Allow up to 100 for excellent urban locations with great infrastructure
+                    enhanced_score = min(100.0, 90.0 + (infrastructure_score / 10.0))  # Much higher base and boost
                     classification = "Urban/Developed Area"
                     return {
                         "score": enhanced_score,
                         "classification": classification,
-                        "buildable_probability": _buildable_probability(classification),
+                        "buildable_probability": 0.95,  # High buildable probability
                         "ndvi_index": 0.25,
                         "ndvi_range": "0.2 – 0.35",
                         "confidence": 94.0,
@@ -406,17 +409,36 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "dataset_date": "2025-2026",
                         "infrastructure_score": infrastructure_score,
                         "nearby_infrastructure": nearby_infra,
-                        "reason": f"Urban land-use detected within 500m. Enhanced by infrastructure proximity. Infrastructure score: {infrastructure_score:.0f}/100."
+                        "reason": f"Prime urban land-use detected within 500m. Excellent development potential. Infrastructure score: {infrastructure_score:.0f}/100."
+                    }
+
+                if landuse in ("rural", "suburban", "mixed"):
+                    # Allow up to 95 for excellent suburban/mixed areas
+                    enhanced_score = min(95.0, 82.0 + (infrastructure_score / 12.0))  # Higher base and boost
+                    classification = "Suburban/Mixed Use"
+                    return {
+                        "score": enhanced_score,
+                        "classification": classification,
+                        "buildable_probability": 0.85,  # High buildable probability
+                        "ndvi_index": 0.35,
+                        "ndvi_range": "0.3 – 0.4",
+                        "confidence": 92.0,
+                        "is_terrestrial": True,
+                        "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
+                        "dataset_date": "2025-2026",
+                        "infrastructure_score": infrastructure_score,
+                        "nearby_infrastructure": nearby_infra,
+                        "reason": f"Excellent suburban/mixed land-use detected within 500m. Very good development potential. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
                 if landuse in ("farmland", "farmyard", "orchard"):
-                    # Moderate boost for agricultural land with infrastructure
-                    enhanced_score = min(85.0, 75.0 + (infrastructure_score / 25.0))
+                    # Allow up to 90 for good agricultural land with infrastructure
+                    enhanced_score = min(90.0, 80.0 + (infrastructure_score / 15.0))  # Higher base and boost
                     classification = "Agricultural Land"
                     return {
                         "score": enhanced_score,
                         "classification": classification,
-                        "buildable_probability": _buildable_probability(classification),
+                        "buildable_probability": 0.80,  # Good buildable probability
                         "ndvi_index": 0.52,
                         "ndvi_range": "0.4 – 0.6",
                         "confidence": 92.0,
@@ -425,17 +447,17 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "dataset_date": "2025-2026",
                         "infrastructure_score": infrastructure_score,
                         "nearby_infrastructure": nearby_infra,
-                        "reason": f"Agricultural land-use detected. Infrastructure access: {infrastructure_score:.0f}/100."
+                        "reason": f"Good agricultural land-use detected with infrastructure access. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
                 if landuse == "meadow":
-                    # Small boost for meadow land with infrastructure
-                    enhanced_score = min(75.0, 65.0 + (infrastructure_score / 30.0))
+                    # Allow up to 85 for meadow land with good infrastructure
+                    enhanced_score = min(85.0, 72.0 + (infrastructure_score / 18.0))  # Higher base and boost
                     classification = "Grassland/Meadow"
                     return {
                         "score": enhanced_score,
                         "classification": classification,
-                        "buildable_probability": _buildable_probability(classification),
+                        "buildable_probability": 0.75,  # Good buildable probability
                         "ndvi_index": 0.45,
                         "ndvi_range": "0.35 – 0.55",
                         "confidence": 90.0,
@@ -444,21 +466,21 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "dataset_date": "2025-2026",
                         "infrastructure_score": infrastructure_score,
                         "nearby_infrastructure": nearby_infra,
-                        "reason": f"Grassland/meadow land-use detected. Infrastructure access: {infrastructure_score:.0f}/100."
+                        "reason": f"Good grassland/meadow land-use detected with infrastructure access. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
         # --------------------------------------------------
-        # 5. GENERIC BUILDABLE FALLBACK (infrastructure-enhanced)
+        # 5. GENERIC BUILDABLE FALLBACK (infrastructure-enhanced) - Allow High Scores
         # --------------------------------------------------
         classification = "Generic Buildable Land"
-        # Infrastructure significantly impacts generic land scores
-        infrastructure_boost = infrastructure_score / 2.5  # Max 40 point boost
-        enhanced_score = min(85.0, 45.0 + infrastructure_boost)
+        # Allow up to 95 for generic areas with excellent infrastructure
+        infrastructure_boost = infrastructure_score / 1.8  # Max ~55 point boost 
+        enhanced_score = min(95.0, 60.0 + infrastructure_boost)  # Higher base and max
         
         return {
             "score": enhanced_score,
             "classification": classification,
-            "buildable_probability": _buildable_probability(classification),
+            "buildable_probability": 0.75,  # Good buildable probability
             "ndvi_index": 0.40,
             "ndvi_range": "0.35 – 0.45",
             "confidence": 55.0,
@@ -467,13 +489,13 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
             "dataset_date": "2025-2026",
             "infrastructure_score": infrastructure_score,
             "nearby_infrastructure": nearby_infra,
-            "reason": f"No dominant land-use detected. Score enhanced by infrastructure proximity: {infrastructure_score:.0f}/100."
+            "reason": f"No dominant land-use detected. Good potential with infrastructure access: {infrastructure_score:.0f}/100."
         }
 
     except Exception:
         classification = "Unknown (API Error)"
         return {
-            "score": 35.0,
+            "score": 50.0,  # Increased from 35.0 to 50.0 - more reasonable fallback
             "classification": classification,
             "buildable_probability": _buildable_probability(classification),
             "ndvi_index": None,

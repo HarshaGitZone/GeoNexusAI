@@ -13801,3 +13801,145 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
     border-color: rgba(45, 138, 138, 0.45);
     background: rgba(45, 138, 138, 0.12);
 }
+
+/* ===== COLLAPSIBLE MAP CONTROLS ===== */
+
+/* Collapse toggle button */
+.collapse-controls-btn {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 20, 0.95)) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    margin-left: 8px !important;
+    margin-right: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+}
+
+.collapse-controls-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(30, 30, 30, 1)) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.collapse-controls-btn:active {
+    transform: translateY(0) scale(0.98) !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Add subtle glow effect */
+.collapse-controls-btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, rgba(100, 100, 255, 0.1), rgba(150, 150, 255, 0.05)) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+    z-index: -1 !important;
+}
+
+.collapse-controls-btn:hover::before {
+    opacity: 1 !important;
+}
+
+/* Style the chevron icons specifically */
+.collapse-controls-btn {
+    font-family: 'Courier New', monospace !important;
+    letter-spacing: -2px !important;
+    line-height: 1 !important;
+}
+
+/* Light theme support */
+[data-theme="light"] .collapse-controls-btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.98)) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    color: rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .collapse-controls-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(245, 245, 245, 1)) !important;
+    color: rgba(0, 0, 0, 0.9) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="light"] .collapse-controls-btn::before {
+    background: linear-gradient(135deg, rgba(100, 100, 255, 0.15), rgba(150, 150, 255, 0.08)) !important;
+}
+
+/* Standalone toggle container that never collapses */
+.standalone-toggle-container {
+    position: absolute !important;
+    bottom: 0 !important;
+    right: 5px !important;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure the standalone toggle is always visible */
+.standalone-toggle-container .collapse-controls-btn {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    display: inline-flex !important;
+    visibility: visible !important;
+}
+
+/* Fullscreen safety for standalone toggle */
+:fullscreen .standalone-toggle-container,
+.map-container:fullscreen .standalone-toggle-container {
+    z-index: 999999 !important;
+    position: absolute !important;
+}
+
+/* Collapsed state for all control containers */
+.engine-switch-container.collapsed,
+.map-variety-picker.collapsed,
+.tactical-mode-toggle-container.collapsed {
+    opacity: 0 !important;
+    transform: translateX(120%) scale(0.8) !important;
+    pointer-events: none !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Smooth transitions for normal state */
+.engine-switch-container,
+.map-variety-picker,
+.tactical-mode-toggle-container {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Ensure toggle button stays visible during collapse */
+.collapse-controls-btn {
+    position: relative !important;
+    z-index: 10000 !important;
+}
+
+/* Fullscreen safety for collapse button */
+:fullscreen .collapse-controls-btn,
+.map-container:fullscreen .collapse-controls-btn {
+    z-index: 99999 !important;
+}
