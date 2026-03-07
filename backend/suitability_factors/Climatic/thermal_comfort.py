@@ -46,14 +46,14 @@ OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 
 def _comfort_label(score: float) -> str:
-    if score < 40:
-        return "Thermally uncomfortable"
-    elif score < 60:
-        return "Marginal thermal comfort"
-    elif score < 80:
-        return "Comfortable conditions"
-    else:
+    if score >= 80:
         return "Highly comfortable climate"
+    elif score >= 60:
+        return "Comfortable conditions"
+    elif score >= 40:
+        return "Marginal thermal comfort"
+    else:
+        return "Thermally uncomfortable"
 
 
 def get_thermal_comfort_analysis(lat: float, lng: float) -> Dict:
@@ -95,14 +95,30 @@ def get_thermal_comfort_analysis(lat: float, lng: float) -> Dict:
                 "source": "Open-Meteo"
             }
 
-        # --- Bioclimatic comfort model ---
+        # --- IMPROVED Bioclimatic comfort model ---
         comfort = 100.0
 
-        # Temperature deviation penalty
-        comfort -= abs(temp - 24.0) * 2.5
+        # More reasonable temperature range (15-35°C is livable)
+        if 18 <= temp <= 32:
+            # Very comfortable range - minimal penalty
+            comfort -= abs(temp - 25.0) * 1.0
+        else:
+            # Outside comfortable range - higher penalty
+            comfort -= abs(temp - 25.0) * 2.0
 
-        # Humidity deviation penalty
-        comfort -= abs(humidity - 55.0) * 0.3
+        # More reasonable humidity range (30-80% is acceptable)
+        if 40 <= humidity <= 70:
+            # Optimal humidity - minimal penalty
+            comfort -= abs(humidity - 55.0) * 0.2
+        else:
+            # Outside optimal range - moderate penalty
+            comfort -= abs(humidity - 55.0) * 0.5
+
+        # Climate zone adjustments (some places are naturally warmer/cooler)
+        if 20 <= lat <= 35:  # Subtropical zones
+            comfort += 5  # Naturally warmer areas get bonus
+        elif -35 <= lat <= -20:  # Southern subtropical
+            comfort += 5
 
         comfort = max(0.0, min(100.0, comfort))
         comfort = round(comfort, 2)

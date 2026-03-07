@@ -28,11 +28,11 @@ OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 
 def _thermal_intensity_label(value: float) -> str:
-    if value < 25:
+    if value >= 80:
         return "Low heat stress"
-    elif value < 45:
+    elif value >= 60:
         return "Moderate heat stress"
-    elif value < 65:
+    elif value >= 40:
         return "High heat stress"
     else:
         return "Extreme heat stress"
@@ -68,27 +68,27 @@ def get_thermal_intensity(lat: float, lng: float) -> Dict:
 
         avg_max_temp = sum(temps) / len(temps)
 
-        # FIXED: Heat stress scoring - optimal temperature gets highest score
-        # Optimal range: 18-28°C gets highest scores (80-100)
-        # Too cold (<18°C) or too hot (>28°C) gets lower scores
-        if 18 <= avg_max_temp <= 28:
-            # Optimal temperature range - high scores
+        # IMPROVED: Heat stress scoring - more reasonable temperature ranges
+        # Good range: 15-35°C gets good scores (70-100)
+        # Too cold (<15°C) or very hot (>35°C) gets lower scores
+        if 15 <= avg_max_temp <= 35:
+            # Good temperature range - high scores
             base_score = 100.0
-            if avg_max_temp < 20:
-                # Slightly cool, still good
-                score = base_score - ((20 - avg_max_temp) * 2)
-            elif avg_max_temp > 26:
-                # Getting warm, slightly lower score
-                score = base_score - ((avg_max_temp - 26) * 3)
+            if avg_max_temp < 18:
+                # Cool but comfortable
+                score = base_score - ((18 - avg_max_temp) * 3)
+            elif avg_max_temp > 32:
+                # Warm but manageable
+                score = base_score - ((avg_max_temp - 32) * 4)
             else:
-                # Perfect temperature range
+                # Very comfortable range (18-32°C)
                 score = base_score
-        elif avg_max_temp < 18:
+        elif avg_max_temp < 15:
             # Too cold - decreasing scores
-            score = max(20, 80 - ((18 - avg_max_temp) * 4))
+            score = max(20, 85 - ((15 - avg_max_temp) * 3))
         else:
-            # Too hot - rapidly decreasing scores
-            score = max(10, 90 - ((avg_max_temp - 28) * 5))
+            # Very hot - gradually decreasing scores
+            score = max(15, 85 - ((avg_max_temp - 35) * 3))
         
         intensity = max(0.0, min(100.0, score))
         intensity = round(intensity, 2)

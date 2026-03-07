@@ -1124,8 +1124,41 @@ def _calculate_confidence(living, health) -> float:
     if health > 0: confidence += 20
     return min(95, confidence)
 
-def _generate_reasoning(idx, living, health) -> str:
-    return f"Habitability score of {idx:.1f} reflects urban infrastructure density and current living standards."
+def _generate_reasoning(recovery_index: float, infrastructure: float, emergency: float) -> str:
+    """Generate detailed reasoning with specific numerical evidence."""
+    reasoning_parts = []
+    
+    # Infrastructure resilience evidence
+    if infrastructure > 80:
+        reasoning_parts.append(f"excellent infrastructure resilience ({infrastructure:.0f}/100) with comprehensive road networks, multiple transport options, and urban connectivity")
+    elif infrastructure > 60:
+        reasoning_parts.append(f"good infrastructure resilience ({infrastructure:.0f}/100) with solid road networks and basic transport connectivity")
+    elif infrastructure > 40:
+        reasoning_parts.append(f"moderate infrastructure resilience ({infrastructure:.0f}/100) with limited road networks and basic transport options")
+    else:
+        reasoning_parts.append(f"poor infrastructure resilience ({infrastructure:.0f}/100) with minimal transport networks and limited connectivity")
+    
+    # Emergency services evidence
+    if emergency > 80:
+        reasoning_parts.append(f"outstanding emergency services access ({emergency:.0f}/100) with multiple hospitals, comprehensive fire protection, and police coverage")
+    elif emergency > 60:
+        reasoning_parts.append(f"good emergency services access ({emergency:.0f}/100) with hospitals nearby and adequate emergency response capabilities")
+    elif emergency > 40:
+        reasoning_parts.append(f"moderate emergency services access ({emergency:.0f}/100) with basic healthcare facilities and limited emergency response")
+    else:
+        reasoning_parts.append(f"limited emergency services access ({emergency:.0f}/100) with minimal healthcare facilities and extended response times")
+    
+    # Overall recovery capacity assessment
+    if recovery_index > 75:
+        reasoning_parts.append(f"excellent recovery capacity ({recovery_index:.0f}/100) enables rapid disaster response within weeks")
+    elif recovery_index > 50:
+        reasoning_parts.append(f"good recovery capacity ({recovery_index:.0f}/100) supports effective disaster response within months")
+    elif recovery_index > 25:
+        reasoning_parts.append(f"moderate recovery capacity ({recovery_index:.0f}/100) may require years for full recovery")
+    else:
+        reasoning_parts.append(f"poor recovery capacity ({recovery_index:.0f}/100) could take decades for recovery")
+    
+    return ". ".join(reasoning_parts) + "."
 
 # --- FALLBACK AND ESTIMATION HELPERS ---
 
@@ -1133,26 +1166,142 @@ def _get_fallback_habitability(lat, lng) -> Dict:
     return {"value": 50.0, "label": "Moderate Habitability", "reasoning": "Baseline estimate applied."}
 
 def _estimate_living_conditions(lat, lng) -> float:
-    return 60.0 # Default fallback score
+    """Estimate living conditions based on urban density and region."""
+    # Check if this is a major urban area
+    urban_density = _estimate_urban_density(lat, lng)
+    region = _get_geographic_region(lat, lng)
+    
+    # Base scores by urban density
+    if urban_density == "high":
+        base_score = 85.0  # Major cities have good infrastructure
+    elif urban_density == "medium":
+        base_score = 65.0  # Suburban areas
+    else:
+        base_score = 40.0  # Rural areas
+    
+    # Regional adjustments
+    regional_boost = {
+        "north_america": 10.0,
+        "europe": 10.0,
+        "asia": 5.0,
+        "oceania": 8.0,
+        "south_america": 0.0,
+        "africa": -5.0
+    }
+    
+    return max(20.0, min(100.0, base_score + regional_boost.get(region, 0.0)))
 
 def _estimate_healthcare_access(lat, lng) -> float:
-    return 50.0
+    """Estimate healthcare access based on urban density."""
+    urban_density = _estimate_urban_density(lat, lng)
+    
+    if urban_density == "high":
+        return 80.0  # Cities have hospitals, clinics
+    elif urban_density == "medium":
+        return 55.0  # Suburbs have some healthcare
+    else:
+        return 25.0  # Rural areas have limited healthcare
 
 def _estimate_education_access(lat, lng) -> float:
-    return 50.0
+    """Estimate education access based on urban density."""
+    urban_density = _estimate_urban_density(lat, lng)
+    
+    if urban_density == "high":
+        return 85.0  # Schools, colleges, universities
+    elif urban_density == "medium":
+        return 60.0  # Some schools
+    else:
+        return 30.0  # Limited educational facilities
 
 def _estimate_economic_opportunity(lat, lng) -> float:
-    return 50.0
+    """Estimate economic opportunity based on urban density and region."""
+    urban_density = _estimate_urban_density(lat, lng)
+    region = _get_geographic_region(lat, lng)
+    
+    # Base economic scores by urban density
+    if urban_density == "high":
+        base_score = 90.0  # Jobs, businesses, commerce
+    elif urban_density == "medium":
+        base_score = 60.0  # Some economic activity
+    else:
+        base_score = 35.0  # Limited economic opportunities
+    
+    # Regional economic adjustments
+    regional_economy = {
+        "north_america": 5.0,
+        "europe": 5.0,
+        "asia": 8.0,  # High growth potential
+        "oceania": 3.0,
+        "south_america": -2.0,
+        "africa": -5.0
+    }
+    
+    return max(20.0, min(100.0, base_score + regional_economy.get(region, 0.0)))
 
 def _estimate_environmental_quality(lat, lng) -> float:
-    return 50.0
+    """Estimate environmental quality - better in less dense areas."""
+    urban_density = _estimate_urban_density(lat, lng)
+    
+    # Paradox: less dense areas often have better environmental quality
+    if urban_density == "high":
+        return 45.0  # Pollution, congestion
+    elif urban_density == "medium":
+        return 65.0  # Moderate environment
+    else:
+        return 80.0  # Clean air, nature
 
 def _estimate_social_infrastructure(lat, lng) -> float:
-    return 50.0
+    """Estimate social infrastructure based on urban density."""
+    urban_density = _estimate_urban_density(lat, lng)
+    
+    if urban_density == "high":
+        return 85.0  # Community centers, parks, facilities
+    elif urban_density == "medium":
+        return 60.0  # Some social infrastructure
+    else:
+        return 30.0  # Limited social facilities
 
 def _get_geographic_region(lat, lng) -> str:
-    if 60 <= lat <= 80: return "europe"
-    return "other"
+    """Determine geographic region with better accuracy."""
+    if 60 <= lat <= 80 and -10 <= lng <= 40:
+        return "europe"
+    elif 25 <= lat <= 50 and -130 <= lng <= -60:
+        return "north_america"
+    elif -55 <= lat <= 15 and -80 <= lng <= -35:
+        return "south_america"
+    elif -35 <= lat <= 37 and 10 <= lng <= 50:
+        return "africa"
+    elif 5 <= lat <= 50 and 60 <= lng <= 150:
+        return "asia"
+    elif -45 <= lat <= -10 and 110 <= lng <= 180:
+        return "oceania"
+    else:
+        return "other"
 
 def _estimate_urban_density(lat, lng) -> str:
-    return "medium"
+    """Estimate urban density based on proximity to major cities."""
+    import math
+    
+    # Major urban centers with larger radius for detection
+    urban_centers = [
+        # India: Delhi, Mumbai, Bangalore, Chennai, Kolkata, Hyderabad, Pune
+        (28.6, 77.2, 1.0), (19.1, 72.9, 1.0), (12.9, 77.6, 0.8),
+        (13.1, 80.3, 0.8), (22.6, 88.4, 0.8), (17.4, 78.5, 0.7), (18.5, 73.9, 0.6),
+        # International: NYC, London, Tokyo, Paris, Singapore, Dubai
+        (40.7, -74.0, 0.8), (51.5, -0.1, 0.8), (35.7, 139.7, 0.8),
+        (48.9, 2.4, 0.7), (1.3, 103.8, 0.7), (25.2, 55.3, 0.6)
+    ]
+    
+    # Check for high density (within radius)
+    for city_lat, city_lng, radius in urban_centers:
+        distance = math.sqrt((lat - city_lat)**2 + (lng - city_lng)**2)
+        if distance <= radius:
+            return "high"
+    
+    # Check for medium density (within 2 degrees)
+    for city_lat, city_lng, _ in urban_centers:
+        distance = math.sqrt((lat - city_lat)**2 + (lng - city_lng)**2)
+        if distance <= 2.0:
+            return "medium"
+    
+    return "low"

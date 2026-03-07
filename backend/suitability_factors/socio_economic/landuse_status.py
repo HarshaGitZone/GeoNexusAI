@@ -275,6 +275,7 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
     - Hard water disqualification (authoritative)
     - Protected-area detection (100m)
     - Buildable fallback detection (500m)
+    - Infrastructure proximity scoring
     """
 
     # --------------------------------------------------
@@ -295,6 +296,8 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
             "is_terrestrial": False,
             "dataset_source": "Sentinel-2 NDVI (ESA 2025) + OpenStreetMap",
             "dataset_date": "2025-2026",
+            "infrastructure_score": 0.0,
+            "nearby_infrastructure": [],
             "reason": (
                 "Location lies on a water body (distance < 20m). "
                 "Land-use and zoning are not applicable."
@@ -302,7 +305,12 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
         }
 
     # --------------------------------------------------
-    # 2. PROTECTED / FOREST DETECTION (100m)
+    # 2. INFRASTRUCTURE PROXIMITY ANALYSIS
+    # --------------------------------------------------
+    infrastructure_score, nearby_infra = _analyze_infrastructure_proximity(latitude, longitude)
+
+    # --------------------------------------------------
+    # 3. PROTECTED / FOREST DETECTION (100m)
     # --------------------------------------------------
     protected_query = f"""
     [out:json][timeout:15];
@@ -340,7 +348,9 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "is_terrestrial": True,
                         "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
                         "dataset_date": "2025-2026",
-                        "reason": "Dense forest detected within 100m. Legally non-buildable."
+                        "infrastructure_score": infrastructure_score,
+                        "nearby_infrastructure": nearby_infra,
+                        "reason": f"Dense forest detected within 100m. Legally non-buildable. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
                 if landuse in ("wetland", "conservation"):
@@ -355,11 +365,13 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "is_terrestrial": True,
                         "dataset_source": "Sentinel-2 NDVI + OpenStreetMap / UNESCO",
                         "dataset_date": "2025-2026",
-                        "reason": "Protected environmental land detected within 100m."
+                        "infrastructure_score": infrastructure_score,
+                        "nearby_infrastructure": nearby_infra,
+                        "reason": f"Protected environmental land detected within 100m. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
         # --------------------------------------------------
-        # 3. BUILDABLE LAND DETECTION (500m)
+        # 4. BUILDABLE LAND DETECTION (500m)
         # --------------------------------------------------
         fallback_query = f"""
         [out:json][timeout:15];
@@ -379,9 +391,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                 landuse = tags.get("landuse", "").lower()
 
                 if landuse in ("residential", "commercial", "industrial", "retail"):
+                    # Boost score based on infrastructure
+                    enhanced_score = min(95.0, 85.0 + (infrastructure_score / 20.0))
                     classification = "Urban/Developed Area"
                     return {
-                        "score": 85.0,
+                        "score": enhanced_score,
                         "classification": classification,
                         "buildable_probability": _buildable_probability(classification),
                         "ndvi_index": 0.25,
@@ -390,13 +404,17 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "is_terrestrial": True,
                         "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
                         "dataset_date": "2025-2026",
-                        "reason": "Urban land-use detected within 500m."
+                        "infrastructure_score": infrastructure_score,
+                        "nearby_infrastructure": nearby_infra,
+                        "reason": f"Urban land-use detected within 500m. Enhanced by infrastructure proximity. Infrastructure score: {infrastructure_score:.0f}/100."
                     }
 
                 if landuse in ("farmland", "farmyard", "orchard"):
+                    # Moderate boost for agricultural land with infrastructure
+                    enhanced_score = min(85.0, 75.0 + (infrastructure_score / 25.0))
                     classification = "Agricultural Land"
                     return {
-                        "score": 75.0,
+                        "score": enhanced_score,
                         "classification": classification,
                         "buildable_probability": _buildable_probability(classification),
                         "ndvi_index": 0.52,
@@ -405,13 +423,17 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "is_terrestrial": True,
                         "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
                         "dataset_date": "2025-2026",
-                        "reason": "Agricultural land-use detected."
+                        "infrastructure_score": infrastructure_score,
+                        "nearby_infrastructure": nearby_infra,
+                        "reason": f"Agricultural land-use detected. Infrastructure access: {infrastructure_score:.0f}/100."
                     }
 
                 if landuse == "meadow":
+                    # Small boost for meadow land with infrastructure
+                    enhanced_score = min(75.0, 65.0 + (infrastructure_score / 30.0))
                     classification = "Grassland/Meadow"
                     return {
-                        "score": 65.0,
+                        "score": enhanced_score,
                         "classification": classification,
                         "buildable_probability": _buildable_probability(classification),
                         "ndvi_index": 0.45,
@@ -420,15 +442,21 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                         "is_terrestrial": True,
                         "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
                         "dataset_date": "2025-2026",
-                        "reason": "Grassland/meadow land-use detected."
+                        "infrastructure_score": infrastructure_score,
+                        "nearby_infrastructure": nearby_infra,
+                        "reason": f"Grassland/meadow land-use detected. Infrastructure access: {infrastructure_score:.0f}/100."
                     }
 
         # --------------------------------------------------
-        # 4. GENERIC BUILDABLE FALLBACK
+        # 5. GENERIC BUILDABLE FALLBACK (infrastructure-enhanced)
         # --------------------------------------------------
         classification = "Generic Buildable Land"
+        # Infrastructure significantly impacts generic land scores
+        infrastructure_boost = infrastructure_score / 2.5  # Max 40 point boost
+        enhanced_score = min(85.0, 45.0 + infrastructure_boost)
+        
         return {
-            "score": 45.0,
+            "score": enhanced_score,
             "classification": classification,
             "buildable_probability": _buildable_probability(classification),
             "ndvi_index": 0.40,
@@ -437,7 +465,9 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
             "is_terrestrial": True,
             "dataset_source": "Sentinel-2 NDVI + Regional Baselines",
             "dataset_date": "2025-2026",
-            "reason": "No dominant land-use detected. Returning conservative unknown-land baseline."
+            "infrastructure_score": infrastructure_score,
+            "nearby_infrastructure": nearby_infra,
+            "reason": f"No dominant land-use detected. Score enhanced by infrastructure proximity: {infrastructure_score:.0f}/100."
         }
 
     except Exception:
@@ -451,5 +481,138 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
             "is_terrestrial": True,
             "dataset_source": "Fallback – Overpass API Error",
             "dataset_date": "2025-2026",
-            "reason": "Land-use data unavailable due API error. Conservative non-buildable-biased fallback applied."
+            "infrastructure_score": infrastructure_score,
+            "nearby_infrastructure": nearby_infra,
+            "reason": f"Land-use data unavailable due API error. Infrastructure score: {infrastructure_score:.0f}/100."
         }
+
+
+def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, list]:
+    """
+    Analyze proximity to key infrastructure and return score + details.
+    Higher score = better infrastructure access.
+    """
+    try:
+        # Comprehensive infrastructure query
+        infra_query = f"""
+        [out:json][timeout:20];
+        (
+          node["amenity"="hospital"](around:2000,{lat},{lng});
+          node["amenity"="clinic"](around:2000,{lat},{lng});
+          node["amenity"="school"](around:1000,{lat},{lng});
+          node["amenity"="university"](around:3000,{lat},{lng});
+          node["shop"="supermarket"](around:1000,{lat},{lng});
+          node["shop"="mall"](around:2000,{lat},{lng});
+          node["highway"="primary"](around:500,{lat},{lng});
+          node["highway"="secondary"](around:500,{lat},{lng});
+          node["railway"="station"](around:2000,{lat},{lng});
+          node["aeroway"="aerodrome"](around:10000,{lat},{lng});
+          node["amenity"="bank"](around:1000,{lat},{lng});
+          node["amenity"="pharmacy"](around:500,{lat},{lng});
+          node["amenity"="restaurant"](around:500,{lat},{lng});
+          node["amenity"="fuel"](around:1000,{lat},{lng});
+          node["power"="tower"](around:1000,{lat},{lng});
+        );
+        out tags;
+        """
+        
+        resp = requests.post(OVERPASS_URL, data={"data": infra_query}, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        
+        # Count infrastructure types
+        infra_counts = {
+            "hospitals": 0,
+            "clinics": 0,
+            "schools": 0,
+            "universities": 0,
+            "supermarkets": 0,
+            "malls": 0,
+            "primary_roads": 0,
+            "secondary_roads": 0,
+            "railway_stations": 0,
+            "airports": 0,
+            "banks": 0,
+            "pharmacies": 0,
+            "restaurants": 0,
+            "fuel_stations": 0,
+            "power_towers": 0
+        }
+        
+        nearby_infra = []
+        
+        for element in data.get("elements", []):
+            tags = element.get("tags", {})
+            name = tags.get("name", "Unnamed")
+            
+            # Categorize and count
+            if tags.get("amenity") == "hospital":
+                infra_counts["hospitals"] += 1
+                nearby_infra.append(f"Hospital: {name}")
+            elif tags.get("amenity") == "clinic":
+                infra_counts["clinics"] += 1
+                nearby_infra.append(f"Clinic: {name}")
+            elif tags.get("amenity") == "school":
+                infra_counts["schools"] += 1
+                nearby_infra.append(f"School: {name}")
+            elif tags.get("amenity") == "university":
+                infra_counts["universities"] += 1
+                nearby_infra.append(f"University: {name}")
+            elif tags.get("shop") == "supermarket":
+                infra_counts["supermarkets"] += 1
+                nearby_infra.append(f"Supermarket: {name}")
+            elif tags.get("shop") == "mall":
+                infra_counts["malls"] += 1
+                nearby_infra.append(f"Mall: {name}")
+            elif tags.get("highway") == "primary":
+                infra_counts["primary_roads"] += 1
+                nearby_infra.append(f"Primary Road")
+            elif tags.get("highway") == "secondary":
+                infra_counts["secondary_roads"] += 1
+                nearby_infra.append(f"Secondary Road")
+            elif tags.get("railway") == "station":
+                infra_counts["railway_stations"] += 1
+                nearby_infra.append(f"Railway Station: {name}")
+            elif tags.get("aeroway") == "aerodrome":
+                infra_counts["airports"] += 1
+                nearby_infra.append(f"Airport: {name}")
+            elif tags.get("amenity") == "bank":
+                infra_counts["banks"] += 1
+                nearby_infra.append(f"Bank: {name}")
+            elif tags.get("amenity") == "pharmacy":
+                infra_counts["pharmacies"] += 1
+                nearby_infra.append(f"Pharmacy: {name}")
+            elif tags.get("amenity") == "restaurant":
+                infra_counts["restaurants"] += 1
+            elif tags.get("amenity") == "fuel":
+                infra_counts["fuel_stations"] += 1
+                nearby_infra.append(f"Fuel Station: {name}")
+            elif tags.get("power") == "tower":
+                infra_counts["power_towers"] += 1
+        
+        # Calculate infrastructure score (0-100)
+        score = 0.0
+        
+        # Healthcare (30 points max)
+        score += min(30, infra_counts["hospitals"] * 15 + infra_counts["clinics"] * 8)
+        
+        # Education (20 points max)
+        score += min(20, infra_counts["schools"] * 5 + infra_counts["universities"] * 10)
+        
+        # Commercial (20 points max)
+        score += min(20, infra_counts["supermarkets"] * 5 + infra_counts["malls"] * 10 + 
+                    infra_counts["banks"] * 3 + infra_counts["restaurants"] * 2)
+        
+        # Transportation (20 points max)
+        score += min(20, infra_counts["primary_roads"] * 5 + infra_counts["secondary_roads"] * 3 +
+                    infra_counts["railway_stations"] * 8 + infra_counts["airports"] * 10)
+        
+        # Utilities (10 points max)
+        score += min(10, infra_counts["pharmacies"] * 3 + infra_counts["fuel_stations"] * 2 +
+                    infra_counts["power_towers"] * 2)
+        
+        return min(100.0, score), nearby_infra[:10]  # Return top 10 nearby facilities
+        
+    except Exception as e:
+        # Fallback infrastructure estimation
+        return 40.0, ["Infrastructure data unavailable"]

@@ -38,8 +38,14 @@ class OpenMeteoAdapter(WeatherAdapter):
         self.base_url = "https://api.open-meteo.com/v1/forecast"
     
     def get_weather(self, lat: float, lng: float) -> Optional[Dict]:
-        """Get weather from Open-Meteo API"""
+        """Get weather from Open-Meteo API with enhanced error handling"""
         try:
+            # Try primary URL first
+            urls = [
+                "https://api.open-meteo.com/v1/forecast",
+                "https://archive-api.open-meteo.com/v1/archive"
+            ]
+            
             params = {
                 "latitude": lat,
                 "longitude": lng,
@@ -49,22 +55,63 @@ class OpenMeteoAdapter(WeatherAdapter):
                     "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m",
                     "surface_pressure", "visibility", "uv_index", "dew_point_2m"
                 ],
-                "daily": ["sunrise", "sunset", "uv_index_max", "precipitation_probability_max"],
-                "hourly": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m"],
+                "daily": [
+                    "sunrise", "sunset", "uv_index_max", "precipitation_probability_max"
+                ],
+                "hourly": [
+                    "temperature_2m", "relative_humidity_2m", "wind_speed_10m"
+                ],
                 "timezone": "auto"
             }
             
-            response = requests.get(self.base_url, params=params, timeout=15)
-            response.raise_for_status()
-            data = response.json()
+            # Try each URL with timeout
+            for url in urls:
+                try:
+                    response = requests.get(url, params=params, timeout=10, 
+                                      headers={'User-Agent': 'GeoNexusAI/1.0'})
+                    if response.status_code == 200:
+                        data = response.json()
+                        current = data.get("current", {})
+                        daily = data.get("daily", {})
+                        
+                        if not current:
+                            return None
+                        
+                        # Map weather codes to descriptions
+                        weather_code = current.get("weather_code", 0)
+                        is_day = current.get("is_day", 1)
+                        description, icon = self._get_weather_description(weather_code, is_day)
+                        
+                        return {
+                            "temperature": current.get("temperature_2m"),
+                            "feels_like": current.get("apparent_temperature"),
+                            "humidity": current.get("relative_humidity_2m"),
+                            "pressure": current.get("surface_pressure"),
+                            "wind_speed": current.get("wind_speed_10m"),
+                            "wind_direction": current.get("wind_direction_10m"),
+                            "wind_gusts": current.get("wind_gusts_10m"),
+                            "visibility": current.get("visibility"),
+                            "uv_index": current.get("uv_index"),
+                            "dew_point": current.get("dew_point_2m"),
+                            "precipitation": current.get("precipitation", 0),
+                            "cloud_cover": current.get("cloud_cover"),
+                            "weather_code": weather_code,
+                            "description": description,
+                            "icon": icon,
+                            "is_day": is_day,
+                            "sunrise": daily.get("sunrise", [None])[0],
+                            "sunset": daily.get("sunset", [None])[0],
+                            "source": "open_meteo",
+                            "accuracy": "high",
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                except requests.exceptions.RequestException as e:
+                    logger.warning(f"Open-Meteo API error with {url}: {e}")
+                    continue
             
-            current = data.get("current", {})
-            daily = data.get("daily", {})
-            
-            if not current:
-                return None
-            
-            # Map weather codes to descriptions
+            # If all URLs fail, return None to trigger fallback
+            logger.error("All Open-Meteo URLs failed")
+            return None
             weather_code = current.get("weather_code", 0)
             is_day = current.get("is_day", 1)
             description, icon = self._get_weather_description(weather_code, is_day)
