@@ -86,7 +86,22 @@ const RadarChart = ({ data, isDarkMode, categoryScores }) => {
     },
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw?.toFixed(1) ?? 0}/100` } }
+      tooltip: {
+        mode: 'nearest',
+        intersect: true,
+        callbacks: {
+          title: () => '',
+          label: (ctx) => {
+            const score = Number(ctx.raw ?? 0);
+            const factorName = ctx.label || 'Factor';
+            return `${factorName}: ${score.toFixed(1)}%`;
+          }
+        }
+      }
+    },
+    interaction: {
+      mode: 'nearest',
+      intersect: true
     },
     maintainAspectRatio: false,
     responsive: true
