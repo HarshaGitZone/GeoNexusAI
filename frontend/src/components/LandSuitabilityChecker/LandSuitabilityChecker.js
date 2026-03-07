@@ -3086,6 +3086,19 @@ useEffect(() => {
     const topPositiveDrivers = scoreProof?.top_positive_drivers || [];
     const topRiskDrivers = scoreProof?.top_risk_drivers || [];
     const contributionTable = scoreProof?.contribution_table || [];
+    const sectionScopeKey = filterCategories ? filterCategories.join("_") : "all";
+    const [expandedBlocks, setExpandedBlocks] = useState({});
+    const [expandedCategories, setExpandedCategories] = useState({});
+
+    const isBlockExpanded = (key) => Boolean(expandedBlocks[key]);
+    const toggleBlock = (key) => {
+      setExpandedBlocks((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const isCategoryExpanded = (key) => Boolean(expandedCategories[key]);
+    const toggleCategory = (key) => {
+      setExpandedCategories((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
 
     if (!meta || Object.keys(meta).length === 0) {
       return (
@@ -3274,85 +3287,124 @@ useEffect(() => {
         {/* Hide the main section title if we are showing the "Extra" sections on the left */}
         {!filterCategories && <h3 className="evidence-title">EVIDENCE DETAILS</h3>}
         {!filterCategories && (
-          <div className="evidence-priority-overview">
-            <div className="evidence-priority-title">Human Suitability Priority Profile (Global Category Weights)</div>
-            <div className="evidence-priority-list">
-              {categoryDisplayOrder
-                .filter((category) => Object.prototype.hasOwnProperty.call(meta, category))
-                .map((category) => (
-                  <span key={`priority-${category}`} className="evidence-priority-pill">
-                    {categoryDisplayLabels[category]}: {getCategoryWeight(category).toFixed(1)}%
-                  </span>
-                ))}
-            </div>
+          <div className="evidence-collapsible-block">
+            <button
+              type="button"
+              className="evidence-toggle-btn"
+              onClick={() => toggleBlock("priority-profile")}
+              aria-expanded={isBlockExpanded("priority-profile")}
+            >
+              <span>Human Suitability Priority Profile</span>
+              <span className={`evidence-toggle-arrow ${isBlockExpanded("priority-profile") ? "open" : ""}`}>▸</span>
+            </button>
+            {isBlockExpanded("priority-profile") && (
+              <div className="evidence-toggle-content evidence-priority-overview">
+                <div className="evidence-priority-title">Global Category Weights</div>
+                <div className="evidence-priority-list">
+                  {categoryDisplayOrder
+                    .filter((category) => Object.prototype.hasOwnProperty.call(meta, category))
+                    .map((category) => (
+                      <span key={`priority-${category}`} className="evidence-priority-pill">
+                        {categoryDisplayLabels[category]}: {getCategoryWeight(category).toFixed(1)}%
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
         {!filterCategories && scoreProof?.model && (
-          <div className="evidence-proof-overview">
-            <div className="evidence-proof-title">Score Proof and Certainty</div>
-            <div className="evidence-proof-metrics">
-              <span className="evidence-proof-metric">Reliability: {Number(proofCertainty?.weighted_data_reliability || 0).toFixed(1)}/100</span>
-              <span className="evidence-proof-metric">Confidence: {Number(proofCertainty?.weighted_model_confidence || 0).toFixed(1)}/100</span>
-              <span className="evidence-proof-metric">Freshness: {Number(proofCertainty?.weighted_data_freshness || 0).toFixed(1)}/100</span>
-              <span className="evidence-proof-metric">Freshest Obs: {proofCertainty?.freshest_observation_hours == null ? "N/A" : `${Number(proofCertainty.freshest_observation_hours).toFixed(1)}h`}</span>
-            </div>
-            <div className="evidence-driver-grid">
-              <div className="evidence-driver-col">
-                <div className="evidence-driver-heading">Top Positive Drivers</div>
-                {(topPositiveDrivers || []).slice(0, 5).map((d, i) => (
-                  <div key={`pos-${i}`} className="evidence-driver-row">
-                    {String(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) {'->'} +{Number(d.contribution_points || 0).toFixed(2)}
+          <div className="evidence-collapsible-block">
+            <button
+              type="button"
+              className="evidence-toggle-btn"
+              onClick={() => toggleBlock("score-proof-certainty")}
+              aria-expanded={isBlockExpanded("score-proof-certainty")}
+            >
+              <span>Score Proof and Certainty</span>
+              <span className={`evidence-toggle-arrow ${isBlockExpanded("score-proof-certainty") ? "open" : ""}`}>▸</span>
+            </button>
+            {isBlockExpanded("score-proof-certainty") && (
+              <div className="evidence-toggle-content evidence-proof-overview">
+                <div className="evidence-proof-title">Score Proof and Certainty</div>
+                <div className="evidence-proof-metrics">
+                  <span className="evidence-proof-metric">Reliability: {Number(proofCertainty?.weighted_data_reliability || 0).toFixed(1)}/100</span>
+                  <span className="evidence-proof-metric">Confidence: {Number(proofCertainty?.weighted_model_confidence || 0).toFixed(1)}/100</span>
+                  <span className="evidence-proof-metric">Freshness: {Number(proofCertainty?.weighted_data_freshness || 0).toFixed(1)}/100</span>
+                  <span className="evidence-proof-metric">Freshest Obs: {proofCertainty?.freshest_observation_hours == null ? "N/A" : `${Number(proofCertainty.freshest_observation_hours).toFixed(1)}h`}</span>
+                </div>
+                <div className="evidence-driver-grid">
+                  <div className="evidence-driver-col">
+                    <div className="evidence-driver-heading">Top Positive Drivers</div>
+                    {(topPositiveDrivers || []).slice(0, 5).map((d, i) => (
+                      <div key={`pos-${i}`} className="evidence-driver-row">
+                        {String(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) {'->'} +{Number(d.contribution_points || 0).toFixed(2)}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="evidence-driver-col">
-                <div className="evidence-driver-heading">Top Risk Drivers</div>
-                {(topRiskDrivers || []).slice(0, 5).map((d, i) => (
-                  <div key={`risk-${i}`} className="evidence-driver-row risk">
-                    {String(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) value {Number(d.value || 0).toFixed(1)}/100
+                  <div className="evidence-driver-col">
+                    <div className="evidence-driver-heading">Top Risk Drivers</div>
+                    {(topRiskDrivers || []).slice(0, 5).map((d, i) => (
+                      <div key={`risk-${i}`} className="evidence-driver-row risk">
+                        {String(d.factor || "factor").replaceAll('_', ' ')} ({Number(d.global_weight_pct || 0).toFixed(2)}%) value {Number(d.value || 0).toFixed(1)}/100
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
         {!filterCategories && ledgerRows.length > 0 && (
-          <div className="evidence-ledger">
-            <div className="evidence-ledger-title">Data Source Ledger (Factor-Level Proof)</div>
-            <div className="evidence-ledger-table-wrap">
-              <table className="evidence-ledger-table">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Factor</th>
-                    <th>Source</th>
-                    <th>Mode</th>
-                    <th>Confidence</th>
-                    <th>Freshness</th>
-                    <th>Reliability</th>
-                    <th>Validation</th>
-                    <th>Global Wt</th>
-                    <th>Contribution</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ledgerRows.map((row, idx) => (
-                    <tr key={`ledger-${idx}`}>
-                      <td>{getCategoryLabel(row?.category)}</td>
-                      <td>{factorLabels[row?.factor] || String(row?.factor || '').replaceAll('_', ' ').toUpperCase()}</td>
-                      <td className="source-cell">{row?.source || "Unknown"}</td>
-                      <td>{row?.data_mode || "N/A"}</td>
-                      <td>{Number(row?.confidence_score || 0).toFixed(1)}</td>
-                      <td>{row?.freshness_hours == null ? "N/A" : `${Number(row.freshness_hours).toFixed(1)}h`}</td>
-                      <td>{Number(row?.reliability_score || 0).toFixed(1)}</td>
-                      <td>{row?.validation_status ? `${String(row.validation_status).toUpperCase()} (${Number(row?.validation_score || 0).toFixed(1)})` : "N/A"}</td>
-                      <td>{Number(row?.global_weight_pct || 0).toFixed(2)}%</td>
-                      <td>{Number(row?.contribution_points || 0).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="evidence-collapsible-block">
+            <button
+              type="button"
+              className="evidence-toggle-btn"
+              onClick={() => toggleBlock("data-ledger")}
+              aria-expanded={isBlockExpanded("data-ledger")}
+            >
+              <span>Data Source Ledger</span>
+              <span className={`evidence-toggle-arrow ${isBlockExpanded("data-ledger") ? "open" : ""}`}>▸</span>
+            </button>
+            {isBlockExpanded("data-ledger") && (
+              <div className="evidence-toggle-content evidence-ledger">
+                <div className="evidence-ledger-title">Data Source Ledger (Factor-Level Proof)</div>
+                <div className="evidence-ledger-table-wrap">
+                  <table className="evidence-ledger-table">
+                    <thead>
+                      <tr>
+                        <th>Category</th>
+                        <th>Factor</th>
+                        <th>Source</th>
+                        <th>Mode</th>
+                        <th>Confidence</th>
+                        <th>Freshness</th>
+                        <th>Reliability</th>
+                        <th>Validation</th>
+                        <th>Global Wt</th>
+                        <th>Contribution</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ledgerRows.map((row, idx) => (
+                        <tr key={`ledger-${idx}`}>
+                          <td>{getCategoryLabel(row?.category)}</td>
+                          <td>{factorLabels[row?.factor] || String(row?.factor || '').replaceAll('_', ' ').toUpperCase()}</td>
+                          <td className="source-cell">{row?.source || "Unknown"}</td>
+                          <td>{row?.data_mode || "N/A"}</td>
+                          <td>{Number(row?.confidence_score || 0).toFixed(1)}</td>
+                          <td>{row?.freshness_hours == null ? "N/A" : `${Number(row.freshness_hours).toFixed(1)}h`}</td>
+                          <td>{Number(row?.reliability_score || 0).toFixed(1)}</td>
+                          <td>{row?.validation_status ? `${String(row.validation_status).toUpperCase()} (${Number(row?.validation_score || 0).toFixed(1)})` : "N/A"}</td>
+                          <td>{Number(row?.global_weight_pct || 0).toFixed(2)}%</td>
+                          <td>{Number(row?.contribution_points || 0).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
         <div className="evidence-categories">
@@ -3365,6 +3417,8 @@ useEffect(() => {
               const categoryWeight = getCategoryWeight(category);
               const categoryColorClass = categoryScore < 40 ? "tone-red" : categoryScore < 70 ? "tone-yellow" : "tone-green";
               const orderedFactorKeys = factorOrder[category] ? factorOrder[category].filter(key => categoryGroup[key]) : Object.keys(categoryGroup);
+              const categoryToggleKey = `${sectionScopeKey}:${category}`;
+              const categoryExpanded = isCategoryExpanded(categoryToggleKey);
 
               return (
                 <div key={category} className="evidence-category-container">
@@ -3378,7 +3432,17 @@ useEffect(() => {
                       </h4>
                       <p className="evidence-category-description">{getCategoryDescription(category)}</p>
                     </div>
+                    <button
+                      type="button"
+                      className="evidence-category-toggle-btn"
+                      onClick={() => toggleCategory(categoryToggleKey)}
+                      aria-expanded={categoryExpanded}
+                    >
+                      <span>{categoryExpanded ? "Hide" : "Show"}</span>
+                      <span className={`evidence-toggle-arrow ${categoryExpanded ? "open" : ""}`}>▸</span>
+                    </button>
                   </div>
+                  {categoryExpanded && (
                   <div className="evidence-factors-sequential">
                     {orderedFactorKeys.map((factorKey) => {
                       const factor = categoryGroup[factorKey];
@@ -3422,6 +3486,7 @@ useEffect(() => {
                       );
                     })}
                   </div>
+                  )}
                 </div>
               );
             })}

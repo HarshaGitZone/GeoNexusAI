@@ -13709,3 +13709,95 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
 [data-theme="light"] .evidence-ledger-table th {
     background: rgba(0, 0, 0, 0.04);
 }
+
+.evidence-collapsible-block {
+    margin-bottom: 12px;
+}
+
+.evidence-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(45, 138, 138, 0.5);
+    background: rgba(45, 138, 138, 0.16);
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+}
+
+.evidence-toggle-btn:hover {
+    background: rgba(45, 138, 138, 0.24);
+}
+
+.evidence-toggle-content {
+    margin-top: 8px;
+}
+
+.evidence-toggle-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.evidence-toggle-arrow.open {
+    transform: rotate(90deg);
+}
+
+.evidence-category-header-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.evidence-category-toggle-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 82px;
+    margin-top: 2px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(45, 138, 138, 0.55);
+    background: rgba(45, 138, 138, 0.2);
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.evidence-category-toggle-btn:hover {
+    background: rgba(45, 138, 138, 0.3);
+}
+
+[data-theme="light"] .evidence-toggle-btn {
+    color: rgba(0, 0, 0, 0.82);
+    border-color: rgba(45, 138, 138, 0.45);
+    background: rgba(45, 138, 138, 0.12);
+}
+
+[data-theme="light"] .evidence-toggle-arrow {
+    border-color: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .evidence-category-toggle-btn {
+    color: rgba(0, 0, 0, 0.82);
+    border-color: rgba(45, 138, 138, 0.45);
+    background: rgba(45, 138, 138, 0.12);
+}
