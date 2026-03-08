@@ -987,7 +987,7 @@ const FactorsSection = memo(({
         <div className="ts-value-wrapper">
             <span className="ts-date">{lastAnalyzedTime.split(',')[0]}</span>
             <span className="ts-divider">|</span>
-            <span className="ts-time">{lastAnalyzedTime.split(',')[1]}</span>
+            <span className="ts-time">{lastAnalyzedTime.split(',')[1].split(' [')[0]}</span>
         </div>
     </div>
 )}
@@ -2028,15 +2028,25 @@ localStorage.setItem("geo_last_analysis_time_b", nowB);
 //     hour12: false
 // });
 if (e && e.preventDefault) e.preventDefault();
-  const getNowTimestamp = () => new Date().toLocaleString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        });
+  const getNowTimestamp = (locationId = '') => {
+  const now = new Date();
+  const timestamp = now.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }) + '.' + now.getMilliseconds().toString().padStart(3, '0');
+  
+  // Add location identifier and random component to ensure uniqueness
+  const uniqueId = locationId + Math.random().toString(36).substr(2, 3);
+  const finalTimestamp = timestamp + ' [' + uniqueId + ']';
+  
+  console.log('🔍 getNowTimestamp called for', locationId, ':', finalTimestamp, 'raw time:', now.toISOString());
+  return finalTimestamp;
+};
     // Safe check for automatic calls from useEffect (where 'e' might be undefined)
 
     
@@ -2073,12 +2083,19 @@ if (e && e.preventDefault) e.preventDefault();
 
     // Reset results and start loading states
     // But keep snapshot data persistent until analysis is closed
-
+    
     setResult(null);
-
-    setCompareResult(null);
+    
+    // Only clear compare result if we're not in compare mode or if B location is empty
+    // This prevents B from disappearing when A is re-analyzed
+    const shouldClearCompareResult = !showLocationB || !bLatInput || !bLngInput;
+    if (shouldClearCompareResult) {
+      setCompareResult(null);
+    }
+    
     // setAnalysisTime(null);
-    localStorage.removeItem("geo_last_analysis_time");
+    // Removed shared localStorage key to prevent timestamp interference between locations
+    // localStorage.removeItem("geo_last_analysis_time");
 
 
     // Don't clear snapshot data - keep cards persistent
@@ -2152,19 +2169,21 @@ if (e && e.preventDefault) e.preventDefault();
       if (results[0].status === 'fulfilled') {
 
         const analysisData = results[0].value;
-        const completedAtA = getNowTimestamp();
+        const completedAtA = getNowTimestamp('A');
+        console.log('🔍 Site A timestamp generated:', completedAtA, 'at:', new Date().toISOString());
 
         setResult(analysisData);
         setAnalysisComplete(true);
       //  setAnalysisTime(now);
     setSiteATime(completedAtA);
-    
+    console.log('🔍 Set Site A time to:', completedAtA);
     localStorage.setItem("geo_last_analysis_time_a", completedAtA);
     
     setAnalyzedCoords({ lat, lng });
 
         // setAnalysisTime(now);
-        localStorage.setItem("geo_last_analysis_time", completedAtA);
+        // Removed shared localStorage key to prevent timestamp interference between locations
+        // localStorage.setItem("geo_last_analysis_time", completedAtA);
         // const coordsA = { lat, lng };
 
         setAnalyzedCoords({ lat, lng });
@@ -2252,12 +2271,14 @@ if (e && e.preventDefault) e.preventDefault();
         if (results[2] && results[2].status === 'fulfilled') {
 
           const compareData = results[2].value;
-          const completedAtB = getNowTimestamp();
+          const completedAtB = getNowTimestamp('B');
+          console.log('🔍 Site B timestamp generated:', completedAtB, 'at:', new Date().toISOString());
 
           setCompareResult(compareData);
           // Set Site B Timestamp
         setSiteBTime(completedAtB);
-        localStorage.setItem("geo_last_analysis_time_b", completedAtB);
+          console.log('🔍 Set Site B time to:', completedAtB);
+          localStorage.setItem("geo_last_analysis_time_b", completedAtB);
           setAnalyzedCoordsB({ lat: bLatInput.toString(), lng: bLngInput.toString() });
 
         }
@@ -2466,11 +2487,15 @@ if (e && e.preventDefault) e.preventDefault();
       window.history.replaceState({}, "", window.location.pathname);
     }
   // }, [restoreFromProjectPayload]);
-  }, [restoreFromProjectPayload, setSiteATime, setSiteBTime]);
+  }, [restoreFromProjectPayload]);
 
 useEffect(() => {
   const aTime = localStorage.getItem("geo_last_analysis_time_a");
   const bTime = localStorage.getItem("geo_last_analysis_time_b");
+
+  console.log('🔍 Loading timestamps from localStorage:');
+  console.log('  - A time:', aTime);
+  console.log('  - B time:', bTime);
 
   if (aTime) setSiteATime(aTime);
   if (bTime) setSiteBTime(bTime);

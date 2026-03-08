@@ -41,289 +41,486 @@ from datetime import datetime, timedelta
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 OPEN_METEO_ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
+OVERPASS_URLS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.openstreetmap.ru/api/interpreter",
+]
+
+HEADERS = {
+    "User-Agent": "GeoAI_VegetationAnalysis/2.0",
+    "Accept": "application/json"
+}
 
 
 def _vegetation_label(index: float) -> str:
+    """Enhanced vegetation classification for residential areas."""
     if index is None:
         return "Vegetation data unavailable"
     if index < 20:
-        return "Bare / Built-up land"
-    elif index < 40:
-        return "Sparse vegetation"
-    elif index < 60:
-        return "Moderate vegetation"
-    elif index < 80:
-        return "Healthy vegetation"
+        return "Minimal Greenery"
+    elif index < 35:
+        return "Limited Greenery"
+    elif index < 50:
+        return "Moderate Greenery"
+    elif index < 70:
+        return "Good Greenery"
+    elif index < 85:
+        return "Excellent Greenery"
     else:
-        return "Dense vegetation"
-
-
-def _estimate_vegetation_from_climate(lat: float, lng: float) -> Dict:
-    """
-    Estimate vegetation using precipitation and temperature data.
-    More reliable than soil moisture for many regions.
-    """
-    end_date = datetime.utcnow().date()
-    start_date = end_date - timedelta(days=90)
-    
-    params = {
-        "latitude": lat,
-        "longitude": lng,
-        "start_date": start_date.isoformat(),
-        "end_date": end_date.isoformat(),
-        "daily": "precipitation_sum,temperature_2m_mean",
-        "timezone": "auto"
-    }
-    
-    resp = requests.get(OPEN_METEO_ARCHIVE_URL, params=params, timeout=15)
-    resp.raise_for_status()
-    data = resp.json()
-    
-    daily = data.get("daily", {})
-    precip = daily.get("precipitation_sum", [])
-    temps = daily.get("temperature_2m_mean", [])
-    
-    if not precip or not temps:
-        raise ValueError("No climate data available")
-    
-    # Calculate 90-day precipitation and average temperature
-    total_precip = sum(p for p in precip if p is not None)
-    avg_temp = sum(t for t in temps if t is not None) / len([t for t in temps if t is not None])
-    
-    # Vegetation model based on precipitation and temperature
-    # High precip + moderate temp = high vegetation
-    # Low precip or extreme temp = low vegetation
-    
-    precip_factor = min(1.0, total_precip / 400.0)  # 400mm in 90 days = lush
-    temp_factor = max(0.0, 1.0 - abs(avg_temp - 22) / 30.0)  # Optimal around 22°C
-    
-    vegetation_index = (precip_factor * 0.7 + temp_factor * 0.3)
-    vegetation_score = round(vegetation_index * 100, 2)
-    
-    return {
-        "value": vegetation_score,
-        "label": _vegetation_label(vegetation_score),
-        "raw": round(vegetation_index, 3),
-        "unit": "vegetation-index",
-        "confidence": 80,
-        "source": "Copernicus Climate Data (Open-Meteo)",
-        "details": {
-            "precip_90d_mm": round(total_precip, 1),
-            "avg_temp_c": round(avg_temp, 1)
-        },
-        "note": "Vegetation index derived from 90-day precipitation and temperature patterns"
-    }
+        return "Outstanding Greenery"
 
 
 def get_ndvi_data(lat: float, lng: float) -> Dict:
     """
-    Vegetation health index derived from REAL satellite-derived observations.
+    Enhanced vegetation analysis focusing on RESIDENTIAL greenery and livability.
     
-    Uses multiple data sources for reliability:
-    1. Water body detection (NDVI should be near 0 for water)
-    2. Soil moisture from Copernicus Land
-    3. Climate-based estimation as fallback
+    Measures what actually matters for residents:
+    1. Parks, gardens, and green spaces
+    2. Street trees and urban forestry
+    3. Residential landscaping quality
+    4. Natural areas and recreational green spaces
     
-    Fully dynamic based on coordinates.
+    NOT agricultural crop production or soil moisture.
     """
 
-    # FIRST: Check if this is a water body
+    # 1. 🌳 URBAN GREEN SPACE ANALYSIS (Primary for residential areas)
     try:
-        # Import water utility to check for water bodies
-        import sys
-        import os
-        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-        from hydrology.water_utility import get_water_utility
+        green_space_data = _analyze_urban_green_spaces(lat, lng)
+        if green_space_data["found"]:
+            return {
+                "value": green_space_data["score"],
+                "label": _vegetation_label(green_space_data["score"]),
+                "raw": green_space_data["score"] / 100.0,
+                "unit": "greenery-index",
+                "confidence": green_space_data["confidence"],
+                "source": "OpenStreetMap Green Space Analysis",
+                "details": green_space_data["details"],
+                "note": f"Found {green_space_data['total_features']} green spaces: {green_space_data['summary']}"
+            }
+    except Exception:
+        pass
+
+    # 2. 🌿 RESIDENTIAL LANDSCAPING ANALYSIS
+    try:
+        landscaping_data = _analyze_residential_landscaping(lat, lng)
+        if landscaping_data["found"]:
+            return {
+                "value": landscaping_data["score"],
+                "label": _vegetation_label(landscaping_data["score"]),
+                "raw": landscaping_data["score"] / 100.0,
+                "unit": "greenery-index",
+                "confidence": landscaping_data["confidence"],
+                "source": "OpenStreetMap Residential Landscaping",
+                "details": landscaping_data["details"],
+                "note": f"Residential landscaping quality: {landscaping_data['summary']}"
+            }
+    except Exception:
+        pass
+
+    # 3. 🏞️ NATURAL AREAS ANALYSIS
+    try:
+        natural_data = _analyze_natural_areas(lat, lng)
+        if natural_data["found"]:
+            return {
+                "value": natural_data["score"],
+                "label": _vegetation_label(natural_data["score"]),
+                "raw": natural_data["score"] / 100.0,
+                "unit": "greenery-index",
+                "confidence": natural_data["confidence"],
+                "source": "OpenStreetMap Natural Areas",
+                "details": natural_data["details"],
+                "note": f"Natural areas nearby: {natural_data['summary']}"
+            }
+    except Exception:
+        pass
+
+    # 4. 🚫 WATER BODY CHECK (Only for complete absence of vegetation)
+    try:
+        from ..hydrology.water_utility import get_water_utility
         water_data = get_water_utility(lat, lng)
-        if water_data.get("value", 100) == 0.0:  # Direct water detection
+        water_distance = water_data.get("distance_km")
+        
+        if water_distance is not None and water_distance < 0.05:  # 50m from water
             return {
-                "value": 0.0,  # NO vegetation on water
-                "label": "Water Body - No Vegetation",
-                "raw": 0.0,
-                "unit": "vegetation-index",
-                "confidence": 95,
-                "source": "Water Body Detection (NDVI Override)",
-                "details": {
-                    "water_detection": True,
-                    "vegetation_type": "aquatic"
-                },
-                "note": "Location identified as water body - vegetation score set to zero"
-            }
-    except Exception:
-        pass
-
-    # SECOND: Check if this is a protected rainforest area
-    try:
-        rainforest_score = _detect_rainforest_area(lat, lng)
-        if rainforest_score > 0.8:  # High confidence rainforest
-            return {
-                "value": 95.0,  # VERY high vegetation for rainforest
-                "label": "Protected Rainforest - Dense Vegetation",
-                "raw": 0.95,
-                "unit": "vegetation-index",
+                "value": 5.0,  # Minimal vegetation on immediate water
+                "label": "Water Body - Minimal Greenery",
+                "raw": 0.05,
+                "unit": "greenery-index",
                 "confidence": 90,
-                "source": "Rainforest Detection (NDVI Enhanced)",
-                "details": {
-                    "rainforest_confidence": round(rainforest_score, 3),
-                    "vegetation_type": "rainforest"
-                },
-                "note": "Protected rainforest area with dense vegetation canopy"
+                "source": "Water Body Detection",
+                "details": {"water_distance_m": water_distance * 1000},
+                "note": "Location very close to water body - minimal vegetation"
             }
     except Exception:
         pass
 
-    # THIRD: Normal urban area detection (should have low vegetation)
+    # 5. 🌍 CLIMATE-BASED GREENERY ESTIMATION (Fallback)
     try:
-        urban_score = _detect_urban_density(lat, lng)
-        if urban_score > 0.7:  # High density urban
-            return {
-                "value": 15.0,  # LOW vegetation for urban areas
-                "label": "Urban Area - Minimal Vegetation",
-                "raw": 0.15,
-                "unit": "vegetation-index",
-                "confidence": 85,
-                "source": "Urban Detection (NDVI Adjusted)",
-                "details": {
-                    "urban_density": round(urban_score, 3),
-                    "vegetation_type": "urban"
-                },
-                "note": "Urban area with minimal vegetation cover"
-            }
+        climate_data = _estimate_climate_greenery(lat, lng)
+        return {
+            "value": climate_data["score"],
+            "label": _vegetation_label(climate_data["score"]),
+            "raw": climate_data["score"] / 100.0,
+            "unit": "greenery-index",
+            "confidence": 60,
+            "source": "Climate-Based Greenery Estimation",
+            "details": climate_data["details"],
+            "note": f"Estimated from climate conditions: {climate_data['summary']}"
+        }
     except Exception:
         pass
 
-    # FOURTH: Try soil moisture (most accurate for vegetation)
+    # 6. 📊 REGIONAL BASELINE (Final fallback)
+    return {
+        "value": 55.0,  # Reasonable baseline for residential areas
+        "label": "Moderate Greenery (Regional Baseline)",
+        "raw": 0.55,
+        "unit": "greenery-index",
+        "confidence": 40,
+        "source": "Regional Greenery Baseline",
+        "details": {"region": _get_region(lat, lng)},
+        "note": "Regional baseline applied - typical greenery for this area"
+    }
+
+
+def _analyze_urban_green_spaces(lat: float, lng: float) -> Dict:
+    """Analyze parks, gardens, and recreational green spaces."""
     try:
+        query = f"""
+        [out:json][timeout:20];
+        (
+          node["leisure"="park"](around:2000,{lat},{lng});
+          node["leisure"="garden"](around:1000,{lat},{lng});
+          node["leisure"="common"](around:1500,{lat},{lng});
+          way["leisure"="park"](around:2000,{lat},{lng});
+          way["leisure"="garden"](around:1000,{lat},{lng});
+          node["landuse"="grass"](around:1500,{lat},{lng});
+          way["landuse"="grass"](around:1500,{lat},{lng});
+          node["landuse"="recreation_ground"](around:2000,{lat},{lng});
+          way["landuse"="recreation_ground"](around:2000,{lat},{lng});
+          node["leisure"="sports_centre"](around:1500,{lat},{lng});
+          node["leisure"="pitch"](around:1000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        for overpass_url in OVERPASS_URLS:
+            try:
+                resp = requests.post(
+                    overpass_url,
+                    data={"data": query},
+                    headers=HEADERS,
+                    timeout=15
+                )
+                resp.raise_for_status()
+                elements = resp.json().get("elements", [])
+                
+                if elements:
+                    # Count different types of green spaces
+                    parks = len([e for e in elements 
+                               if e.get("tags", {}).get("leisure") == "park"])
+                    gardens = len([e for e in elements 
+                                if e.get("tags", {}).get("leisure") == "garden"])
+                    common = len([e for e in elements 
+                               if e.get("tags", {}).get("leisure") == "common"])
+                    grass_areas = len([e for e in elements 
+                                   if e.get("tags", {}).get("landuse") == "grass"])
+                    recreation = len([e for e in elements 
+                                  if e.get("tags", {}).get("landuse") == "recreation_ground"])
+                    sports = len([e for e in elements 
+                               if e.get("tags", {}).get("leisure") == "sports_centre"])
+                    pitches = len([e for e in elements 
+                               if e.get("tags", {}).get("leisure") == "pitch"])
+                    
+                    total_features = parks + gardens + common + grass_areas + recreation + sports + pitches
+                    
+                    # Enhanced scoring for residential areas
+                    if total_features >= 8:
+                        score = 90.0  # Outstanding greenery
+                    elif total_features >= 5:
+                        score = 80.0  # Excellent greenery
+                    elif total_features >= 3:
+                        score = 70.0  # Good greenery
+                    elif total_features >= 2:
+                        score = 60.0  # Moderate greenery
+                    elif total_features >= 1:
+                        score = 45.0  # Limited greenery
+                    else:
+                        score = 30.0  # Minimal greenery
+                    
+                    # Bonus for parks (most valuable green spaces)
+                    if parks >= 2:
+                        score = min(100.0, score + 5)
+                    elif parks >= 1:
+                        score = min(100.0, score + 3)
+                    
+                    return {
+                        "found": True,
+                        "score": score,
+                        "confidence": 85,
+                        "total_features": total_features,
+                        "details": {
+                            "parks": parks,
+                            "gardens": gardens,
+                            "common": common,
+                            "grass_areas": grass_areas,
+                            "recreation": recreation,
+                            "sports": sports,
+                            "pitches": pitches
+                        },
+                        "summary": f"{parks} parks, {gardens} gardens, {grass_areas} grass areas"
+                    }
+            except Exception:
+                continue
+                
+    except Exception:
+        pass
+    
+    return {"found": False, "score": 0, "confidence": 0}
+
+
+def _analyze_residential_landscaping(lat: float, lng: float) -> Dict:
+    """Analyze residential landscaping quality and urban trees."""
+    try:
+        query = f"""
+        [out:json][timeout:20];
+        (
+          node["natural"="tree"](around:500,{lat},{lng});
+          way["natural"="tree_row"](around:1000,{lat},{lng});
+          node["highway"="residential"](around:300,{lat},{lng});
+          way["highway"="residential"](around:300,{lat},{lng});
+          node["landuse"="residential"](around:500,{lat},{lng});
+          way["landuse"="residential"](around:500,{lat},{lng});
+          node["leisure"="garden"](around:500,{lat},{lng});
+          way["leisure"="garden"](around:500,{lat},{lng});
+        );
+        out count;
+        """
+        
+        for overpass_url in OVERPASS_URLS:
+            try:
+                resp = requests.post(
+                    overpass_url,
+                    data={"data": query},
+                    headers=HEADERS,
+                    timeout=15
+                )
+                resp.raise_for_status()
+                elements = resp.json().get("elements", [])
+                
+                if elements:
+                    # Count residential features
+                    trees = len([e for e in elements 
+                              if e.get("tags", {}).get("natural") == "tree"])
+                    tree_rows = len([e for e in elements 
+                                  if e.get("tags", {}).get("natural") == "tree_row"])
+                    residential = len([e for e in elements 
+                                   if e.get("tags", {}).get("highway") == "residential" or 
+                                   e.get("tags", {}).get("landuse") == "residential"])
+                    gardens = len([e for e in elements 
+                                if e.get("tags", {}).get("leisure") == "garden"])
+                    
+                    total_features = trees + tree_rows + residential + gardens
+                    
+                    # Scoring based on residential greenery quality
+                    if total_features >= 10:
+                        score = 75.0  # Excellent residential landscaping
+                    elif total_features >= 6:
+                        score = 65.0  # Good residential landscaping
+                    elif total_features >= 3:
+                        score = 55.0  # Moderate residential landscaping
+                    elif total_features >= 1:
+                        score = 45.0  # Basic residential landscaping
+                    else:
+                        score = 35.0  # Minimal residential landscaping
+                    
+                    # Bonus for trees (very valuable in residential areas)
+                    if trees >= 5:
+                        score = min(100.0, score + 8)
+                    elif trees >= 2:
+                        score = min(100.0, score + 4)
+                    
+                    return {
+                        "found": True,
+                        "score": score,
+                        "confidence": 80,
+                        "total_features": total_features,
+                        "details": {
+                            "trees": trees,
+                            "tree_rows": tree_rows,
+                            "residential_areas": residential,
+                            "gardens": gardens
+                        },
+                        "summary": f"{trees} individual trees, {tree_rows} tree rows, {gardens} gardens"
+                    }
+            except Exception:
+                continue
+                
+    except Exception:
+        pass
+    
+    return {"found": False, "score": 0, "confidence": 0}
+
+
+def _analyze_natural_areas(lat: float, lng: float) -> Dict:
+    """Analyze nearby natural areas and forests."""
+    try:
+        query = f"""
+        [out:json][timeout:20];
+        (
+          node["natural"="wood"](around:3000,{lat},{lng});
+          way["natural"="wood"](around:3000,{lat},{lng});
+          node["natural"="forest"](around:5000,{lat},{lng});
+          way["natural"="forest"](around:5000,{lat},{lng});
+          node["landuse"="forest"](around:5000,{lat},{lng});
+          way["landuse"="forest"](around:5000,{lat},{lng});
+          node["natural"="scrub"](around:2000,{lat},{lng});
+          node["natural"="heath"](around:2000,{lat},{lng});
+        );
+        out count;
+        """
+        
+        for overpass_url in OVERPASS_URLS:
+            try:
+                resp = requests.post(
+                    overpass_url,
+                    data={"data": query},
+                    headers=HEADERS,
+                    timeout=15
+                )
+                resp.raise_for_status()
+                elements = resp.json().get("elements", [])
+                
+                if elements:
+                    # Count natural features
+                    woods = len([e for e in elements 
+                               if e.get("tags", {}).get("natural") == "wood"])
+                    forests = len([e for e in elements 
+                                if e.get("tags", {}).get("natural") == "forest" or 
+                                   e.get("tags", {}).get("landuse") == "forest"])
+                    scrub = len([e for e in elements 
+                              if e.get("tags", {}).get("natural") == "scrub"])
+                    heath = len([e for e in elements 
+                              if e.get("tags", {}).get("natural") == "heath"])
+                    
+                    total_features = woods + forests + scrub + heath
+                    
+                    # Natural areas are very valuable for residents
+                    if total_features >= 3:
+                        score = 85.0  # Outstanding natural access
+                    elif total_features >= 2:
+                        score = 75.0  # Excellent natural access
+                    elif total_features >= 1:
+                        score = 65.0  # Good natural access
+                    else:
+                        score = 50.0  # Limited natural access
+                    
+                    # Bonus for forests (most valuable)
+                    if forests >= 1:
+                        score = min(100.0, score + 5)
+                    
+                    return {
+                        "found": True,
+                        "score": score,
+                        "confidence": 75,
+                        "total_features": total_features,
+                        "details": {
+                            "woods": woods,
+                            "forests": forests,
+                            "scrub": scrub,
+                            "heath": heath
+                        },
+                        "summary": f"{forests} forests, {woods} woodlands, {scrub} scrub areas"
+                    }
+            except Exception:
+                continue
+                
+    except Exception:
+        pass
+    
+    return {"found": False, "score": 0, "confidence": 0}
+
+
+def _estimate_climate_greenery(lat: float, lng: float) -> Dict:
+    """Estimate greenery potential based on climate conditions."""
+    try:
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=90)
+        
         params = {
             "latitude": lat,
             "longitude": lng,
-            "hourly": "soil_moisture_0_to_7cm,soil_moisture_7_to_28cm",
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat(),
+            "daily": "precipitation_sum,temperature_2m_mean",
             "timezone": "auto"
         }
         
-        resp = requests.get(OPEN_METEO_URL, params=params, timeout=12)
+        resp = requests.get(OPEN_METEO_ARCHIVE_URL, params=params, timeout=15)
         resp.raise_for_status()
         data = resp.json()
         
-        moisture_0_7 = data.get("hourly", {}).get("soil_moisture_0_to_7cm")
-        moisture_7_28 = data.get("hourly", {}).get("soil_moisture_7_to_28cm")
+        daily = data.get("daily", {})
+        precip = daily.get("precipitation_sum", [])
+        temps = daily.get("temperature_2m_mean", [])
         
-        if moisture_0_7 and any(m is not None for m in moisture_0_7):
-            # Filter out None values
-            valid_moisture = [m for m in moisture_0_7 if m is not None]
-            if valid_moisture:
-                avg_moisture = sum(valid_moisture) / len(valid_moisture)
-                
-                # Also consider deeper moisture if available
-                if moisture_7_28:
-                    valid_deep = [m for m in moisture_7_28 if m is not None]
-                    if valid_deep:
-                        avg_deep = sum(valid_deep) / len(valid_deep)
-                        # Weighted average: surface 60%, deep 40%
-                        avg_moisture = avg_moisture * 0.6 + avg_deep * 0.4
-                
-                # Normalize moisture (calibrated for global ranges)
-                vegetation_index = max(0.0, min(1.0, avg_moisture * 2.0))
-                vegetation_score = round(vegetation_index * 100, 2)
-                
-                return {
-                    "value": vegetation_score,
-                    "label": _vegetation_label(vegetation_score),
-                    "raw": round(vegetation_index, 3),
-                    "unit": "vegetation-index",
-                    "confidence": 85,
-                    "source": "Copernicus Land (Open-Meteo)",
-                    "details": {
-                        "soil_moisture_surface": round(avg_moisture, 3)
-                    },
-                    "note": "Vegetation proxy derived from real-time soil moisture satellite data"
-                }
-    except Exception:
-        pass
-    
-    # Fallback: Use climate-based estimation
-    try:
-        return _estimate_vegetation_from_climate(lat, lng)
-    except Exception as e:
-        # Final fallback with honest uncertainty
-        return {
-            "value": 45.0,
-            "label": "Moderate vegetation (estimated)",
-            "raw": 0.45,
-            "unit": "vegetation-index",
-            "confidence": 40,
-            "source": "Regional Baseline (satellite data temporarily unavailable)",
-            "note": f"Estimated value - actual satellite data unavailable: {str(e)}"
+        if not precip or not temps:
+            raise ValueError("No climate data available")
+        
+        # Calculate climate metrics
+        total_precip = sum(p for p in precip if p is not None)
+        avg_temp = sum(t for t in temps if t is not None) / len([t for t in temps if t is not None])
+        
+        # Climate-based greenery estimation for residential areas
+        # Moderate precipitation + moderate temperature = good residential greenery
+        precip_factor = min(1.0, total_precip / 300.0)  # 300mm in 90 days = good for gardens
+        temp_factor = max(0.0, 1.0 - abs(avg_temp - 20) / 25.0)  # Optimal around 20°C for gardens
+        
+        greenery_index = (precip_factor * 0.6 + temp_factor * 0.4)
+        greenery_score = round(greenery_index * 100, 2)
+        
+        # Regional adjustment for typical greenery
+        region = _get_region(lat, lng)
+        regional_adjustment = {
+            "north_america": 5.0,
+            "europe": 8.0,     # Good urban planning
+            "asia": 3.0,      # Variable
+            "oceania": 7.0,    # Good climate
+            "south_america": 2.0,
+            "africa": 0.0,
+            "other": 4.0
         }
+        
+        final_score = max(30.0, min(80.0, greenery_score + regional_adjustment.get(region, 0.0)))
+        
+        return {
+            "score": final_score,
+            "confidence": 60,
+            "details": {
+                "precip_90d_mm": round(total_precip, 1),
+                "avg_temp_c": round(avg_temp, 1),
+                "region": region
+            },
+            "summary": f"Climate supports {final_score:.0f}% greenery potential"
+        }
+        
+    except Exception:
+        return {"score": 50.0, "confidence": 20, "details": {}, "summary": "Climate data unavailable"}
 
 
-def _detect_rainforest_area(lat: float, lng: float) -> float:
-    """
-    Detect if location is in a protected rainforest area.
-    Returns confidence score (0-1).
-    """
-    # Amazon Rainforest bounds
-    if -10.0 <= lat <= 2.0 and -79.0 <= lng <= -47.0:
-        return 0.95
-    
-    # Congo Basin Rainforest
-    if -5.0 <= lat <= 5.0 and 10.0 <= lng <= 30.0:
-        return 0.90
-    
-    # Southeast Asian Rainforests
-    if -10.0 <= lat <= 10.0 and 95.0 <= lng <= 140.0:
-        return 0.85
-    
-    # Indonesian Rainforests
-    if -10.0 <= lat <= 5.0 and 110.0 <= lng <= 140.0:
-        return 0.88
-    
-    # Central American Rainforests
-    if 0.0 <= lat <= 15.0 and -90.0 <= lng <= -75.0:
-        return 0.80
-    
-    return 0.0
-
-
-def _detect_urban_density(lat: float, lng: float) -> float:
-    """
-    Detect urban density based on known major cities and infrastructure.
-    Returns confidence score (0-1).
-    """
-    # Major Indian cities (high density)
-    indian_cities = [
-        (28.6, 77.2, 0.3),  # Delhi
-        (19.1, 72.9, 0.3),  # Mumbai
-        (12.9, 77.6, 0.3),  # Bangalore
-        (13.1, 80.3, 0.3),  # Chennai
-        (22.6, 88.4, 0.3),  # Kolkata
-        (26.9, 75.8, 0.2),  # Jaipur
-        (23.3, 77.4, 0.2),  # Bhopal
-        (17.4, 78.5, 0.2),  # Hyderabad
-    ]
-    
-    # Major international cities
-    international_cities = [
-        (40.7, -74.0, 0.4),  # New York
-        (51.5, -0.1, 0.4),   # London
-        (35.7, 139.7, 0.4), # Tokyo
-        (37.8, -122.4, 0.4), # San Francisco
-        (-33.9, 151.2, 0.4), # Sydney
-        (48.9, 2.4, 0.3),    # Paris
-        (52.5, 13.4, 0.3),   # Berlin
-    ]
-    
-    all_cities = indian_cities + international_cities
-    
-    for city_lat, city_lng, radius in all_cities:
-        distance = ((lat - city_lat)**2 + (lng - city_lng)**2)**0.5
-        if distance <= radius:
-            return 0.85  # High confidence urban
-    
-    # Medium density areas (within 2 degrees)
-    for city_lat, city_lng, _ in all_cities:
-        distance = ((lat - city_lat)**2 + (lng - city_lng)**2)**0.5
-        if distance <= 2.0:
-            return 0.60  # Medium confidence urban
-    
-    return 0.0
+def _get_region(lat: float, lng: float) -> str:
+    """Get geographic region for climate adjustments."""
+    if 60 <= lat <= 80 and -10 <= lng <= 40:
+        return "europe"
+    elif 25 <= lat <= 50 and -130 <= lng <= -60:
+        return "north_america"
+    elif -55 <= lat <= 15 and -80 <= lng <= -35:
+        return "south_america"
+    elif -35 <= lat <= 37 and 10 <= lng <= 50:
+        return "africa"
+    elif 5 <= lat <= 50 and 60 <= lng <= 150:
+        return "asia"
+    elif -45 <= lat <= -10 and 110 <= lng <= 180:
+        return "oceania"
+    else:
+        return "other"
