@@ -987,7 +987,7 @@ const FactorsSection = memo(({
         <div className="ts-value-wrapper">
             <span className="ts-date">{lastAnalyzedTime.split(',')[0]}</span>
             <span className="ts-divider">|</span>
-            <span className="ts-time">{lastAnalyzedTime.split(',')[1].split(' [')[0]}</span>
+            <span className="ts-time">{lastAnalyzedTime.split(',')[1].split('.')[0]}</span>
         </div>
     </div>
 )}
