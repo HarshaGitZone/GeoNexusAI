@@ -61,39 +61,39 @@ def get_population_data(lat: float, lng: float) -> Dict:
         density = int(base_density * regional_multiplier.get(region, 1.0))
         density = max(50, min(15000, density))  # Increased max to 15000 for major cities
         
-        # Enhanced scoring with higher scores for good population areas
-        if density < 100:
-            score = 15
+        # Balanced scoring with optimal range for development
+        if density < 50:
+            score = 20
             label = "Very Sparse"
-            score_reason = f"Score 15/100: density {density} people/km² is VERY SPARSE (<100). Extremely limited services and infrastructure."
-        elif density < 300:
-            score = 35
+            score_reason = f"Score 20/100: density {density} people/km² is VERY SPARSE (<50). Limited infrastructure and services."
+        elif density < 200:
+            score = 45
             label = "Sparse Population"
-            score_reason = f"Score 35/100: density {density} people/km² is SPARSE (100–300). Limited services, suitable for specialized development."
-        elif density < 800:
-            score = 65
+            score_reason = f"Score 45/100: density {density} people/km² is SPARSE (50–200). Basic services available, suitable for specialized development."
+        elif density < 600:
+            score = 75
             label = "Moderate Population"
-            score_reason = f"Score 65/100: density {density} people/km² is MODERATE (300–800). Good balance of services and livability."
-        elif density < 2000:
-            score = 88
+            score_reason = f"Score 75/100: density {density} people/km² is MODERATE (200–600). Good balance of services, infrastructure, and livability."
+        elif density < 1500:
+            score = 90
             label = "Well Populated"
-            score_reason = f"Score 88/100: density {density} people/km² is WELL POPULATED (800–2000). Excellent services, labor, and market access."
-        elif density < 4000:
-            score = 95
+            score_reason = f"Score 90/100: density {density} people/km² is WELL POPULATED (600–1500). Excellent services, labor, and market access with good livability."
+        elif density < 3000:
+            score = 85
             label = "Dense Urban"
-            score_reason = f"Score 95/100: density {density} people/km² is DENSE URBAN (2000–4000). Prime location with maximum services and opportunities."
-        elif density < 8000:
-            score = 100
+            score_reason = f"Score 85/100: density {density} people/km² is DENSE URBAN (1500–3000). Good services but some congestion and pollution concerns."
+        elif density < 5000:
+            score = 75
             label = "Very Dense Urban"
-            score_reason = f"Score 100/100: density {density} people/km² is VERY DENSE (4000–8000). Excellent city location with premium services and infrastructure."
-        elif density < 12000:
-            score = 98
+            score_reason = f"Score 75/100: density {density} people/km² is VERY DENSE (3000–5000). High congestion, pollution, and reduced livability despite good infrastructure."
+        elif density < 8000:
+            score = 65
             label = "Ultra Dense Urban"
-            score_reason = f"Score 98/100: density {density} people/km² is ULTRA DENSE (8000–12000). Major metropolitan area with world-class infrastructure."
+            score_reason = f"Score 65/100: density {density} people/km² is ULTRA DENSE (5000–8000). Major congestion, high pollution, and significant livability challenges."
         else:
-            score = 96
+            score = 55
             label = "Mega City"
-            score_reason = f"Score 96/100: density {density} people/km² is MEGA CITY (>12000). World-class metropolitan area with exceptional infrastructure."
+            score_reason = f"Score 55/100: density {density} people/km² is MEGA CITY (>8000). Extreme congestion, severe pollution, and poor livability despite world-class infrastructure."
 
         return {
             "value": float(score),
@@ -112,13 +112,13 @@ def get_population_data(lat: float, lng: float) -> Dict:
 
     except Exception as e:
         return {
-            "value": 70.0,  # Increased from 50.0 - more reasonable fallback
+            "value": 60.0,  # Reduced from 70.0 - more realistic baseline
             "density": None,
             "label": "Population Baseline",
             "unit": "people/km²",
             "source": "Fallback",
             "confidence": 40,
-            "reasoning": "Population estimate unavailable; score 70/100 is neutral-to-good baseline assuming moderate population. Density (people/km²) not available.",
+            "reasoning": "Population estimate unavailable; score 60/100 is moderate baseline assuming average population density. Density (people/km²) not available.",
             "note": str(e)[:100]
         }
 

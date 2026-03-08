@@ -342,26 +342,30 @@ def estimate_pollution_score(
 
     # 1. FALLBACK: If the context is completely empty
     if all(p is None for p in [pm25, pm10, no2, so2, o3, co]):
-        return 65.0, None, {
+        return 55.0, None, {
             "source": pollution_ctx.get("source", "Global CAMS Baseline"),
             "reason": "Real-time sensor gap; utilizing regional atmospheric baseline."
         }
 
-    # 2. PRIMARY SCORING (Prioritizing PM2.5 as the lead health hazard)
+    # 2. PRIMARY SCORING (Stricter WHO-aligned scoring for better differentiation)
     # If PM2.5 is missing, we use the next most significant pollutant
     primary_val = pm25 if pm25 is not None else (pm10 if pm10 is not None else no2)
     
-    # WHO 2024 Guidelines Alignment
-    if primary_val <= 5:    # Pristine
+    # WHO 2024 Guidelines with stricter scoring for better differentiation
+    if primary_val <= 5:    # Excellent - Pristine air quality
         base_score = 98.0
-    elif primary_val <= 12: # Good
-        base_score = 88.0
-    elif primary_val <= 25: # Moderate
-        base_score = 72.0
-    elif primary_val <= 50: # Poor
+    elif primary_val <= 10: # Very Good - Well below WHO annual limit
+        base_score = 92.0
+    elif primary_val <= 15: # Good - Meets WHO annual guideline
+        base_score = 80.0
+    elif primary_val <= 25: # Moderate - Above WHO guideline but acceptable
+        base_score = 65.0
+    elif primary_val <= 35: # Poor - Significantly above WHO guideline
         base_score = 45.0
-    else:                   # Hazardous
-        base_score = 25.0
+    elif primary_val <= 50: # Very Poor - Health concerns
+        base_score = 30.0
+    else:                   # Hazardous - Serious health risks
+        base_score = 15.0
 
     # 3. MULTI-POLLUTANT SYNERGY PENALTY
     # If NO2 (traffic/industrial) is high alongside PM2.5, lower the score
