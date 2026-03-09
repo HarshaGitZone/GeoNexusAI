@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🌍 GeoNexusAI: Land Suitability Intelligence Platform
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Online-blue?style=for-the-badge&logo=vercel)](https://geo-nexus-ai.vercel.app)
@@ -429,6 +428,3 @@ Think of GeoNexusAI as your smart assistant that helps you ask the right questio
 ---
 
 *Built with ❤️ by the GeoNexusAI Team*
-=======
-
->>>>>>> old-frontend/main
