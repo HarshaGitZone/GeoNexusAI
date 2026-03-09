@@ -1,0 +1,21 @@
+flask
+gunicorn
+pymongo
+numpy
+scikit-learn
+requests
+flask-cors
+xgboost
+google-genai
+python-dotenv
+# Graphics and PDF Generation
+matplotlib>=3.5.0
+reportlab>=3.6.0
+Pillow>=9.0.0
+groq
+qrcode
+pandas
+openai
+# AI Assistant Dependencies
+asyncio
+aiohttp
