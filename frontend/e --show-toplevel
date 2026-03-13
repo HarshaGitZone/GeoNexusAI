@@ -1,0 +1,119 @@
+[33me937e01[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m removed old
+[33m9a7928f[m Readme initial
+[33m2bb79cd[m Update WeatherCard.js
+[33m8e2716d[m r 13
+[33ma28ff52[m r 12
+[33m6b99af8[m r 12
+[33ma8ce554[m render check 4
+[33mfbf4758[m LSC
+[33m6523cdf[m sidebar collapse
+[33m740e45e[m weather check
+[33m7eef085[m trio shape check
+[33m5a8e55a[m Ui
+[33m12b76bf[m LSC timeline
+[33m92ba49e[m sidebar top
+[33m4a3c501[m Update SideBar.js
+[33me4304ef[m Color persist
+[33mce86bfd[m top nav small screens
+[33m46d4fb6[m Update SideBar.css
+[33m40ec185[m Update SideBar.css
+[33me0fe241[m Update SideBar.css
+[33m0a16222[m Update SideBar.css
+[33mdda85b1[m Topnav small screen
+[33mce61175[m GSD
+[33mc59548a[m Analog deck
+[33mc9f24c7[m GlobalSyncDock
+[33mf4aafa8[m sidebar+ history display
+[33mfa7e00e[m last analyzed at in score
+[33m2a378b1[m sidebar upd
+[33mc04462f[m snow effect
+[33m2c33c46[m compare toggle back
+[33mb3c4158[m loc b name persist
+[33mff606ce[m hazards+geo persist
+[33m9503a0b[m topnav smallscreen
+[33m0a6c071[m smallscreen topnav
+[33m4112cb4[m Update SideBar.css
+[33m741431d[m removed logs
+[33mbb1e686[m sidebar+lsc
+[33m942ec9b[m Update index.html
+[33m3275032[m Update index.html
+[33m4d44cdd[m Update vercel.json
+[33m4a07ff1[m Update vercel.json
+[33m5a46fb5[m Create vercel.json
+[33m36fac82[m color palette
+[33m26d247c[m UI updates topnav sidebar lsc
+[33m7aad9fb[m lsc ui
+[33mcf431df[m Sidebar UI
+[33me409bec[m topnav + sidebar date
+[33m1848fd4[m styles and save places cross
+[33mb7299a8[m snow
+[33m04f5cc9[m weather
+[33mf586eca[m weatheradapter
+[33m7c5d1c8[m color palette
+[33m19e30a1[m natural effects
+[33m1b32199[m Update LandSuitabilityChecker.js
+[33m8ab722b[m space for weathereffect
+[33m70b18ac[m weathereffect
+[33m5a226bd[m last analyzed at
+[33m41f103a[m space in fullscreen
+[33m07dee60[m smart search
+[33m36d18fc[m radar+ project+sitea close+ somemore
+[33mbcc7ab0[m wildfacts
+[33md5a4874[m better acc+ audio
+[33md241dab[m audio + accuracy-pollution, infra+ report
+[33m197bbc5[m upd some
+[33m48e3d3c[m upd factors
+[33m267e9d4[m assist+23 factors+ facts+...
+[33m46c4973[m analysis stretch
+[33m9ea051b[m updates ui and audio
+[33m1b6d661[m aiassist
+[33m28b1bd1[m upd styles
+[33mfd53fbe[m updates huge
+[33m97d91e8[m sidebar+terrain+digitaltwin css
+[33m014a06b[m Digital twin +history View responsive.
+[33mea0b2b8[m nearby places
+[33m1b292d3[m reverted LSC
+[33m172aeb7[m geogpt + others
+[33m39c5919[m Updated huge.
+[33me1726c1[m minor ui
+[33m646541a[m ui
+[33m66e6dc0[m 3d overlay on fullscreen
+[33m899f3c1[m 3 buttons in 3d too and some more changes
+[33m039c5e4[m test 3 buttons
+[33m22e41a5[m minimap change stop+ zoom in 2d
+[33m36d1c07[m update maplocate in 2d
+[33m285de71[m Update LandSuitabilityChecker.js
+[33m4f5495c[m leaflet error
+[33m52262b9[m removed overlay check
+[33m4e6077f[m sidebar css for overlay bubble of my loc
+[33m7fbb6cf[m Topnav
+[33m0a3476b[m zoom and fullscreen map
+[33mc06f0e9[m 3d map
+[33m86624f3[m siam cnn
+[33m4d9affd[m upd logic of telemetry
+[33m25a54fc[m live telemetry only forest for all
+[33m0061739[m same upgraded
+[33m895f03a[m nvdia+heat+flow
+[33m02df7e3[m esg card
+[33mbcf8593[m audiocheck 2 + strategic utility gap
+[33m890bb27[m sound check
+[33m1368c41[m infra proximity removed
+[33m4214db6[m LSC order
+[33m5b732bb[m strategic utility
+[33m6e540b5[m upd share link check
+[33mb3fb14a[m share in sidebar
+[33m959c2bc[m qr+datetime in topnav
+[33m63430fb[m gen report using api_base
+[33m47c9927[m light mode colors of history
+[33m2a97668[m geogpt forecast in history+ light mode effects
+[33mb7608c5[m upd urban vel +future in history
+[33mc41bf71[m terrain analysis+ format history
+[33m84fb944[m slider+ urbani-- velocity
+[33m80a8ff4[m Update HistoryView.js
+[33m1f15d1b[m Update HistoryView.js
+[33m5fe5d99[m Update package.json
+[33m2994d02[m Updated for history.
+[33m75748c9[m upd geogpt
+[33m243fddb[m Update api.js
+[33m4c4c022[m suitedtobackend
+[33m47d5121[m Initial commit

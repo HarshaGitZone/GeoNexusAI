@@ -31,8 +31,19 @@ class ParallelAPIExecutor:
         if self.session:
             await self.session.close()
     
-    async def fetch_all_factors(self, lat: float, lng: float) -> Dict[str, Any]:
-        """Fetch ALL 23 factors in parallel"""
+    async def fetch_all_factors(self, lat: float, lng: float, total_timeout: float = 30.0, connect_timeout: float = 10.0) -> Dict[str, Any]:
+        """Fetch ALL 23 factors in parallel with configurable timeouts"""
+        
+        # Update session timeouts if different from defaults
+        if total_timeout != 30.0 or connect_timeout != 10.0:
+            if self.session:
+                await self.session.close()
+            connector = aiohttp.TCPConnector(limit=self.max_concurrent, limit_per_host=self.max_concurrent)
+            timeout = aiohttp.ClientTimeout(total=total_timeout, connect=connect_timeout)
+            self.session = aiohttp.ClientSession(
+                connector=connector,
+                timeout=timeout
+            )
         
         # Define all API calls to run in parallel
         api_calls = {

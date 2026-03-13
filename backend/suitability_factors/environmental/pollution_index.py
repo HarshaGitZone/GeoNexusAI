@@ -29,24 +29,30 @@ def estimate_pollution_score(
     # If PM2.5 is missing, we use the next most significant pollutant
     primary_val = pm25 if pm25 is not None else (pm10 if pm10 is not None else no2)
     
-    # WHO 2024 Guidelines Alignment
-    if primary_val <= 5:    # Pristine
-        base_score = 98.0
-    elif primary_val <= 12: # Good
+    # Generous Scoring for Pristine Locations (perfect scores for clean areas)
+    if primary_val <= 3:    # Perfect/Virtually Zero Pollution (Deep Ocean, Protected Zones)
+        base_score = 100.0
+    elif primary_val <= 8:    # Excellent/Clean Air
+        base_score = 95.0
+    elif primary_val <= 15: # Very Good
         base_score = 88.0
-    elif primary_val <= 25: # Moderate
-        base_score = 72.0
-    elif primary_val <= 50: # Poor
-        base_score = 45.0
-    else:                   # Hazardous
+    elif primary_val <= 25: # Good
+        base_score = 78.0
+    elif primary_val <= 35: # Moderate/Fair
+        base_score = 65.0
+    elif primary_val <= 50: # Moderate-Poor
+        base_score = 50.0
+    elif primary_val <= 75: # Poor
+        base_score = 35.0
+    else:                   # Unhealthy/Hazardous
         base_score = 25.0
 
-    # 3. MULTI-POLLUTANT SYNERGY PENALTY
+    # 3. MULTI-POLLUTANT SYNERGY PENALTY (reduced for balance)
     # If NO2 (traffic/industrial) is high alongside PM2.5, lower the score
     if no2 and no2 > 40:
-        base_score -= 10
+        base_score -= 5  # Reduced from 10
     if so2 and so2 > 20:
-        base_score -= 5
+        base_score -= 3  # Reduced from 5
 
     final_score = max(10.0, min(100.0, base_score))
 

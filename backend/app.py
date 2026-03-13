@@ -44,6 +44,7 @@ RENDER_SAFE_MODE = os.environ.get(
     "true" if IS_RENDER else "false"
 ).lower() == "true"
 USE_FAST_ANALYSIS = os.environ.get("USE_FAST_ANALYSIS", "false").lower() == "true"
+FORCE_FAST_MODE_RENDER = os.environ.get("FORCE_FAST_MODE_RENDER", "false").lower() == "true"
 
 # Light Imports
 from PIL import Image
@@ -298,12 +299,22 @@ init_db()
 def _fetch_land_intelligence(lat: float, lng: float) -> dict:
     """
     ULTRA-FAST FACTOR INTELLIGENCE:
-    - Local: Fast Analysis (70-85% speedup)
-    - Render: Parallel ThreadPool (memory-safe)
+    - Render: Fast Analysis (memory optimized) or Parallel ThreadPool (fallback)
+    - Local: Fast Analysis (70-85% speedup) or Parallel ThreadPool
     - Fallback: Sequential (if both fail)
     """
-    # Force parallel path on Render for stability against 30s timeouts.
+    # PRIORITY 1: Force fast mode on Render if explicitly enabled
+    if IS_RENDER and FORCE_FAST_MODE_RENDER:
+        try:
+            from utils.fast_analysis import get_land_intelligence_sync
+            logger.info("Render: Using FAST ANALYSIS mode (memory optimized)")
+            return get_land_intelligence_sync(lat, lng)
+        except Exception as fast_err:
+            logger.warning(f"Render fast analysis failed, falling back to parallel: {fast_err}")
+    
+    # PRIORITY 2: Parallel path for stability (original Render behavior)
     if IS_RENDER:
+        logger.info("Render: Using PARALLEL ThreadPool mode")
         return GeoDataService.get_land_intelligence_parallel(lat, lng)
 
     # Local: Always use fast analysis for maximum speed
@@ -4238,6 +4249,7 @@ def suitability():
         try:
             result = _perform_suitability_analysis(latitude, longitude)
         except Exception as analysis_err:
+            logger.error(f"Suitability analysis failed: {analysis_err}")
             if RENDER_SAFE_MODE:
                 logger.error(f"Render suitability analysis failed (attempt 1): {analysis_err}")
                 # one retry before failing hard
@@ -4253,7 +4265,24 @@ def suitability():
                         cached['cnn_analysis'] = cnn_analysis
                         cached['stale_cache_used'] = True
                         return jsonify(cached)
-                    raise
+                    
+                    # EMERGENCY FALLBACK: Return minimal viable response
+                    logger.warning("Using emergency fallback response")
+                    result = {
+                        "suitability_score": 50.0,
+                        "label": "Moderately Suitable (Limited Analysis)",
+                        "confidence": 0.5,
+                        "factors": {
+                            "physical": {"elevation": {"value": 50}, "slope": {"value": 50}, "ruggedness": {"value": 45}, "stability": {"value": 55}},
+                            "hydrology": {"water": {"value": 60}, "flood": {"value": 65}, "drainage": {"value": 60}, "groundwater": {"value": 55}},
+                            "environmental": {"pollution": {"value": 70}, "vegetation": {"value": 70}, "biodiversity": {"value": 65}, "heat_island": {"value": 60}},
+                            "climatic": {"rainfall": {"value": 70}, "thermal": {"value": 65}, "comfort": {"value": 70}},
+                            "socio_econ": {"infrastructure": {"value": 50}, "landuse": {"value": 60}, "population": {"value": 50}},
+                            "risk_resilience": {"multi_hazard": {"value": 45}, "climate_change": {"value": 55}, "recovery": {"value": 60}, "habitability": {"value": 50}}
+                        },
+                        "emergency_fallback": True,
+                        "error": str(retry_err)
+                    }
             else:
                 raise
         result = _enforce_score_hide_policy(result)

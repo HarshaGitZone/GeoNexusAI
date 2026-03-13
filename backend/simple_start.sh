@@ -6,8 +6,13 @@ echo "🚀 Starting GeoAI Backend - Simplified Production Mode"
 # Set environment
 export RENDER=true
 export RENDER_SAFE_MODE=true
+export USE_FAST_ANALYSIS=true
+export FORCE_FAST_MODE_RENDER=true
 export PYTHONUNBUFFERED=1
 export PYTHONDONTWRITEBYTECODE=1
+export MALLOC_ARENA_MAX=2
+export MAX_WORKERS_RENDER=8
+export TIMEOUT_RENDER=15
 
 # Quick validation
 if [ -z "$GROQ_API_KEY" ]; then
@@ -16,6 +21,7 @@ if [ -z "$GROQ_API_KEY" ]; then
 fi
 
 echo "✅ Environment OK"
+echo "🔧 Fast Analysis Mode: ENABLED (memory optimized)"
 
 # Start via gunicorn for production stability on Render.
 echo "🌐 Starting gunicorn on port ${PORT:-10000}"
