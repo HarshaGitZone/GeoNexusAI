@@ -32,3 +32,8 @@ yarn-error.log*
 Thumbs.db
 
 # build/  ← DO NOT IGNORE (Flask needs this)
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
