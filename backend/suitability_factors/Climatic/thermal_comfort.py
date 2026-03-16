@@ -1,44 +1,3 @@
-# # backend/suitability_factors/climatic/thermal_comfort.py
-# import requests
-
-# def get_thermal_comfort_analysis(lat: float, lng: float):
-#     """
-#     Evaluates suitability based on Temperature Extremity and Solar Stress.
-#     100 = Optimal Comfort | 0 = Extreme Heat/Cold.
-#     """
-#     try:
-#         # Fetching current/historical averages
-#         avg_temp = 32.0  # Sample: High temp
-#         solar_rad = 800  # Sample: High solar radiation (W/m2)
-
-#         # 1. Base Temperature Scoring (Extremity Logic)
-#         if 20 <= avg_temp <= 26:
-#             temp_score = 100
-#         elif avg_temp > 26:
-#             # Drop 5 points for every degree above 26
-#             temp_score = max(0, 100 - (avg_temp - 26) * 5)
-#         else:
-#             # Drop 4 points for every degree below 20
-#             temp_score = max(0, 100 - (20 - avg_temp) * 4)
-
-#         # 2. Solar Stress Modifier
-#         # High sun + High temp = "Heat Island" effect
-#         solar_penalty = 0
-#         if avg_temp > 30 and solar_rad > 700:
-#             solar_penalty = 15 
-
-#         final_score = max(0, temp_score - solar_penalty)
-
-#         return {
-#             "value": avg_temp,
-#             "suitability_score": round(final_score, 1),
-#             "label": "Optimal" if final_score > 80 else "Extreme Heat" if avg_temp > 30 else "Cold Stress",
-#             "source": "Copernicus Sentinel-3 (LST) + ERA5 Reanalysis",
-#             "link": "https://cds.climate.copernicus.eu/",
-#             "provenance_note": "Score reflects the bioclimatic deviation from the 22°C human-standard baseline."
-#         }
-#     except Exception:
-#         return {"value": 25.0, "suitability_score": 80}
 import requests
 from typing import Dict
 
@@ -95,23 +54,18 @@ def get_thermal_comfort_analysis(lat: float, lng: float) -> Dict:
                 "source": "Open-Meteo"
             }
 
-        # --- IMPROVED Bioclimatic comfort model ---
         comfort = 100.0
-
-        # More reasonable temperature range (15-35°C is livable)
         if 18 <= temp <= 32:
-            # Very comfortable range - minimal penalty
+            # minimal penalty
             comfort -= abs(temp - 25.0) * 1.0
         else:
-            # Outside comfortable range - higher penalty
+            # higher penalty
             comfort -= abs(temp - 25.0) * 2.0
-
-        # More reasonable humidity range (30-80% is acceptable)
         if 40 <= humidity <= 70:
-            # Optimal humidity - minimal penalty
+            # minimal penalty
             comfort -= abs(humidity - 55.0) * 0.2
         else:
-            # Outside optimal range - moderate penalty
+            # moderate penalty
             comfort -= abs(humidity - 55.0) * 0.5
 
         # Climate zone adjustments (some places are naturally warmer/cooler)
