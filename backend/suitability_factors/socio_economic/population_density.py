@@ -74,10 +74,14 @@ def get_population_data(lat: float, lng: float) -> Dict:
             score = 75
             label = "Moderate Population"
             score_reason = f"Score 75/100: density {density} people/km² is MODERATE (200–600). Good balance of services, infrastructure, and livability."
+        elif density < 1200:
+            score = 100
+            label = "Optimal Population"
+            score_reason = f"Score 100/100: density {density} people/km² is OPTIMAL (600–1200). Perfect balance of services, infrastructure, labor availability, and quality of life."
         elif density < 1500:
-            score = 90
+            score = 95
             label = "Well Populated"
-            score_reason = f"Score 90/100: density {density} people/km² is WELL POPULATED (600–1500). Excellent services, labor, and market access with good livability."
+            score_reason = f"Score 95/100: density {density} people/km² is WELL POPULATED (1200–1500). Excellent services, labor, and market access with good livability."
         elif density < 3000:
             score = 85
             label = "Dense Urban"

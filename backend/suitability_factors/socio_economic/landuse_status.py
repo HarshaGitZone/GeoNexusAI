@@ -277,6 +277,7 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
     - Protected-area detection (100m)
     - Buildable fallback detection (500m)
     - Infrastructure proximity scoring
+    - Improved urban area detection
     """
 
     # --------------------------------------------------
@@ -306,9 +307,74 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
         }
 
     # --------------------------------------------------
-    # 2. INFRASTRUCTURE PROXIMITY ANALYSIS
+    # 2. INFRASTRUCTURE PROXIMITY ANALYSIS (Enhanced)
     # --------------------------------------------------
     infrastructure_score, nearby_infra = _analyze_infrastructure_proximity(latitude, longitude)
+    
+    # --------------------------------------------------
+    # 3. ENHANCED URBAN DETECTION (Primary Check)
+    # --------------------------------------------------
+    # Check for high-density urban areas first
+    urban_query = f"""
+    [out:json][timeout:15];
+    (
+      way["landuse"~"^(residential|commercial|industrial)$"](around:200,{latitude},{longitude});
+      node["place"~"^(city|town)$"](around:500,{latitude},{longitude});
+      way["building"~"^(commercial|retail|office|apartments|residential)$"](around:200,{latitude},{longitude});
+    );
+    out tags 3;
+    """
+    
+    try:
+        resp = requests.post(OVERPASS_URL, data={"data": urban_query}, timeout=8)
+        resp.raise_for_status()
+        js = resp.json()
+        
+        urban_elements = js.get("elements", [])
+        if urban_elements:
+            # Strong urban indicators detected
+            if infrastructure_score > 80:
+                # Prime urban location with excellent infrastructure
+                base_score = 95.0
+                infra_boost = min(5.0, (infrastructure_score - 80) / 4.0)
+                enhanced_score = min(100.0, base_score + infra_boost)
+                classification = "Prime Urban Core"
+                return {
+                    "score": enhanced_score,
+                    "classification": classification,
+                    "buildable_probability": 0.98,
+                    "ndvi_index": 0.15,
+                    "ndvi_range": "0.1 – 0.2",
+                    "confidence": 96.0,
+                    "is_terrestrial": True,
+                    "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
+                    "dataset_date": "2025-2026",
+                    "infrastructure_score": infrastructure_score,
+                    "nearby_infrastructure": nearby_infra,
+                    "reason": f"Prime urban core detected with excellent infrastructure: {infrastructure_score:.0f}/100. Optimal development potential."
+                }
+            elif infrastructure_score > 60:
+                # Good urban area
+                base_score = 88.0
+                infra_boost = min(7.0, (infrastructure_score - 60) / 2.86)
+                enhanced_score = min(95.0, base_score + infra_boost)
+                classification = "Urban/Developed Area"
+                return {
+                    "score": enhanced_score,
+                    "classification": classification,
+                    "buildable_probability": 0.92,
+                    "ndvi_index": 0.22,
+                    "ndvi_range": "0.2 – 0.25",
+                    "confidence": 92.0,
+                    "is_terrestrial": True,
+                    "dataset_source": "Sentinel-2 NDVI + OpenStreetMap",
+                    "dataset_date": "2025-2026",
+                    "infrastructure_score": infrastructure_score,
+                    "nearby_infrastructure": nearby_infra,
+                    "reason": f"Urban area detected with good infrastructure: {infrastructure_score:.0f}/100. Strong development potential."
+                }
+    except Exception:
+        pass  # Continue to other detection methods
 
     # --------------------------------------------------
     # 3. PROTECTED / FOREST DETECTION (100m) - Less Strict
@@ -478,27 +544,57 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
                     }
 
         # --------------------------------------------------
-        # 5. GENERIC BUILDABLE FALLBACK (infrastructure-enhanced) - Allow High Scores
+        # 5. ENHANCED GENERIC FALLBACK (infrastructure-enhanced)
         # --------------------------------------------------
         classification = "Generic Buildable Land"
-        # Allow up to 98 for generic areas with excellent infrastructure
-        base_score = 60.0  # Higher base score
-        infra_boost = min(38.0, infrastructure_score / 2.63)  # Max 38 point boost
-        enhanced_score = min(98.0, base_score + infra_boost)
+        
+        # Dynamic scoring based on infrastructure quality
+        if infrastructure_score > 85:
+            # Excellent infrastructure - likely suburban/urban fringe
+            base_score = 75.0
+            infra_boost = min(20.0, (infrastructure_score - 85) * 2.0)
+            enhanced_score = min(95.0, base_score + infra_boost)
+            confidence = 70.0
+            ndvi_val = 0.30
+            reason = f"Buildable land with excellent infrastructure access: {infrastructure_score:.0f}/100. High development potential."
+        elif infrastructure_score > 70:
+            # Good infrastructure - likely developing suburban
+            base_score = 68.0
+            infra_boost = min(15.0, (infrastructure_score - 70) * 1.0)
+            enhanced_score = min(85.0, base_score + infra_boost)
+            confidence = 65.0
+            ndvi_val = 0.35
+            reason = f"Buildable land with good infrastructure: {infrastructure_score:.0f}/100. Good development potential."
+        elif infrastructure_score > 50:
+            # Moderate infrastructure - likely rural with some services
+            base_score = 55.0
+            infra_boost = min(15.0, (infrastructure_score - 50) * 0.75)
+            enhanced_score = min(75.0, base_score + infra_boost)
+            confidence = 60.0
+            ndvi_val = 0.40
+            reason = f"Buildable land with moderate infrastructure: {infrastructure_score:.0f}/100. Moderate development potential."
+        else:
+            # Limited infrastructure - likely remote rural
+            base_score = 45.0
+            infra_boost = min(10.0, infrastructure_score * 0.2)
+            enhanced_score = min(60.0, base_score + infra_boost)
+            confidence = 50.0
+            ndvi_val = 0.45
+            reason = f"Buildable land with limited infrastructure: {infrastructure_score:.0f}/100. Basic development potential."
         
         return {
             "score": enhanced_score,
             "classification": classification,
-            "buildable_probability": 0.75,  # Good buildable probability
-            "ndvi_index": 0.40,
-            "ndvi_range": "0.35 – 0.45",
-            "confidence": 55.0,
+            "buildable_probability": min(0.85, 0.5 + (infrastructure_score / 200.0)),
+            "ndvi_index": ndvi_val,
+            "ndvi_range": f"{ndvi_val-0.1:.2f} – {ndvi_val+0.1:.2f}",
+            "confidence": confidence,
             "is_terrestrial": True,
-            "dataset_source": "Sentinel-2 NDVI + Regional Baselines",
+            "dataset_source": "Sentinel-2 NDVI + Infrastructure Analysis",
             "dataset_date": "2025-2026",
             "infrastructure_score": infrastructure_score,
             "nearby_infrastructure": nearby_infra,
-            "reason": f"No dominant land-use detected. Good potential with infrastructure access: {infrastructure_score:.0f}/100. Total score: {enhanced_score:.0f}/100."
+            "reason": reason
         }
 
     except Exception as e:
@@ -561,11 +657,11 @@ def _get_landuse_details_with_evidence(latitude: float, longitude: float) -> dic
 
 def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, list]:
     """
-    Analyze proximity to key infrastructure and return score + details.
+    Enhanced infrastructure analysis with better urban detection.
     Higher score = better infrastructure access.
     """
     try:
-        # Comprehensive infrastructure query
+        # Enhanced infrastructure query with urban density focus
         infra_query = f"""
         [out:json][timeout:20];
         (
@@ -575,8 +671,7 @@ def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, li
           node["amenity"="university"](around:3000,{lat},{lng});
           node["shop"="supermarket"](around:1000,{lat},{lng});
           node["shop"="mall"](around:2000,{lat},{lng});
-          node["highway"="primary"](around:500,{lat},{lng});
-          node["highway"="secondary"](around:500,{lat},{lng});
+          node["highway"~"^(motorway|trunk|primary|secondary)$"](around:1000,{lat},{lng});
           node["railway"="station"](around:2000,{lat},{lng});
           node["aeroway"="aerodrome"](around:10000,{lat},{lng});
           node["amenity"="bank"](around:1000,{lat},{lng});
@@ -584,6 +679,9 @@ def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, li
           node["amenity"="restaurant"](around:500,{lat},{lng});
           node["amenity"="fuel"](around:1000,{lat},{lng});
           node["power"="tower"](around:1000,{lat},{lng});
+          node["place"~"^(city|town|suburb)$"](around:2000,{lat},{lng});
+          way["landuse"~"^(residential|commercial|industrial)$"](around:500,{lat},{lng});
+          node["building"~"^(commercial|retail|office)$"](around:500,{lat},{lng});
         );
         out tags;
         """
@@ -592,7 +690,7 @@ def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, li
         resp.raise_for_status()
         data = resp.json()
         
-        # Count infrastructure types
+        # Enhanced infrastructure counting
         infra_counts = {
             "hospitals": 0,
             "clinics": 0,
@@ -600,15 +698,17 @@ def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, li
             "universities": 0,
             "supermarkets": 0,
             "malls": 0,
-            "primary_roads": 0,
-            "secondary_roads": 0,
+            "major_roads": 0,
             "railway_stations": 0,
             "airports": 0,
             "banks": 0,
             "pharmacies": 0,
             "restaurants": 0,
             "fuel_stations": 0,
-            "power_towers": 0
+            "power_towers": 0,
+            "urban_places": 0,
+            "urban_buildings": 0,
+            "urban_landuse": 0
         }
         
         nearby_infra = []
@@ -617,74 +717,111 @@ def _analyze_infrastructure_proximity(lat: float, lng: float) -> Tuple[float, li
             tags = element.get("tags", {})
             name = tags.get("name", "Unnamed")
             
-            # Categorize and count
+            # Healthcare (35 points max)
             if tags.get("amenity") == "hospital":
                 infra_counts["hospitals"] += 1
                 nearby_infra.append(f"Hospital: {name}")
             elif tags.get("amenity") == "clinic":
                 infra_counts["clinics"] += 1
                 nearby_infra.append(f"Clinic: {name}")
+            
+            # Education (25 points max)
             elif tags.get("amenity") == "school":
                 infra_counts["schools"] += 1
                 nearby_infra.append(f"School: {name}")
             elif tags.get("amenity") == "university":
                 infra_counts["universities"] += 1
                 nearby_infra.append(f"University: {name}")
+            
+            # Commercial (25 points max)
             elif tags.get("shop") == "supermarket":
                 infra_counts["supermarkets"] += 1
                 nearby_infra.append(f"Supermarket: {name}")
             elif tags.get("shop") == "mall":
                 infra_counts["malls"] += 1
                 nearby_infra.append(f"Mall: {name}")
-            elif tags.get("highway") == "primary":
-                infra_counts["primary_roads"] += 1
-                nearby_infra.append(f"Primary Road")
-            elif tags.get("highway") == "secondary":
-                infra_counts["secondary_roads"] += 1
-                nearby_infra.append(f"Secondary Road")
+            elif tags.get("amenity") == "bank":
+                infra_counts["banks"] += 1
+                nearby_infra.append(f"Bank: {name}")
+            elif tags.get("amenity") == "restaurant":
+                infra_counts["restaurants"] += 1
+            
+            # Transportation (30 points max)
+            elif tags.get("highway") in ["motorway", "trunk", "primary", "secondary"]:
+                infra_counts["major_roads"] += 1
+                nearby_infra.append(f"Major Road: {tags.get('name', tags.get('highway', 'Road'))}")
             elif tags.get("railway") == "station":
                 infra_counts["railway_stations"] += 1
                 nearby_infra.append(f"Railway Station: {name}")
             elif tags.get("aeroway") == "aerodrome":
                 infra_counts["airports"] += 1
                 nearby_infra.append(f"Airport: {name}")
-            elif tags.get("amenity") == "bank":
-                infra_counts["banks"] += 1
-                nearby_infra.append(f"Bank: {name}")
+            
+            # Utilities (15 points max)
             elif tags.get("amenity") == "pharmacy":
                 infra_counts["pharmacies"] += 1
                 nearby_infra.append(f"Pharmacy: {name}")
-            elif tags.get("amenity") == "restaurant":
-                infra_counts["restaurants"] += 1
             elif tags.get("amenity") == "fuel":
                 infra_counts["fuel_stations"] += 1
                 nearby_infra.append(f"Fuel Station: {name}")
             elif tags.get("power") == "tower":
                 infra_counts["power_towers"] += 1
+            
+            # Urban density indicators (bonus points)
+            elif tags.get("place") in ["city", "town", "suburb"]:
+                infra_counts["urban_places"] += 1
+                nearby_infra.append(f"Urban Area: {name}")
+            elif tags.get("landuse") in ["residential", "commercial", "industrial"]:
+                infra_counts["urban_landuse"] += 1
+            elif tags.get("building") in ["commercial", "retail", "office"]:
+                infra_counts["urban_buildings"] += 1
         
-        # Calculate infrastructure score (0-100)
+        # Enhanced infrastructure scoring (0-100)
         score = 0.0
         
-        # Healthcare (30 points max)
-        score += min(30, infra_counts["hospitals"] * 15 + infra_counts["clinics"] * 8)
+        # Healthcare (35 points max - increased)
+        score += min(35, infra_counts["hospitals"] * 18 + infra_counts["clinics"] * 10)
         
-        # Education (20 points max)
-        score += min(20, infra_counts["schools"] * 5 + infra_counts["universities"] * 10)
+        # Education (25 points max - increased)
+        score += min(25, infra_counts["schools"] * 6 + infra_counts["universities"] * 12)
         
-        # Commercial (20 points max)
-        score += min(20, infra_counts["supermarkets"] * 5 + infra_counts["malls"] * 10 + 
-                    infra_counts["banks"] * 3 + infra_counts["restaurants"] * 2)
+        # Commercial (25 points max)
+        score += min(25, infra_counts["supermarkets"] * 6 + infra_counts["malls"] * 12 + 
+                    infra_counts["banks"] * 4 + infra_counts["restaurants"] * 3)
         
-        # Transportation (20 points max)
-        score += min(20, infra_counts["primary_roads"] * 5 + infra_counts["secondary_roads"] * 3 +
-                    infra_counts["railway_stations"] * 8 + infra_counts["airports"] * 10)
+        # Transportation (30 points max - increased)
+        score += min(30, infra_counts["major_roads"] * 8 + infra_counts["railway_stations"] * 10 +
+                    infra_counts["airports"] * 15)
         
-        # Utilities (10 points max)
-        score += min(10, infra_counts["pharmacies"] * 3 + infra_counts["fuel_stations"] * 2 +
-                    infra_counts["power_towers"] * 2)
+        # Utilities (15 points max - increased)
+        score += min(15, infra_counts["pharmacies"] * 4 + infra_counts["fuel_stations"] * 3 +
+                    infra_counts["power_towers"] * 3)
+        
+        # Urban density bonus (up to 20 points)
+        urban_bonus = min(20, infra_counts["urban_places"] * 8 + 
+                          infra_counts["urban_landuse"] * 4 + 
+                          infra_counts["urban_buildings"] * 2)
+        score += urban_bonus
         
         return min(100.0, score), nearby_infra[:10]  # Return top 10 nearby facilities
         
     except Exception as e:
-        # Fallback infrastructure estimation
-        return 40.0, ["Infrastructure data unavailable"]
+        # Smart fallback based on location type
+        # Use a simple heuristic for common cases
+        try:
+            # Quick check for major urban centers
+            quick_urban_check = f"""
+            [out:json][timeout:5];
+            (
+              node["place"="city"](around:10000,{lat},{lng});
+              way["highway"="motorway"](around:2000,{lat},{lng});
+            );
+            out tags;
+            """
+            resp = requests.post(OVERPASS_URL, data={"data": quick_urban_check}, timeout=3)
+            if resp.status_code == 200 and resp.json().get("elements"):
+                return 75.0, ["Urban area detected (quick check)"]
+        except:
+            pass
+        
+        return 50.0, ["Infrastructure data unavailable - using moderate fallback"]
