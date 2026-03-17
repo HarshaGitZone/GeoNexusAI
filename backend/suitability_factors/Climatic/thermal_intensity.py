@@ -1,26 +1,3 @@
-# # backend/suitability_factors/Climatic/thermal_intensity.py
-# import requests
-
-# def get_thermal_intensity(lat: float, lng: float):
-#     """
-#     Measures Land Surface Temperature (LST) and Heat Stress.
-#     Source: Copernicus Sentinel-3 (SLSTR).
-#     """
-#     try:
-#         # Fetching real-world LST data
-#         avg_temp_c = 28.4  # Sample processed return
-        
-#         return {
-#             "value": round(avg_temp_c, 1),
-#             "unit": "°C",
-#             "source": "Copernicus Sentinel-3 (SLSTR)",
-#             "link": "https://sentinel.esa.int/web/sentinel/missions/sentinel-3",
-#             "vintage": "2026 Monthly Average",
-#             "provenance_note": "Radiative surface temperature derived from thermal infrared bands."
-#         }
-#     except Exception:
-#         return {"value": 25.0, "source": "Climatic Baseline"}
-
 import requests
 from typing import Dict
 
