@@ -439,7 +439,7 @@ export default function GlobalSyncDock() {
   return (
     <>
       <div className="telemetry-trigger-pulse" onClick={() => setIsOpen(true)}>
-        <div className="pulse-core-icon">🌐</div>
+        <div className="pulse-core-icon">🌍</div>
         <div className="pulse-signal-ring"></div>
       </div>
 

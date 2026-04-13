@@ -5182,25 +5182,29 @@ useEffect(() => {
 
                   <select value={mapVariety} onChange={(e) => setMapVariety(e.target.value)} className="variety-select">
 
+                    {/* <option value="all">🌍 All Maps</option> */}
+
                     <optgroup label="Google Maps">
 
-                      <option value="hybrid">Satellite Hybrid</option>
+                      <option value="hybrid">🛰️ Satellite Hybrid</option>
 
-                      <option value="satellite">Pure Satellite</option>
+                      <option value="satellite">📡 Pure Satellite</option>
 
-                      <option value="terrain">Physical Terrain</option>
+                      <option value="terrain">⛰️ Physical Terrain</option>
 
                     </optgroup>
 
                     <optgroup label="Analysis Themes">
 
-                      <option value="dark">Dark Matter (Pro)</option>
+                      <option value="dark">🌑 Dark Matter (Pro)</option>
 
-                      <option value="topo">Topographic (Technical)</option>
+                      <option value="topo">🗺️ Topographic (Technical)</option>
 
-                      <option value="streets">Standard Streets</option>
+                      <option value="streets">🏙️ Standard Streets</option>
 
-                      <option value="light">Minimalist Light</option>
+                      <option value="light">☀️ Minimalist Light</option>
+
+                      <option value="natural">🌿 Natural</option>
 
                     </optgroup>
 
@@ -5223,12 +5227,14 @@ useEffect(() => {
               ) : (
 
                 <select value={active3DStyle} onChange={(e) => setActive3DStyle(e.target.value)} className="variety-select">
-                  <option value="satellite">🛰 3D Satellite</option>
-                  <option value="topo"> 3D Topographic</option>
-                  <option value="dark">🕶 3D Stealth</option>
-                  <option value="nature">🌱 3D Nature</option>
-                  <option value="streets"> 3D Urban (Buildings)</option> {/* New */}
+                  {/* <option value="all">🌍 All 3D Maps</option> */}
+                  <option value="satellite">🛰️ 3D Satellite</option>
+                  <option value="topo">🗺️ 3D Topographic</option>
+                  <option value="dark">🌑 3D Stealth</option>
+                  <option value="nature">🌿 3D Nature</option>
+                  <option value="streets">🏙️ 3D Urban (Buildings)</option>
                   <option value="outdoor">⛅ 3D Atmospheric</option>
+                  <option value="natural">🌱 3D Natural</option>
                 </select>
               )}
             </div>
