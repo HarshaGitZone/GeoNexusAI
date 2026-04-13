@@ -13423,16 +13423,28 @@ html body [data-theme='light'] .digital-twin-card *[style*="color:#fff"] {
 
 /* Active 2D / 3D button */
 [data-theme="light"] .engine-switch-container .switch-btn.active {
-  background: rgba(var(--accent-color, 16, 185, 129), 0.18) !important;
-  border-color: rgba(var(--accent-color, 16, 185, 129), 0.45) !important;
-  color: #0f172a !important;
-  font-weight: 800 !important;
+  /* Use a solid fill in light theme so the selected 2D/3D mode is unambiguous. */
+  background: var(--accent-color, #2d8a8a) !important;
+  border-color: var(--accent-color, #2d8a8a) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.14) !important;
 }
 
 /* Hover polish */
 [data-theme="light"] .engine-switch-container .switch-btn:hover,
 [data-theme="light"] .engine-switch-container .fullscreen-btn:hover {
   background: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Keep hover from washing out the active (solid) selection in light theme. */
+[data-theme="light"] .engine-switch-container .switch-btn.active:hover {
+  filter: brightness(0.98) saturate(1.05);
+}
+
+[data-theme="light"] .engine-switch-container .switch-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-color, #2d8a8a) 55%, #ffffff);
+  outline-offset: 2px;
 }
 
 /* Divider in light theme */
