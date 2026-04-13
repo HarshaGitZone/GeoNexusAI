@@ -1126,4 +1126,360 @@
 
 
 
+/* === Global Sync Dock: Theme Polish (2026-04-13) === */
+/* This file contains many earlier iterations; these rules are appended last on purpose. */
+.global-command-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 22px !important;
+  overflow: hidden !important;
+
+  /* Theme tokens (dark defaults). */
+  --gsd-overlay-bg: radial-gradient(1200px 800px at 20% 10%, rgba(59, 130, 246, 0.14), rgba(0, 0, 0, 0) 55%),
+                   radial-gradient(900px 700px at 85% 20%, rgba(16, 185, 129, 0.10), rgba(0, 0, 0, 0) 52%),
+                   radial-gradient(700px 600px at 55% 90%, rgba(251, 191, 36, 0.10), rgba(0, 0, 0, 0) 55%),
+                   rgba(8, 10, 14, 0.985);
+  --gsd-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
+  --gsd-panel-border: rgba(255, 255, 255, 0.12);
+  --gsd-text: rgba(255, 255, 255, 0.92);
+  --gsd-subtext: rgba(255, 255, 255, 0.60);
+  --gsd-shadow: 0 24px 60px rgba(0, 0, 0, 0.60);
+  --gsd-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.04));
+  --gsd-card-border: rgba(255, 255, 255, 0.14);
+  --gsd-gauge-bg: rgba(0, 0, 0, 0.35);
+  --gsd-gauge-border: rgba(255, 255, 255, 0.22);
+  --gsd-divider: rgba(255, 255, 255, 0.10);
+
+  background: var(--gsd-overlay-bg) !important;
+  backdrop-filter: blur(34px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(140%) !important;
+}
+
+/* Subtle technical grid/noise layer */
+.global-command-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 35%, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0) 70%);
+}
+
+[data-theme="light"] .global-command-overlay {
+  --gsd-overlay-bg: radial-gradient(1200px 800px at 20% 10%, rgba(37, 99, 235, 0.12), rgba(255, 255, 255, 0) 60%),
+                   radial-gradient(900px 700px at 85% 15%, rgba(5, 150, 105, 0.10), rgba(255, 255, 255, 0) 55%),
+                   radial-gradient(700px 600px at 55% 92%, rgba(245, 158, 11, 0.12), rgba(255, 255, 255, 0) 58%),
+                   rgba(250, 251, 252, 0.97);
+  --gsd-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.68));
+  --gsd-panel-border: rgba(15, 23, 42, 0.14);
+  --gsd-text: rgba(2, 6, 23, 0.92);
+  --gsd-subtext: rgba(2, 6, 23, 0.60);
+  --gsd-shadow: 0 20px 50px rgba(2, 6, 23, 0.12);
+  --gsd-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.86));
+  --gsd-card-border: rgba(15, 23, 42, 0.14);
+  --gsd-gauge-bg: rgba(255, 255, 255, 0.95);
+  --gsd-gauge-border: rgba(2, 6, 23, 0.35);
+  --gsd-divider: rgba(2, 6, 23, 0.10);
+}
+
+[data-theme="light"] .global-command-overlay::before {
+  opacity: 0.14;
+  background:
+    linear-gradient(rgba(2, 6, 23, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(2, 6, 23, 0.05) 1px, transparent 1px);
+}
+
+.global-command-overlay .command-inner-container {
+  width: min(1600px, 96vw);
+  height: min(92vh, calc(100vh - 44px));
+  max-height: 980px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: max(18px, env(safe-area-inset-top)) 18px 18px !important;
+  border-radius: 26px;
+  background: var(--gsd-panel-bg) !important;
+  border: 1px solid var(--gsd-panel-border) !important;
+  box-shadow: var(--gsd-shadow) !important;
+}
+
+.global-command-overlay .command-header-block {
+  padding: 12px 12px 14px !important;
+  border-bottom: 1px solid var(--gsd-divider) !important;
+  background: transparent !important;
+}
+
+.global-command-overlay .brand-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.global-command-overlay .header-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 14px;
+}
+
+.global-command-overlay .live-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent-color);
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+  animation: gsd-pulse 1.8s ease-out infinite;
+}
+
+@keyframes gsd-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.40); }
+  60% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.00); }
+  100% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.00); }
+}
+
+.global-command-overlay .command-title {
+  font-family: 'Roboto Mono', 'JetBrains Mono', monospace;
+  font-size: clamp(20px, 2.6vw, 40px) !important;
+  font-weight: 900;
+  letter-spacing: clamp(2px, 0.8vw, 12px) !important;
+  line-height: 1.1;
+  color: var(--gsd-text) !important;
+  margin: 0 !important;
+  text-shadow: none !important;
+}
+
+.global-command-overlay .reliability-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.global-command-overlay .header-divider-glow {
+  height: 2px;
+  width: min(260px, 55vw);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0),
+    #3b82f6,
+    #ef4444,
+    #f59e0b,
+    rgba(0, 0, 0, 0)
+  );
+  opacity: 0.85;
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.35), 0 0 18px rgba(239, 68, 68, 0.22), 0 0 18px rgba(245, 158, 11, 0.22);
+}
+
+.global-command-overlay .sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--gsd-divider);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--gsd-text) !important;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+}
+
+[data-theme="light"] .global-command-overlay .sync-status {
+  background: rgba(2, 6, 23, 0.03);
+}
+
+.global-command-overlay .hub-clock-grid {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap: 16px !important;
+  padding: 6px !important;
+}
+
+.global-command-overlay .hub-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px !important;
+  padding: 18px !important;
+  background: var(--gsd-card-bg) !important;
+  border: 1px solid var(--gsd-card-border) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22) !important;
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.global-command-overlay .hub-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  opacity: 0.65;
+  background: radial-gradient(500px 260px at 15% 10%, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0) 55%);
+}
+
+/* 3-zone color system (based on WORLD_HUBS DOM order):
+   1) Before India (Americas + Europe) = Blue
+   2) India + nearby (Middle East + South Asia) = Red
+   3) After India (East Asia + Oceania, "faster" timezones) = Yellow
+*/
+.global-command-overlay .hub-card { --hub-zone: #3b82f6; } /* default (blue) */
+.global-command-overlay .hub-card:nth-child(-n+6) { --hub-zone: #3b82f6; } /* SFO..CDG */
+.global-command-overlay .hub-card:nth-child(n+7):nth-child(-n+11) { --hub-zone: #ef4444; } /* DXB..HYD */
+.global-command-overlay .hub-card:nth-child(n+12) { --hub-zone: #f59e0b; } /* SIN..SYD */
+
+/* Day/night becomes a subtle luminance shift, not a new color. */
+.global-command-overlay .hub-card.ops-night { --hub-accent: var(--hub-zone); }
+.global-command-overlay .hub-card.ops-day { --hub-accent: var(--hub-zone); }
+
+@supports (color: color-mix(in srgb, #000 50%, #fff)) {
+  .global-command-overlay .hub-card.ops-night { --hub-accent: color-mix(in srgb, var(--hub-zone) 78%, #000); }
+  .global-command-overlay .hub-card.ops-day { --hub-accent: color-mix(in srgb, var(--hub-zone) 88%, #fff); }
+}
+
+.global-command-overlay .hub-card::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0), var(--hub-accent, var(--accent-color)), rgba(0, 0, 0, 0));
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.global-command-overlay .hub-card:hover {
+  transform: translateY(-6px) scale(1.02) !important;
+  border-color: color-mix(in srgb, var(--hub-accent, var(--accent-color)) 55%, var(--gsd-card-border)) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.30) !important;
+}
+
+@supports not (color: color-mix(in srgb, #000 50%, #fff)) {
+  .global-command-overlay .hub-card:hover {
+    border-color: var(--hub-accent, var(--accent-color)) !important;
+  }
+}
+
+.global-command-overlay .hub-card-header {
+  gap: 10px;
+  align-items: center;
+}
+
+.global-command-overlay .hub-badge {
+  border-radius: 999px !important;
+  padding: 5px 10px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  letter-spacing: 0.6px !important;
+}
+
+.global-command-overlay .hub-badge.code {
+  color: var(--gsd-text) !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid var(--gsd-divider) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .global-command-overlay .hub-badge.code {
+  background: rgba(2, 6, 23, 0.04) !important;
+}
+
+.global-command-overlay .hub-badge.gmt {
+  color: var(--gsd-subtext) !important;
+  background: transparent !important;
+  border: 1px solid var(--gsd-divider) !important;
+  box-shadow: none !important;
+}
+
+.global-command-overlay .analog-gauge-container {
+  width: 104px !important;
+  height: 104px !important;
+  border-radius: 999px;
+  background: var(--gsd-gauge-bg) !important;
+  border: 2px solid var(--gsd-gauge-border) !important;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.28) !important;
+}
+
+.global-command-overlay .hub-card .analog-gauge-container {
+  border-color: var(--hub-accent) !important;
+}
+
+@supports (color: color-mix(in srgb, #000 50%, #fff)) {
+  .global-command-overlay .hub-card .analog-gauge-container {
+    border-color: color-mix(in srgb, var(--hub-accent) 55%, var(--gsd-gauge-border)) !important;
+  }
+}
+
+.global-command-overlay .hub-readout {
+  margin-top: 10px;
+}
+
+.global-command-overlay .hub-digital-time {
+  color: var(--gsd-text) !important;
+  text-shadow: none !important;
+  letter-spacing: -0.5px;
+  font-size: 1.75rem !important;
+}
+
+.global-command-overlay .hub-location-name {
+  color: var(--gsd-subtext) !important;
+  text-shadow: none !important;
+  margin-top: 8px;
+}
+
+.global-command-overlay .hub-protocol-tag {
+  color: var(--gsd-subtext) !important;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .global-command-overlay {
+    padding: 12px !important;
+  }
+
+  .global-command-overlay .command-inner-container {
+    height: calc(100vh - 24px);
+    border-radius: 20px;
+  }
+
+  .global-command-overlay .hub-clock-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    padding: 4px !important;
+  }
+
+  .global-command-overlay .hub-card {
+    padding: 14px !important;
+    min-height: 0 !important;
+  }
+
+  .global-command-overlay .analog-gauge-container {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  .global-command-overlay .hub-digital-time {
+    font-size: 1.25rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-command-overlay .hub-card,
+  .global-command-overlay .live-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 
